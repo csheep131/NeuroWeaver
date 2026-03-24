@@ -20,6 +20,20 @@ Phase 4A Commands (neu):
     python -m orchestrator.meta_dashboard pareto          # Pareto-Frontier anzeigen
     python -m orchestrator.meta_dashboard recommendations # Top-Empfehlungen
 
+Phase 4B Commands (neu):
+    python -m orchestrator.meta_dashboard anomalies       # Anomalien anzeigen
+    python -m orchestrator.meta_dashboard failures        # Fehler-Analyse
+    python -m orchestrator.meta_dashboard quarantine      # Quarantäne-Liste
+    python -m orchestrator.meta_dashboard drift           # Drift-Reports
+    python -m orchestrator.meta_dashboard recovery        # Recovery-Empfehlungen
+
+Phase 4C Commands (neu):
+    python -m orchestrator.meta_dashboard guardrails      # Guardrail-Status
+    python -m orchestrator.meta_dashboard approvals       # Ausstehende Freigaben
+    python -m orchestrator.meta_dashboard alerts          # Alert-Historie
+    python -m orchestrator.meta_dashboard autonomy-stats  # Autonomie-Statistiken
+    python -m orchestrator.meta_dashboard overrides       # Override-Analyse
+
 Beispiele:
     python -m orchestrator.meta_dashboard summary --top 10
     python -m orchestrator.meta_dashboard feature-stats --min-count 3
@@ -46,6 +60,16 @@ from research.surrogate_scorer import SurrogateScorer
 from research.hypothesis_generator import HypothesisGenerator, RunHypothesis
 from research.pareto_tracker import ParetoTracker, ParetoPoint
 from research.adaptive_kill_thresholds import AdaptiveKillThresholdManager
+from research.anomaly_detector import AnomalyDetector, AnomalyReport
+from research.failure_classifier import FailureClassifier, FailureDiagnosis
+from research.drift_monitor import DriftMonitor, DriftReport
+from orchestrator.rollback_manager import RollbackManager, RollbackPlan
+from orchestrator.run_quarantine import RunQuarantineManager, QuarantineEntry
+from orchestrator.guardrails import create_default_guardrails, GuardrailManager, AutonomyLevel
+from orchestrator.autonomy_orchestrator import create_autonomy_orchestrator, AutonomyOrchestrator
+from orchestrator.approval_interface import create_approval_interface, ApprovalInterface
+from core.alerting import create_alert_manager, AlertManager, AlertSeverity
+from research.override_learner import create_override_learner, OverrideLearner
 
 
 def load_features_from_registry(registry: RunRegistry, extractor: MetaFeatureExtractor) -> List[RunMetaFeatures]:
@@ -872,6 +896,508 @@ def print_recommendations(features: List[RunMetaFeatures], top_n: int = 5) -> No
     print("\n" + "=" * 80)
 
 
+# =============================================================================
+# Phase 4B Commands
+# =============================================================================
+
+def print_anomalies(registry: RunRegistry, top_n: int = 10) -> None:
+    """
+    Drucke Anomalie-Reports.
+
+    Args:
+        registry: RunRegistry
+        top_n: Anzahl der Top-Anomalien
+    """
+    print("=" * 80)
+    print("🔍 ANOMALIE-ERKENNUNG")
+    print("=" * 80)
+
+    detector = AnomalyDetector(significance_level=0.05)
+    all_reports: List[AnomalyReport] = []
+
+    # Alle Runs durchgehen
+    for run in registry.list_runs():
+        reports = detector.run_all_checks(run.run_id, registry)
+        all_reports.extend(reports)
+
+    if not all_reports:
+        print("\n✅ Keine Anomalien erkannt.")
+        print("\n" + "=" * 80)
+        return
+
+    # Nach Schweregrad sortieren
+    severity_order = {"critical": 0, "high": 1, "medium": 2, "low": 3}
+    all_reports.sort(key=lambda r: severity_order.get(r.severity, 4))
+
+    # Statistik
+    stats = detector.get_summary_statistics(all_reports)
+    print(f"\n📊 Zusammenfassung:")
+    print(f"   Gesamt: {stats['total_anomalies']} Anomalien")
+    print(f"   Kritisch: {stats.get('critical_count', 0)}")
+    print(f"   Hoch: {stats.get('high_count', 0)}")
+    print(f"   Nach Typ: {stats['by_type']}")
+
+    # Top-Anomalien
+    print(f"\n⚠️  Top {min(top_n, len(all_reports))} Anomalien:")
+    print("-" * 80)
+
+    for i, report in enumerate(all_reports[:top_n], 1):
+        severity_icon = {"critical": "🔴", "high": "🟠", "medium": "🟡", "low": "🟢"}.get(report.severity, "⚪")
+        print(f"\n{i}. {severity_icon} [{report.severity.upper()}] {report.anomaly_type}")
+        print(f"   Run: {report.run_id}")
+        print(f"   Beschreibung: {report.description}")
+        
+        # Statistische Evidenz
+        if report.statistical_evidence:
+            print(f"   Evidenz: ", end="")
+            evidence_parts = []
+            for key, value in list(report.statistical_evidence.items())[:3]:
+                if isinstance(value, float):
+                    evidence_parts.append(f"{key}={value:.3f}")
+                else:
+                    evidence_parts.append(f"{key}={value}")
+            print(", ".join(evidence_parts))
+        
+        print(f"   Empfehlung: {report.recommended_action[:80]}...")
+
+    print("\n" + "=" * 80)
+
+
+def print_failures(registry: RunRegistry, top_n: int = 10) -> None:
+    """
+    Drucke Fehler-Analyse.
+
+    Args:
+        registry: RunRegistry
+        top_n: Anzahl der Top-Fehler
+    """
+    print("=" * 80)
+    print("❌ FEHLER-ANALYSE")
+    print("=" * 80)
+
+    classifier = FailureClassifier()
+
+    # Fehler-Statistiken
+    stats = classifier.get_failure_statistics(registry)
+    print(f"\n📊 Fehler-Statistiken:")
+    print(f"   Gesamt-Runs: {stats['total_runs']}")
+    print(f"   Fehlgeschlagen: {stats['failed_runs']}")
+    print(f"   Fehlerrate: {stats['failure_rate']:.1%}")
+    print(f"   Nach Kategorie: {stats['by_category']}")
+    print(f"   Häufigster Fehler: {stats['most_common_failure']}")
+
+    # Top-Fehler klassifizieren
+    failed_runs = [r for r in registry.list_runs() if r.status in ("failed", "killed")]
+    
+    if not failed_runs:
+        print("\n✅ Keine fehlgeschlagenen Runs.")
+        print("\n" + "=" * 80)
+        return
+
+    print(f"\n🔍 Top {min(top_n, len(failed_runs))} Fehler-Diagnosen:")
+    print("-" * 80)
+
+    diagnoses: List[FailureDiagnosis] = []
+    for run in failed_runs[:top_n]:
+        diagnosis = classifier.classify(run.run_id, registry)
+        if diagnosis:
+            diagnoses.append(diagnosis)
+
+    if not diagnoses:
+        print("\n⚠️  Keine Diagnosen verfügbar.")
+        print("\n" + "=" * 80)
+        return
+
+    for i, diag in enumerate(diagnoses, 1):
+        confidence_icon = "🔴" if diag.confidence < 0.5 else "🟡" if diag.confidence < 0.75 else "🟢"
+        print(f"\n{i}. {confidence_icon} {diag.failure_category.upper()} (Confidence: {diag.confidence:.1%})")
+        print(f"   Run: {diag.run_id}")
+        print(f"   Root Cause: {diag.root_cause}")
+        
+        if diag.contributing_factors:
+            print(f"   Faktoren: {', '.join(diag.contributing_factors)}")
+        
+        if diag.similar_failures:
+            print(f"   Ähnliche Fehler: {', '.join(diag.similar_failures[:3])}")
+        
+        print(f"   Empfohlener Fix: {diag.recommended_fix}")
+
+    print("\n" + "=" * 80)
+
+
+def print_quarantine(registry: RunRegistry) -> None:
+    """
+    Drucke Quarantäne-Liste.
+
+    Args:
+        registry: RunRegistry
+    """
+    print("=" * 80)
+    print("🚫 QUARANTÄNE-LISTE")
+    print("=" * 80)
+
+    manager = RunQuarantineManager()
+
+    # Statistik
+    stats = manager.get_feature_statistics()
+    print(f"\n📊 Quarantäne-Statistik:")
+    print(f"   Getrackte Features: {stats['total_features_tracked']}")
+    print(f"   Aktive Quarantänen: {stats['active_quarantines']['total']}")
+    print(f"     - Features: {stats['active_quarantines']['feature']}")
+    print(f"     - Kombinationen: {stats['active_quarantines']['combination']}")
+    print(f"     - Kontext-spezifisch: {stats['active_quarantines']['context_specific']}")
+    print(f"   Erfolgreiche Runs: {stats['total_successful_runs']}")
+
+    # Aktive Quarantänen
+    entries = manager.get_quarantine_list()
+
+    if not entries:
+        print("\n✅ Keine aktiven Quarantänen.")
+        print("\n" + "=" * 80)
+        return
+
+    print(f"\n⚠️  Aktive Quarantänen ({len(entries)}):")
+    print("-" * 80)
+
+    for i, entry in enumerate(entries, 1):
+        type_icon = {"feature": "🔹", "combination": "🔸", "context_specific": "🔶"}.get(entry.quarantine_type, "⚪")
+        print(f"\n{i}. {type_icon} {entry.target}")
+        print(f"   Typ: {entry.quarantine_type}")
+        print(f"   Grund: {entry.reason}")
+        print(f"   Ausgelöst durch: {', '.join(entry.triggered_by[:3])}")
+        print(f"   Verbleibende Runs: {entry.remaining_runs} / {entry.quarantine_duration}")
+        
+        if entry.context_filter:
+            print(f"   Kontext: {entry.context_filter}")
+
+    print("\n" + "=" * 80)
+
+
+def print_drift(registry: RunRegistry, top_n: int = 10) -> None:
+    """
+    Drucke Drift-Reports.
+
+    Args:
+        registry: RunRegistry
+        top_n: Anzahl der Top-Drifts
+    """
+    print("=" * 80)
+    print("📈 DRIFT-MONITORING")
+    print("=" * 80)
+
+    monitor = DriftMonitor(window_size=20, threshold=0.05)
+
+    # Environment Drift prüfen
+    env_report = monitor.detect_environment_drift(registry)
+    if env_report:
+        print(f"\n🌍 ENVIRONMENT DRIFT erkannt:")
+        print(f"   Schweregrad: {env_report.severity}")
+        print(f"   Empfehlung: {env_report.recommended_action}")
+
+    # Zusammenfassung
+    summary = monitor.get_drift_summary()
+    print(f"\n📊 Drift-Zusammenfassung:")
+    print(f"   Gesamt-Alerts: {summary['total_alerts']}")
+    print(f"   Nach Typ: {summary['by_type']}")
+    print(f"   Nach Schweregrad: {summary['by_severity']}")
+
+    # Aktive Alerts
+    alerts = monitor.get_drift_alerts(limit=top_n)
+
+    if not alerts:
+        print("\n✅ Keine Drift-Alerts.")
+        print("\n" + "=" * 80)
+        return
+
+    print(f"\n⚠️  Top {len(alerts)} Drift-Alerts:")
+    print("-" * 80)
+
+    for i, report in enumerate(alerts, 1):
+        severity_icon = {"high": "🔴", "medium": "🟡", "low": "🟢"}.get(report.severity, "⚪")
+        print(f"\n{i}. {severity_icon} [{report.severity.upper()}] {report.drift_type}")
+        print(f"   Betroffene Features: {', '.join(report.affected_features) if report.affected_features else 'Alle'}")
+        print(f"   Drift-Magnitude: {report.drift_magnitude:+.1%}")
+        print(f"   Signifikanz: p={report.statistical_significance:.3f}")
+        print(f"   Empfohlung: {report.recommended_action[:80]}...")
+
+    print("\n" + "=" * 80)
+
+
+def print_recovery(registry: RunRegistry, top_n: int = 10) -> None:
+    """
+    Drucke Recovery-Empfehlungen.
+
+    Args:
+        registry: RunRegistry
+        top_n: Anzahl der Top-Empfehlungen
+    """
+    print("=" * 80)
+    print("🔄 RECOVERY-EMPFEHLUNGEN")
+    print("=" * 80)
+
+    manager = RollbackManager(registry)
+    classifier = FailureClassifier()
+
+    # Rollback-Statistiken
+    stats = manager.get_rollback_statistics()
+    print(f"\n📊 Rollback-Statistik:")
+    print(f"   Gesamt-Rollbacks: {stats['total_rollbacks']}")
+    print(f"   Erfolgsrate: {stats['success_rate']:.1%}")
+    print(f"   Erfolgreich: {stats['success_count']}")
+    print(f"   Partiell: {stats['partial_count']}")
+    print(f"   Fehlgeschlagen: {stats['failed_count']}")
+    print(f"   Häufigste Ursache: {stats['most_common_cause']}")
+
+    # Fehlgeschlagene Runs für Recovery
+    failed_runs = [r for r in registry.list_runs() if r.status in ("failed", "killed")]
+
+    if not failed_runs:
+        print("\n✅ Keine fehlgeschlagenen Runs für Recovery.")
+        print("\n" + "=" * 80)
+        return
+
+    print(f"\n💡 Recovery-Optionen für {min(top_n, len(failed_runs))} fehlgeschlagene Runs:")
+    print("-" * 80)
+
+    for i, run in enumerate(failed_runs[:top_n], 1):
+        diagnosis = classifier.classify(run.run_id, registry)
+        
+        if diagnosis:
+            print(f"\n{i}. {run.run_id} - {diagnosis.failure_category.upper()}")
+            print(f"   Confidence: {diagnosis.confidence:.1%}")
+            print(f"   Root Cause: {diagnosis.root_cause}")
+            print(f"   Empfohlener Fix: {diagnosis.recommended_fix}")
+            
+            # Rollback-Empfehlung
+            last_stable = manager.get_last_stable_configuration(run.run_id)
+            if last_stable:
+                print(f"   Rollback-Ziel: {last_stable}")
+            else:
+                print(f"   Rollback-Ziel: Kein stabiler Vorfahre gefunden")
+        else:
+            print(f"\n{i}. {run.run_id} - Status: {run.status}")
+            if run.notes:
+                print(f"   Notizen: {run.notes[:80]}...")
+
+    # Rollback-Historie
+    history = manager.get_rollback_history(limit=5)
+    if history:
+        print(f"\n📜 Letzte Rollbacks:")
+        for record in history:
+            outcome_icon = {"success": "✅", "partial": "⚠️", "failed": "❌"}.get(record.outcome, "⚪")
+            print(f"   {outcome_icon} {record.rollback_id}: {record.failed_run_id} → {record.target_run_id}")
+
+    print("\n" + "=" * 80)
+
+
+# =============================================================================
+# Phase 4C Commands - Guardrail System & Integration
+# =============================================================================
+
+def print_guardrails() -> None:
+    """Guardrail-Status anzeigen."""
+    print("=" * 80)
+    print("🛡️  GUARDRAIL STATUS")
+    print("=" * 80)
+
+    # Erstelle default Guardrails
+    config = create_default_guardrails()
+    manager = GuardrailManager(config)
+
+    print(f"\n📊 Autonomie-Level: {config.level.value.upper()}")
+    print(f"📋 Anzahl Guardrails: {len(config.guardrails)}")
+
+    print(f"\n✅ {len(config.guardrails)} Guardrails aktiv:")
+
+    for guardrail in config.guardrails:
+        icon = "🔒" if guardrail.is_hard_limit else "⚠️"
+        print(f"\n   {icon} {guardrail.name}")
+        print(f"      Typ: {guardrail.guardrail_type.value}")
+        print(f"      Threshold: {guardrail.threshold:.2f}")
+        print(f"      Hard Limit: {'Ja' if guardrail.is_hard_limit else 'Nein'}")
+        print(f"      Action on Violation: {guardrail.action_on_violation}")
+        print(f"      Beschreibung: {guardrail.description}")
+
+    print(f"\n📝 Erlaubte Aktionen: {', '.join(config.allowed_actions)}")
+    print(f"🔐 Benötigt Approval für: {', '.join(config.requires_approval)}")
+
+    print("\n" + "=" * 80)
+
+
+def print_approvals() -> None:
+    """Ausstehende Freigaben anzeigen."""
+    print("=" * 80)
+    print("📋 AUSSTEHENDE FREIGABEN")
+    print("=" * 80)
+
+    # Erstelle Orchestrator und Interface
+    orchestrator = create_autonomy_orchestrator()
+    interface = create_approval_interface(orchestrator)
+
+    # Simuliere einige Pending Approvals für Demo
+    pending = interface.get_pending_approvals()
+
+    if not pending:
+        print("\nℹ️  Keine ausstehenden Freigaben.")
+        print("   Alle Aktionen sind genehmigt oder abgelaufen.")
+    else:
+        print(f"\n⏳ {len(pending)} ausstehende Freigabe(n):")
+
+        for i, request in enumerate(pending, 1):
+            risk_icon = {"low": "🟢", "medium": "🟡", "high": "🔴"}.get(
+                request.risk_level, "⚪"
+            )
+            print(f"\n   {i}. {request.action_type}")
+            print(f"      {risk_icon} Risk: {request.risk_level}")
+            print(f"      📊 Confidence: {request.confidence:.1%}")
+            print(f"      🕐 Erstellt: {request.created_at.strftime('%Y-%m-%d %H:%M')}")
+            print(f"      ⏰ Läuft ab: {request.expires_at.strftime('%Y-%m-%d %H:%M')}")
+
+    # Zeige Statistiken
+    stats = interface.get_approval_statistics()
+    print(f"\n📈 Statistiken:")
+    print(f"   Pending: {stats['pending']}")
+    print(f"   Heute genehmigt: {stats['approved_today']}")
+    print(f"   Heute abgelehnt: {stats['rejected_today']}")
+    print(f"   Ø Genehmigungszeit: {stats['avg_approval_time']}")
+
+    print("\n" + "=" * 80)
+
+
+def print_alerts(hours: int = 24) -> None:
+    """Alert-Historie anzeigen."""
+    print("=" * 80)
+    print("🚨 ALERT-HISTORIE")
+    print("=" * 80)
+
+    # Erstelle AlertManager
+    manager = create_alert_manager()
+
+    # Zeige Summary
+    summary = manager.get_alert_summary(hours=hours)
+
+    print(f"\n📊 Zusammenfassung (letzte {hours}h):")
+    print(f"   Total Alerts: {summary['total']}")
+    print(f"   Davon bestätigt: {summary['acknowledged']}")
+    print(f"   Davon ausstehend: {summary['pending']}")
+    print(f"   Davon aufgelöst: {summary['resolved']}")
+    print(f"   Action required: {summary['action_required']}")
+
+    print(f"\n📈 Nach Schweregrad:")
+    for severity, count in summary.get("by_severity", {}).items():
+        icon = {"info": "ℹ️", "warning": "⚠️", "high": "🔴", "critical": "🚨"}.get(
+            severity, "•"
+        )
+        print(f"   {icon} {severity.upper()}: {count}")
+
+    # Zeige aktive Alerts
+    active_alerts = manager.get_active_alerts()
+    if active_alerts:
+        print(f"\n🔴 Aktive Alerts ({len(active_alerts)}):")
+        for alert in active_alerts[:10]:
+            sev_icon = {
+                AlertSeverity.INFO: "ℹ️",
+                AlertSeverity.WARNING: "⚠️",
+                AlertSeverity.HIGH: "🔴",
+                AlertSeverity.CRITICAL: "🚨",
+            }.get(alert.severity, "•")
+            print(f"   {sev_icon} [{alert.timestamp.strftime('%H:%M')}] {alert.title}")
+            print(f"      {alert.message[:80]}...")
+    else:
+        print("\n✅ Keine aktiven Alerts.")
+
+    print("\n" + "=" * 80)
+
+
+def print_autonomy_stats() -> None:
+    """Autonomie-Statistiken anzeigen."""
+    print("=" * 80)
+    print("📊 AUTONOMIE-STATISTIKEN")
+    print("=" * 80)
+
+    # Erstelle Orchestrator
+    orchestrator = create_autonomy_orchestrator()
+
+    stats = orchestrator.get_statistics()
+
+    total = stats["total_actions"]
+    if total == 0:
+        print("\nℹ️  Noch keine Aktionen durchgeführt.")
+        print("   Das System ist bereit für autonome Operationen.")
+    else:
+        print(f"\n📈 Gesamt-Statistiken:")
+        print(f"   Total Actions: {total}")
+        print(f"   Auto-ausgeführt: {stats['auto_executed']} ({stats['success_rate']:.0%})")
+        print(f"   Human-genehmigt: {stats['human_approved']}")
+        print(f"   Blockiert: {stats['blocked_by_guardrails']}")
+
+        # Erfolgsrate visualisieren
+        success_rate = stats["success_rate"]
+        bar_length = 30
+        filled = int(bar_length * success_rate)
+        bar = "█" * filled + "░" * (bar_length - filled)
+        print(f"\n   Erfolgsrate: [{bar}] {success_rate:.0%}")
+
+    # Zeige Guardrail-Status
+    config = create_default_guardrails()
+    manager = GuardrailManager(config)
+    guardrail_status = manager.get_guardrail_status()
+
+    print(f"\n🛡️  Guardrail-Konfiguration:")
+    print(f"   Autonomie-Level: {guardrail_status['autonomy_level'].upper()}")
+    print(f"   Total Guardrails: {guardrail_status['total_guardrails']}")
+
+    print("\n" + "=" * 80)
+
+
+def print_overrides(hours: int = 24) -> None:
+    """Override-Analyse anzeigen."""
+    print("=" * 80)
+    print("🧠 OVERRIDE-ANALYSE")
+    print("=" * 80)
+
+    # Erstelle OverrideLearner
+    learner = create_override_learner()
+
+    # Zeige Statistiken
+    stats = learner.get_override_statistics(hours=hours)
+
+    print(f"\n📊 Zusammenfassung (letzte {hours}h):")
+    print(f"   Total Overrides: {stats['total_overrides']}")
+
+    if stats['total_overrides'] == 0:
+        print("\nℹ️  Keine Overrides in diesem Zeitraum.")
+        print("   Das System trifft autonome Entscheidungen ohne Human-Eingriffe.")
+    else:
+        print(f"\n📈 Nach Entscheidung:")
+        for decision, count in stats.get("by_decision", {}).items():
+            icon = {"approve": "✅", "reject": "❌", "modify": "⚠️"}.get(decision, "•")
+            print(f"   {icon} {decision}: {count}")
+
+        print(f"\n📈 Nach Action-Type:")
+        for action_type, count in stats.get("by_action_type", {}).items():
+            print(f"   • {action_type}: {count}")
+
+        print(f"\n📊 Ø Confidence vor Override: {stats.get('avg_confidence_before', 0):.1%}")
+
+    # Zeige Muster-Analyse
+    patterns = learner.analyze_override_patterns()
+    if patterns["most_overridden_actions"]:
+        print(f"\n🔍 Häufigste Overrides:")
+        for item in patterns["most_overridden_actions"][:5]:
+            print(f"   • {item['action']}: {item['count']}x")
+
+    # Zeige Threshold-Vorschläge
+    suggestions = learner.suggest_threshold_adjustments()
+    if suggestions:
+        print(f"\n💡 Threshold-Anpassungsvorschläge:")
+        for sug in suggestions[:3]:
+            print(f"   • {sug['suggestion']}")
+            print(f"     → {sug['recommendation']}")
+
+    print("\n" + "=" * 80)
+
+
 def parse_args() -> argparse.Namespace:
     """Parse command-line arguments."""
     parser = argparse.ArgumentParser(
@@ -893,6 +1419,11 @@ Beispiele:
   %(prog)s pareto                     # Pareto-Frontier anzeigen
   %(prog)s pareto --plot              # Mit Plot
   %(prog)s recommendations --top 5    # Top-Empfehlungen
+  %(prog)s anomalies                  # Anomalien anzeigen (Phase 4B)
+  %(prog)s failures                   # Fehler-Analyse (Phase 4B)
+  %(prog)s quarantine                 # Quarantäne-Liste (Phase 4B)
+  %(prog)s drift                      # Drift-Reports (Phase 4B)
+  %(prog)s recovery                   # Recovery-Empfehlungen (Phase 4B)
         """,
     )
 
@@ -901,7 +1432,9 @@ Beispiele:
         choices=[
             "summary", "co-occurrence", "feature-stats", "lineage",
             "budget", "quant", "predictions", "hypotheses", "pareto",
-            "recommendations"
+            "recommendations", "anomalies", "failures", "quarantine",
+            "drift", "recovery", "guardrails", "approvals", "alerts",
+            "autonomy-stats", "overrides"
         ],
         help="Dashboard Command",
     )
@@ -959,7 +1492,36 @@ def main() -> None:
     registry = RunRegistry(results_dir=str(results_dir))
     extractor = MetaFeatureExtractor(configs_dir=Path(__file__).parent.parent / "configs")
 
-    # Lade Features
+    # Phase 4B und 4C Commands benötigen keine Features
+    phase4b_4c_commands = (
+        "anomalies", "failures", "quarantine", "drift", "recovery",
+        "guardrails", "approvals", "alerts", "autonomy-stats", "overrides"
+    )
+
+    if args.command in phase4b_4c_commands:
+        if args.command == "anomalies":
+            print_anomalies(registry, top_n=args.top)
+        elif args.command == "failures":
+            print_failures(registry, top_n=args.top)
+        elif args.command == "quarantine":
+            print_quarantine(registry)
+        elif args.command == "drift":
+            print_drift(registry, top_n=args.top)
+        elif args.command == "recovery":
+            print_recovery(registry, top_n=args.top)
+        elif args.command == "guardrails":
+            print_guardrails()
+        elif args.command == "approvals":
+            print_approvals()
+        elif args.command == "alerts":
+            print_alerts()
+        elif args.command == "autonomy-stats":
+            print_autonomy_stats()
+        elif args.command == "overrides":
+            print_overrides()
+        return
+
+    # Lade Features für andere Commands
     features = get_features(registry, extractor, json_path=args.json)
 
     if not features:

@@ -143,7 +143,7 @@ class AdaptiveKillThresholdManager:
         Thresholds für Budget-Klasse zurückgeben.
         
         Args:
-            budget_class: "low_budget", "medium_budget", oder "high_budget"
+            budget_class: "low", "medium", "high" oder "low_budget", "medium_budget", "high_budget"
             
         Returns:
             KillThresholds für die Budget-Klasse
@@ -151,13 +151,18 @@ class AdaptiveKillThresholdManager:
         Raises:
             ValueError: Bei ungültiger Budget-Klasse
         """
-        if budget_class not in self.thresholds:
+        # Normalisiere Budget-Klasse (unterstütze beide Formate)
+        normalized = budget_class
+        if budget_class in ("low", "medium", "high"):
+            normalized = f"{budget_class}_budget"
+        
+        if normalized not in self.thresholds:
             raise ValueError(
                 f"Ungültige Budget-Klasse: {budget_class}. "
-                f"Erlaubt: {list(self.thresholds.keys())}"
+                f"Erlaubt: 'low', 'medium', 'high' oder 'low_budget', 'medium_budget', 'high_budget'"
             )
         
-        return self.thresholds[budget_class]
+        return self.thresholds[normalized]
     
     def should_kill_run(
         self,

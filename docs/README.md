@@ -56,7 +56,8 @@ docs/
 │   ├── roadmap_runs.md          # Detaillierte Run-Roadmap
 │   ├── run_tabelle.md           # Run-Übersichtstabelle
 │   ├── trainings_plan.md        # Trainings-Planung
-│   └── auto_approve.md          # Phase 4: Autonome Selbstverbesserung
+│   ├── auto_approve.md          # Phase 4: Autonome Selbstverbesserung (Spezifikation)
+│   └── phase4_overview.md       # Phase 4: Implementierungs-Übersicht
 └── api/                         # API-Dokumentation
     └── README.md                # API-Docs Übersicht
 ```
@@ -135,7 +136,8 @@ python3 -m orchestrator.dashboard
 | [roadmap_runs.md](guides/roadmap_runs.md) | Detaillierte Run-Roadmap |
 | [run_tabelle.md](guides/run_tabelle.md) | Run-Übersichtstabelle |
 | [trainings_plan.md](guides/trainings_plan.md) | Trainings-Planung |
-| [auto_approve.md](guides/auto_approve.md) | Phase 4: Autonome Selbstverbesserung |
+| [auto_approve.md](guides/auto_approve.md) | Phase 4: Autonome Selbstverbesserung (Spezifikation) |
+| [phase4_overview.md](guides/phase4_overview.md) | Phase 4: Implementierungs-Übersicht |
 
 ### 🔌 API (`api/`)
 

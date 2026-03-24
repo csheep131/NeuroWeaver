@@ -1,7 +1,7 @@
 # Guides Übersicht
 
 **Letztes Update:** 2026-03-24
-**Gesamtanzahl Guides:** 10
+**Gesamtanzahl Guides:** 11
 
 ---
 
@@ -47,6 +47,7 @@ Dieses Verzeichnis enthält praktische Anleitungen und How-Tos für die Arbeit m
 | Guide | Beschreibung |
 |-------|--------------|
 | [auto_approve.md](auto_approve.md) | Phase 4 Plan: Adaptive Search, Self-Diagnosis, Guided Autonomy |
+| [phase4_overview.md](phase4_overview.md) | Implementierungs-Übersicht, Quick Start, Architektur |
 
 ---
 
@@ -114,13 +115,29 @@ Dieses Verzeichnis enthält praktische Anleitungen und How-Tos für die Arbeit m
 - [sweep_guide.md](sweep_guide.md)
 - [promotion_guide.md](promotion_guide.md)
 
-### Phase 4: Autonome Selbstverbesserung 🚧 IN PLANUNG
-- Adaptive Search Engine (4A)
-- Self-Diagnosis & Recovery (4B)
-- Guided Autonomy (4C)
+### Phase 4: Autonome Selbstverbesserung 🚧 IN PLANUNG → ✅ IMPLEMENTIERT
+- Adaptive Search Engine (4A) ✅
+- Self-Diagnosis & Recovery (4B) ✅
+- Guided Autonomy (4C) ✅
 
 **Relevante Guides:**
-- [auto_approve.md](auto_approve.md)
+- [auto_approve.md](auto_approve.md) – Vollständige Spezifikation
+- [phase4_overview.md](phase4_overview.md) – Implementierungs-Übersicht
+
+**Quick Start:**
+```bash
+# Meta-Features extrahieren
+python3 scripts/enrich_historical_runs.py --all
+
+# Dashboard starten
+python3 -m orchestrator.meta_dashboard summary
+
+# Run-Vorschläge generieren
+python3 -m orchestrator.meta_dashboard hypotheses --top 10
+
+# Autonomer Zyklus
+python3 -m orchestrator.phase4_orchestrator run
+```
 
 ---
 
