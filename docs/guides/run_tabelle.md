@@ -1,159 +1,289 @@
-blation Plan (10 Runs)
-Legende (wichtig)
-ΔBPB = Verbesserung vs vorher
-Kill-Kriterium = sofort verwerfen wenn erfüllt
-KEEP = darf in nächste Runs
-🧱 Phase A — Backbone + Tokenizer
-Run 1 — Control
-Run	Änderung	Erwartung	Kill-Kriterium	KEEP
-1	Baseline Backbone	stabile Referenz	Instabil / zu langsam	✅ Pflicht
+# Run-Tabelle — Ablationsplan (10 Runs)
 
-👉 Output = dein Nullpunkt
+**Stand:** 2026-03-24  
+**Status:** Implementiert (Phase 1–3 abgeschlossen)  
+**Verwandte Dokumente:** [runs_guide.md](runs_guide.md), [runs_development.md](runs_development.md), [roadmap_runs.md](roadmap_runs.md)
 
-Run 2 — Hash Tokenizer
-Run	Änderung	Erwartung	Kill-Kriterium	KEEP
-2	Bigram + Trigram	klarer BPB Drop	ΔBPB < 0.002	ggf.
+---
 
-👉 Wenn kaum Gewinn → nur Bigram später
+## Übersicht
 
-Run 3 — Byte Fallback
-Run	Änderung	Erwartung	Kill-Kriterium	KEEP
-3	+ Byte embedding	stabilere BPB	langsamer + kein Gain	❌ meistens raus
+Dieses Dokument bietet eine komprimierte Übersicht des 10-Run-Ablationsplans zur systematischen Optimierung des Modell-Setups für die Challenge (16 MB Artifact-Limit, H100 GPU). Jeder Run ändert genau **eine** Variable gegenüber dem Parent-Run.
 
-👉 Sehr wahrscheinlich fliegt das wieder raus
+---
 
-⚙️ Phase B — MLP / Aktivierung
-Run 4 — LeakyReLU²
-Run	Änderung	Erwartung	Kill-Kriterium	KEEP
-4	LeakyReLU²	solider Boost	ΔBPB < 0.002	wahrscheinlich ✅
-Run 5 — Gated LeakyReLU²
-Run	Änderung	Erwartung	Kill-Kriterium	KEEP
-5	+ Gate	stärker als Run 4	minimal besser + komplexer	❌ wenn nicht klar besser
+## Legende
 
-👉 Faustregel:
+| Begriff | Beschreibung |
+|---------|--------------|
+| **ΔBPB** | Verbesserung der Bits Per Byte vs. Parent-Run (negativ = besser) |
+| **Kill-Kriterium** | Bedingung bei der der Run sofort verworfen wird |
+| **KEEP** | Feature darf in nachfolgende Runs übernommen werden |
+| **BPB** | Bits Per Byte — Hauptmetrik für Modellqualität (niedriger = besser) |
+| **ms/step** | Millisekunden pro Trainingsschritt — Performance-Metrik |
+| **Artifact-Budget** | Maximale Größe der Modell-Artefakte (16 MB Limit) |
 
-nur behalten wenn sichtbar besser
-sonst weg (zu teuer für quant + tuning)
-💾 Phase C — Budget / Quant
-Run 6 — Mixed int5/int6
-Run	Änderung	Erwartung	Kill-Kriterium	KEEP
-6	int5 MLP / int6 Attn	mehr Platz	quant gap zu groß	✅ wenn stabil
+### Akronyme
 
-👉 Einer der wichtigsten Runs
+| Abkürzung | Bedeutung |
+|-----------|-----------|
+| **XSA** | Cross-Sequence Attention |
+| **TTT** | Test-Time Training |
+| **FiLM** | Feature-wise Linear Modulation |
+| **GQA** | Grouped Query Attention |
+| **MLP** | Multi-Layer Perceptron |
+| **Attn** | Attention-Layer |
 
-Run 7 — Größer trainieren
-Run	Änderung	Erwartung	Kill-Kriterium	KEEP
-7	mehr Kapazität	besseres BPB	kein Gewinn trotz Größe	✅ nur wenn besser
+---
 
-👉 Beispiele:
+## Run-Übersicht
 
-MLP 3.0 → 3.5
-ODER
-minimal mehr effektive Tiefe
-🚀 Phase D — Frontier Hebel
-Run 8 — XSA-4
-Run	Änderung	Erwartung	Kill-Kriterium	KEEP
-8	XSA letzte Layer	starker Boost	Stepzeit explodiert	🔥 Favorit
+| Run | Phase | Änderung | Erwartung | Kill-Kriterium | KEEP |
+|-----|-------|----------|-----------|----------------|------|
+| 1 | A | Baseline Backbone | Stabile Referenz | Instabil / zu langsam | ✅ Pflicht |
+| 2 | A | Bigram + Trigram Hash | Klarer BPB-Drop | ΔBPB < 0,002 | ggf. |
+| 3 | A | Byte Fallback Embedding | Stabilere BPB | Langsamer + kein Gain | ❌ meistens raus |
+| 4 | B | LeakyReLU² Aktivierung | Solider Boost | ΔBPB < 0,002 | wahrscheinlich ✅ |
+| 5 | B | Gated LeakyReLU² | Stärker als Run 4 | Minimal besser + komplexer | ❌ wenn nicht klar besser |
+| 6 | C | Mixed INT5/INT6 Quantisierung | Mehr Platz im Budget | Quant-Gap > 0,1 BPB | ✅ wenn stabil |
+| 7 | C | Größere Kapazität | Besseres BPB | Kein Gewinn trotz Größe | ✅ nur wenn besser |
+| 8 | D | XSA-4 (letzte 4 Layer) | Starker Boost | Stepzeit explodiert | 🔥 Favorit |
+| 9 | D | TTT minimal (ohne XSA) | BPB reduziert | Volatil / instabil | optional |
+| 10 | E | 3-Seed-Finale | Stabiles Ergebnis | Große Varianz | 🏆 |
 
-👉 Einer der stärksten realen Hebel
+---
 
-Run 9 — TTT (ohne XSA!)
-Run	Änderung	Erwartung	Kill-Kriterium	KEEP
-9	TTT minimal	BPB runter	volatil / instabil	optional
+## Phasen im Detail
 
-👉 Wichtig:
+### 🧱 Phase A — Backbone + Tokenizer (Runs 1–3)
 
-KEIN XSA gleichzeitig
-nur 1 pass
-state reset
-🏁 Phase E — Finale
-Run 10 — 3 Seed Final
-Run	Änderung	Erwartung	Kill-Kriterium	KEEP
-10	bestes Setup	stabil	große Varianz	🏆
+**Ziel:** Etablierung einer stabilen Baseline und Evaluation von Tokenizer-Ansätzen.
 
-👉 Wähle einen:
+#### Run 1 — Control Baseline
+- **Änderung:** Baseline Backbone ohne Features
+- **Erwartung:** Stabile Referenz für alle weiteren Vergleiche
+- **Kill-Kriterium:** Training instabil oder ms/step zu hoch
+- **KEEP:** ✅ Pflicht — wird nie verworfen
+- **Notiz:** Dient als Nullpunkt für alle ΔBPB-Messungen
 
-Variante A
+#### Run 2 — Hash Tokenizer
+- **Änderung:** Bigram + Trigram Hash-Tokenizer
+- **Erwartung:** Klarer BPB-Drop durch kürzere effektive Sequenzen
+- **Kill-Kriterium:** ΔBPB < 0,002 (unter Noise-Schwelle)
+- **KEEP:** ggf. — bei minimalem Gewinn nur Bigram beibehalten
+- **Notiz:** Wenn kaum Gewinn gegenüber Byte → nur Bigram in Folge-Runs
 
-Backbone + Tokenizer + Quant + XSA
+#### Run 3 — Byte Fallback
+- **Änderung:** Byte Fallback Embedding zusätzlich zu Hash
+- **Erwartung:** Stabilere BPB bei Hash-Kollisionen
+- **Kill-Kriterium:** Langsamer + kein messbarer BPB-Gewinn
+- **KEEP:** ❌ meistens raus — nur bei klarem Vorteil behalten
+- **Notiz:** Sehr wahrscheinlich wird dieses Feature verworfen
 
-Variante B
+---
 
-Backbone + Tokenizer + Quant + TTT
+### ⚙️ Phase B — MLP / Aktivierung (Runs 4–5)
 
-❗ Nicht mischen (erst später)
+**Ziel:** Evaluation von Aktivierungsfunktionen und MLP-Architekturen.
 
-🧠 Entscheidungslogik (extrem wichtig)
+#### Run 4 — LeakyReLU²
+- **Änderung:** LeakyReLU² statt GELU
+- **Erwartung:** Solider BPB-Boost bei ähnlicher Rechenkosten
+- **Kill-Kriterium:** ΔBPB < 0,002
+- **KEEP:** wahrscheinlich ✅ — bei klarem Gewinn Standard für Folge-Runs
+- **Notiz:** Aktivierungswahl ist backbone-abhängig
 
-Nach JEDEM Run:
+#### Run 5 — Gated LeakyReLU²
+- **Änderung:** Gate zusätzlich zu LeakyReLU²
+- **Erwartung:** Stärker als Run 4
+- **Kill-Kriterium:** Nur minimal besser + höhere Komplexität
+- **KEEP:** ❌ wenn nicht klar besser — Gate erhöht Engineering-Kosten
+- **Notiz:** Faustregel: Nur behalten wenn Gewinn deutlich sichtbar
 
-1. BPB besser?
-2. Schrittzeit schlimmer?
-3. Artifact Budget besser/schlechter?
-4. Komplexität gerechtfertigt?
+---
 
-👉 Wenn 2 von 4 schlecht → Feature fliegt raus
+### 💾 Phase C — Budget / Quantisierung (Runs 6–7)
 
-⚠️ Typische Fehler (die dich Zeit kosten)
-❌ Fehler 1: „Stack alles zusammen“
+**Ziel:** Optimierung des Artifact-Budgets durch Quantisierung und Kapazitätsanpassung.
 
-→ führt zu:
+#### Run 6 — Mixed INT5/INT6
+- **Änderung:** INT5 für MLP, INT6 für Attention/Embeddings
+- **Erwartung:** Mehr Platz im 16 MB Budget bei akzeptablem Quant-Gap
+- **Kill-Kriterium:** Quant-Gap > 0,1 BPB (`quantized_val_bpb - val_bpb`)
+- **KEEP:** ✅ wenn stabil — einer der wichtigsten Runs
+- **Notiz:** 16 MB Limit und H100/10-Minuten-Grenze sind Challenge-Anforderungen
 
-keine Ahnung was wirkt
-unstable runs
-wasted budget
-❌ Fehler 2: „+0.001 BPB ist gut“
+#### Run 7 — Größere Kapazität
+- **Änderung:** Mehr Kapazität (MLP-Ratio 3,0 → 3,5 oder minimale Tiefe)
+- **Erwartung:** Besseres BPB durch mehr Parameter
+- **Kill-Kriterium:** Kein BPB-Gewinn trotz größerem Modell
+- **KEEP:** ✅ nur wenn besser — Budget muss genutzt werden
+- **Notiz:** Nicht gleichzeitig XSA oder TTT aktivieren
 
-→ nein
+---
 
-Unter diesem Budget gilt:
+### 🚀 Phase D — Frontier Hebel (Runs 8–9)
 
-<0.002 = oft Noise
-nur klare Sprünge behalten
-❌ Fehler 3: „TTT wird’s retten“
+**Ziel:** Evaluation fortgeschrittener Features mit hohem Potenzial.
 
-→ nein
+#### Run 8 — XSA-4
+- **Änderung:** Cross-Sequence Attention auf letzten 4 Layern
+- **Erwartung:** Starker BPB-Boost für lange Abhängigkeiten
+- **Kill-Kriterium:** Stepzeit explodiert (>30% Overhead)
+- **KEEP:** 🔥 Favorit — einer der stärksten realen Hebel
+- **Notiz:** XSA auf allen Layern nicht automatisch besser als XSA-4
 
-TTT funktioniert nur auf:
+#### Run 9 — TTT (ohne XSA!)
+- **Änderung:** Test-Time Training minimal (1 pass, state reset)
+- **Erwartung:** BPB reduziert
+- **Kill-Kriterium:** Volatil / instabil / schlechter als Run 8
+- **KEEP:** optional — nur wenn klar besser als XSA
+- **Notiz:** 
+  - KEIN XSA gleichzeitig mit TTT
+  - Nur 1 pass
+  - State reset pro Eval-Fenster
 
-starkem Backbone
-stabiler Quantisierung
-❌ Fehler 4: „größeres Vocab = besser“
+---
 
-→ falsch in dieser Challenge
+### 🏁 Phase E — Finale (Run 10)
 
-→ Depth gewinnt meist
+**Ziel:** Finales Setup mit 3 Seeds für Robustheits-Validierung.
 
-🏆 Realistische Endkonfiguration (mein Tipp für dich)
+#### Run 10 — 3-Seed-Finale
+- **Änderung:** Bestes Setup aus vorherigen Runs
+- **Erwartung:** Stabiles Ergebnis über 3 Seeds
+- **Kill-Kriterium:** Große Varianz zwischen Seeds (σ > 0,03 BPB)
+- **KEEP:** 🏆 — finales Submission-Setup
+- **Notiz:** Wähle genau einen Pfad:
+  - **Variante A:** Backbone + Tokenizer + Quant + XSA
+  - **Variante B:** Backbone + Tokenizer + Quant + TTT
+  - ❗ Nicht mischen (erst später evaluieren)
 
-Wenn ich wetten müsste:
+---
 
-Backbone:
-- 8×2 recurrence
-- d=512
+## Entscheidungslogik
 
-Tokenizer:
-- Bigram + kleiner Trigram
+Nach **jedem** Run werden folgende 4 Fragen gestellt:
 
-MLP:
-- LeakyReLU² (kein Gate)
+| # | Frage | Bewertung |
+|---|-------|-----------|
+| 1 | BPB besser? | Hauptmetrik — niedrig ist besser |
+| 2 | ms/step schlechter? | Overhead — kostet Trainingsschritte |
+| 3 | Artifact-Budget besser/schlechter? | Freier Platz unter 16 MB? |
+| 4 | Komplexität gerechtfertigt? | Engineering-Kosten im Verhältnis zum Gewinn? |
 
-Quant:
-- int5 MLP / int6 Rest
+**Entscheidungsregel:** Wenn 2 von 4 Punkten negativ → Feature wird verworfen.
 
-Extra:
-- XSA-4
+---
 
-Optional:
-- TTT nur wenn klar besser
-🚀 Wenn du noch einen Schritt weiter willst
+## Best Practices & Anti-Patterns
 
-Ich kann dir jetzt noch geben:
+### ❌ Anti-Pattern 1: Features stacken
 
-👉 exakte Run-Kommandos + Configs
-ODER
-👉 train_gpt.py Patch (recurrence + XSA + tokenizer integriert)
+**Beschreibung:** Mehrere Änderungen gleichzeitig in einem Run.
 
-Sag einfach:
+**Konsequenz:**
+- Keine Ahnung was wirkt
+- Instabile Runs
+- Verschwendetes Budget
 
-„Code“ → dann bauen wir dir direkt dein Record-Setup 🔥
+**Gegenmaßnahme:** Immer genau eine Änderung pro Run.
+
+---
+
+### ❌ Anti-Pattern 2: +0,001 BPB als Gewinn werten
+
+**Beschreibung:** Minimale BPB-Verbesserungen als echten Fortschritt interpretieren.
+
+**Konsequenz:**
+- Noise wird als Signal behandelt
+- Falsche Entscheidungen bei Feature-Übernahme
+
+**Gegenmaßnahme:** ΔBPB < 0,002 gilt als Noise — nur klare Sprünge behalten.
+
+---
+
+### ❌ Anti-Pattern 3: TTT zu früh aktivieren
+
+**Beschreibung:** TTT auf schwachem Backbone oder ohne stabile Quantisierung.
+
+**Konsequenz:**
+- Instabiles Training
+- Kein messbarer Gewinn
+
+**Gegenmaßnahme:** TTT erst in Phase D auf starkem Backbone mit stabiler Quant.
+
+---
+
+### ❌ Anti-Pattern 4: Größeres Vocab = besser
+
+**Beschreibung:** Annahme dass größeres Vokabular automatisch bessere BPB liefert.
+
+**Konsequenz:**
+- Verschwendetes Artifact-Budget
+- Kein entsprechender BPB-Gewinn
+
+**Gegenmaßnahme:** Depth schlägt Vocab fast immer — Vocab-Size nicht übertreiben.
+
+---
+
+## Zielkonfiguration
+
+Basierend auf dem Ablationsplan ergibt sich folgende realistische Zielkonfiguration:
+
+```yaml
+# Backbone
+model:
+  d_model: 512
+  recurrence:
+    enabled: true
+    depth: 2
+    tied: true
+
+# Tokenizer
+tokenizer:
+  type: bigram_hash
+  vocab_size: 4096  # Nicht übertreiben — Depth gewinnt meist
+
+# Aktivierung
+  activation: leaky_relu_squared  # Kein Gate wenn nicht klar besser
+
+# Quantisierung
+quantization:
+  enabled: true
+  type: mixed
+  mlp_dtype: int5
+  attention_dtype: int6
+  embedding_dtype: int6
+
+# Frontier Features
+  xsa:
+    enabled: true
+    layers: [8, 9, 10, 11]  # Nur letzte 4 Layer
+
+# Optional (nur wenn klar besser als XSA)
+# ttt:
+#   enabled: true
+#   passes: 1
+#   state_reset: true
+```
+
+---
+
+## Nächste Schritte
+
+Nach Abschluss des Ablationsplans:
+
+1. **Submission Bundle erstellen** — Siehe [runs_guide.md](runs_guide.md#submission-vorbereiten)
+2. **Multi-Seed Validierung** — 3 Seeds für finales Setup
+3. **Artifact-Check** — Sicherstellen dass < 16 MB
+4. **Dokumentation** — Lineage und Metriken im Submission-README
+
+---
+
+## Verwandte Dokumente
+
+- [runs_guide.md](runs_guide.md) — Ausführlicher Guide zum Starten von Runs
+- [runs_development.md](runs_development.md) — Development-Guide mit Prinzipien
+- [roadmap_runs.md](roadmap_runs.md) — Detaillierte Roadmap mit Challenge- und Lokal-Pfad
+- [configuration.md](configuration.md) — Konfigurations-Handbuch

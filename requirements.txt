@@ -5,6 +5,11 @@ pyyaml>=6.0
 # Optional: PyTorch for training (if not using pure Rust)
 # torch>=2.0.0
 
+# Machine Learning (Phase 4A)
+scikit-learn>=1.0.0
+pandas>=2.0.0
+matplotlib>=3.5.0
+
 # Development
 pytest>=7.0.0
 pytest-cov>=4.0.0

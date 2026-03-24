@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """
-Basic Dashboard für Meta-Feature Visualisierung.
+Meta-Feature Dashboard für NeuroWeave.
 
 Dieses Dashboard bietet Einblicke in die extrahierten Meta-Features
 aller Runs und hilft bei der Analyse von Feature-Performance und
 Co-occurrence Mustern.
 
-Commands:
+Phase 3 Commands:
     python -m orchestrator.meta_dashboard summary       # Übersicht aller Features
     python -m orchestrator.meta_dashboard co-occurrence # Feature Co-occurrence Matrix
     python -m orchestrator.meta_dashboard feature-stats # Statistiken pro Feature
@@ -14,10 +14,20 @@ Commands:
     python -m orchestrator.meta_dashboard budget        # Budget-Klassen Analyse
     python -m orchestrator.meta_dashboard quant         # Quantisierungs-Analyse
 
+Phase 4A Commands (neu):
+    python -m orchestrator.meta_dashboard predictions     # Surrogate Scorer Vorhersagen
+    python -m orchestrator.meta_dashboard hypotheses      # Run-Vorschläge generieren
+    python -m orchestrator.meta_dashboard pareto          # Pareto-Frontier anzeigen
+    python -m orchestrator.meta_dashboard recommendations # Top-Empfehlungen
+
 Beispiele:
     python -m orchestrator.meta_dashboard summary --top 10
     python -m orchestrator.meta_dashboard feature-stats --min-count 3
     python -m orchestrator.meta_dashboard co-occurrence --limit 20
+    python -m orchestrator.meta_dashboard predictions
+    python -m orchestrator.meta_dashboard hypotheses --top 10
+    python -m orchestrator.meta_dashboard pareto --plot
+    python -m orchestrator.meta_dashboard recommendations --top 5
 """
 
 import argparse
@@ -32,6 +42,10 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from core.meta_features import MetaFeatureExtractor, RunMetaFeatures
 from core.registry import RunRegistry
+from research.surrogate_scorer import SurrogateScorer
+from research.hypothesis_generator import HypothesisGenerator, RunHypothesis
+from research.pareto_tracker import ParetoTracker, ParetoPoint
+from research.adaptive_kill_thresholds import AdaptiveKillThresholdManager
 
 
 def load_features_from_registry(registry: RunRegistry, extractor: MetaFeatureExtractor) -> List[RunMetaFeatures]:
@@ -508,6 +522,356 @@ def print_quant_analysis(features: List[RunMetaFeatures]) -> None:
     print("=" * 70)
 
 
+def print_predictions(features: List[RunMetaFeatures], top_n: int = 10) -> None:
+    """
+    Drucke Surrogate Scorer Vorhersagen.
+
+    Args:
+        features: Liste von RunMetaFeatures
+        top_n: Anzahl der Top-Vorhersagen
+    """
+    if not features:
+        print("Keine Features vorhanden.")
+        return
+
+    print("\n" + "=" * 70)
+    print("SURROGATE SCORER VORHERSAGEN")
+    print("=" * 70)
+
+    # Surrogate Scorer initialisieren und trainieren
+    scorer = SurrogateScorer(model_type="random_forest")
+
+    # Trainingsdaten vorbereiten
+    targets = {
+        "delta_bpb": [f.delta_bpb_vs_parent for f in features if f.delta_bpb_vs_parent is not None],
+        "efficiency_gain": [f.efficiency_gain_percent for f in features if f.efficiency_gain_percent is not None],
+    }
+
+    # Nur Features mit Targets verwenden
+    train_features = [
+        f for f in features
+        if f.delta_bpb_vs_parent is not None and f.efficiency_gain_percent is not None
+    ]
+
+    if len(train_features) < 5:
+        print(f"❌ Nicht genügend Trainingsdaten ({len(train_features)} < 5)")
+        print("   Führe mehr Runs durch um den Surrogate Scorer zu trainieren.")
+        return
+
+    # Modell trainieren
+    try:
+        metrics = scorer.train(train_features, {
+            "delta_bpb": targets["delta_bpb"][:len(train_features)],
+            "efficiency_gain": targets["efficiency_gain"][:len(train_features)],
+        })
+
+        print(f"\n📊 Modell-Statistiken:")
+        print(f"   Modell-Typ: Random Forest")
+        print(f"   Trainings-Runs: {len(train_features)}")
+        print(f"   BPB CV-RMSE: {metrics.get('bpb_cv_rmse', 0):.4f}")
+        print(f"   Efficiency CV-RMSE: {metrics.get('efficiency_cv_rmse', 0):.4f}")
+
+        # Feature-Importance anzeigen
+        importance = scorer.get_feature_importance()
+        sorted_importance = sorted(importance.items(), key=lambda x: -x[1])[:10]
+
+        print(f"\n🔍 Top 10 Feature-Importancen:")
+        for feat, imp in sorted_importance:
+            bar = "█" * int(imp * 20)
+            print(f"   {feat:<30} {imp:.4f} {bar}")
+
+        # Vorhersagen für alle Runs
+        print(f"\n📈 Vorhersagen (Top {top_n}):")
+        print(f"{'Run ID':<40} {'Pred ΔBPB':>12} {'Pred Eff%':>12} {'Confidence':>12}")
+        print("-" * 78)
+
+        predictions = []
+        for f in features:
+            try:
+                pred_bpb, pred_eff, conf = scorer.predict(f)
+                predictions.append((f.run_id, pred_bpb, pred_eff, conf))
+            except Exception:
+                continue
+
+        # Nach Confidence sortieren
+        predictions.sort(key=lambda x: -x[3])
+
+        for run_id, pred_bpb, pred_eff, conf in predictions[:top_n]:
+            bpb_str = f"{pred_bpb:+.4f}"
+            eff_str = f"{pred_eff:+.1f}"
+            conf_str = f"{conf:.1%}"
+            symbol = "✓" if pred_bpb < 0 else "✗"
+            print(f"{run_id:<40} {bpb_str:>12} {eff_str:>12} {conf_str:>12} {symbol}")
+
+    except Exception as e:
+        print(f"❌ Fehler beim Trainieren: {e}")
+
+    print("=" * 70)
+
+
+def print_hypotheses(features: List[RunMetaFeatures], top_n: int = 10) -> None:
+    """
+    Drucke generierte Run-Hypothesen.
+
+    Args:
+        features: Liste von RunMetaFeatures
+        top_n: Anzahl der Top-Hypothesen
+    """
+    if not features:
+        print("Keine Features vorhanden.")
+        return
+
+    print("\n" + "=" * 80)
+    print("HYPOTHESIS GENERATOR - RUN VORSCHLÄGE")
+    print("=" * 80)
+
+    # Surrogate Scorer trainieren
+    scorer = SurrogateScorer(model_type="random_forest")
+
+    train_features = [
+        f for f in features
+        if f.delta_bpb_vs_parent is not None and f.efficiency_gain_percent is not None
+    ]
+
+    if len(train_features) < 5:
+        print(f"❌ Nicht genügend Trainingsdaten ({len(train_features)} < 5)")
+        return
+
+    targets = {
+        "delta_bpb": [f.delta_bpb_vs_parent for f in train_features],
+        "efficiency_gain": [f.efficiency_gain_percent for f in train_features],
+    }
+
+    try:
+        scorer.train(train_features, targets)
+    except Exception as e:
+        print(f"❌ Fehler beim Trainieren: {e}")
+        return
+
+    # Hypothesis Generator initialisieren
+    generator = HypothesisGenerator(scorer, features)
+
+    # Alle Hypothesen generieren
+    hypotheses = generator.generate_all()
+
+    if not hypotheses:
+        print("❌ Keine Hypothesen generiert.")
+        return
+
+    print(f"\n📊 Übersicht:")
+    print(f"   Total Hypothesen: {len(hypotheses)}")
+
+    exploitation_count = sum(1 for h in hypotheses if h.hypothesis_type == "exploitation")
+    exploration_count = sum(1 for h in hypotheses if h.hypothesis_type == "exploration")
+    pattern_count = sum(1 for h in hypotheses if h.hypothesis_type == "pattern_based")
+
+    print(f"   Exploitation: {exploitation_count}")
+    print(f"   Exploration: {exploration_count}")
+    print(f"   Pattern-based: {pattern_count}")
+
+    # Feature-Erfolgsraten
+    success_rates = generator.get_feature_success_rates()
+    if success_rates:
+        print(f"\n🏆 Top Feature-Erfolgsraten:")
+        sorted_rates = sorted(success_rates.items(), key=lambda x: -x[1])[:5]
+        for feat, rate in sorted_rates:
+            count = generator.feature_counts.get(feat, 0)
+            print(f"   {feat:<25} {rate:.1%} ({count} Runs)")
+
+    # Top-Hypothesen anzeigen
+    print(f"\n💡 Top {top_n} Hypothesen:")
+    print("-" * 80)
+
+    for i, h in enumerate(hypotheses[:top_n], 1):
+        risk_symbol = {"low": "🟢", "medium": "🟡", "high": "🔴"}.get(h.risk_level, "⚪")
+        type_symbol = {
+            "exploitation": "⚡",
+            "exploration": "🔍",
+            "pattern_based": "🧩"
+        }.get(h.hypothesis_type, "•")
+
+        print(f"\n{i:2}. {type_symbol} {', '.join(h.features_proposed)}")
+        print(f"    Vorhergesagtes ΔBPB: {h.predicted_delta_bpb:+.4f}")
+        print(f"    Confidence: {h.confidence:.1%}")
+        print(f"    Risiko: {h.risk_level} {risk_symbol}")
+        print(f"    Begründung: {h.reasoning}")
+
+        if h.similar_successful_runs:
+            similar_str = ", ".join(h.similar_successful_runs[:3])
+            print(f"    Ähnliche Runs: {similar_str}")
+
+    print("\n" + "=" * 80)
+
+
+def print_pareto_frontier(features: List[RunMetaFeatures], plot: bool = False) -> None:
+    """
+    Drucke Pareto-Frontier Analyse.
+
+    Args:
+        features: Liste von RunMetaFeatures
+        plot: Ob Plot erstellt werden soll
+    """
+    if not features:
+        print("Keine Features vorhanden.")
+        return
+
+    print("\n" + "=" * 70)
+    print("PARETO FRONTIER ANALYSE")
+    print("=" * 70)
+
+    # Pareto Tracker initialisieren
+    tracker = ParetoTracker()
+
+    # Runs hinzufügen (nur mit vollständigen Daten)
+    for f in features:
+        if f.delta_bpb_vs_parent is not None and f.efficiency_gain_percent is not None:
+            size_change = f.model_size_change_percent or 0.0
+            tracker.add_run(
+                run_id=f.run_id,
+                delta_bpb=f.delta_bpb_vs_parent,
+                efficiency_gain=f.efficiency_gain_percent,
+                size_change=size_change,
+            )
+
+    # Frontier berechnen
+    frontier = tracker.get_frontier_points()
+    dominated = tracker.get_dominated_points()
+
+    print(f"\n📊 Übersicht:")
+    print(f"   Total Runs: {len(tracker.points)}")
+    print(f"   Pareto-optimal: {len(frontier)}")
+    print(f"   Dominiert: {len(dominated)}")
+
+    # Statistik
+    stats = tracker.get_statistics()
+    print(f"\n📈 Frontier-Statistiken:")
+    print(f"   Volumen: {stats.get('frontier_volume', 0):.2f}")
+    print(f"   Bestes ΔBPB: {stats.get('best_delta_bpb', 0):+.4f}")
+    print(f"   Beste Effizienz: {stats.get('best_efficiency_gain', 0):+.1f}%")
+    print(f"   Frontier Expansion: {stats.get('frontier_expansion', 0):+.1%}")
+
+    # Pareto-optimale Runs anzeigen
+    if frontier:
+        print(f"\n🏆 Pareto-optimale Runs:")
+        print(f"{'Run ID':<40} {'ΔBPB':>10} {'Eff%':>10} {'Size%':>10}")
+        print("-" * 72)
+
+        # Sortiert nach ΔBPB
+        sorted_frontier = sorted(frontier, key=lambda p: p.delta_bpb)
+        for p in sorted_frontier:
+            bpb_str = f"{p.delta_bpb:+.4f}"
+            eff_str = f"{p.efficiency_gain:+.1f}"
+            size_str = f"{p.size_change:+.1f}"
+            print(f"{p.run_id:<40} {bpb_str:>10} {eff_str:>10} {size_str:>10}")
+
+    # Lücken identifizieren
+    gaps = tracker.identify_gaps(num_gaps=3)
+    if gaps:
+        print(f"\n🔍 Identifizierte Lücken:")
+        for i, gap in enumerate(gaps, 1):
+            print(f"   {i}. Target ΔBPB: {gap['target_bpb']:+.4f}, "
+                  f"Effizienz: {gap['target_efficiency']:+.1f}%")
+            print(f"      {gap['reason'][:80]}...")
+
+    # Plot erstellen
+    if plot:
+        try:
+            output_path = tracker.plot_frontier(output_path="results/pareto_frontier.png")
+            print(f"\n📊 Plot erstellt: {output_path}")
+        except ImportError as e:
+            print(f"\n⚠️  Plotting nicht verfügbar: {e}")
+        except Exception as e:
+            print(f"\n⚠️  Fehler beim Plotten: {e}")
+
+    print("=" * 70)
+
+
+def print_recommendations(features: List[RunMetaFeatures], top_n: int = 5) -> None:
+    """
+    Drucke Top-Empfehlungen für nächste Runs.
+
+    Args:
+        features: Liste von RunMetaFeatures
+        top_n: Anzahl der Top-Empfehlungen
+    """
+    if not features:
+        print("Keine Features vorhanden.")
+        return
+
+    print("\n" + "=" * 80)
+    print("TOP EMPFEHLUNGEN FÜR NÄCHSTE RUNS")
+    print("=" * 80)
+
+    # Surrogate Scorer trainieren
+    scorer = SurrogateScorer(model_type="gradient_boosting")
+
+    train_features = [
+        f for f in features
+        if f.delta_bpb_vs_parent is not None and f.efficiency_gain_percent is not None
+    ]
+
+    if len(train_features) < 5:
+        print(f"❌ Nicht genügend Trainingsdaten ({len(train_features)} < 5)")
+        return
+
+    targets = {
+        "delta_bpb": [f.delta_bpb_vs_parent for f in train_features],
+        "efficiency_gain": [f.efficiency_gain_percent for f in train_features],
+    }
+
+    try:
+        scorer.train(train_features, targets)
+    except Exception as e:
+        print(f"❌ Fehler beim Trainieren: {e}")
+        return
+
+    # Hypothesis Generator
+    generator = HypothesisGenerator(scorer, features)
+    hypotheses = generator.generate_all()
+
+    # Adaptive Kill Thresholds
+    kill_manager = AdaptiveKillThresholdManager()
+    kill_stats = kill_manager.get_kill_statistics()
+
+    print(f"\n📊 Analyse-Basis:")
+    print(f"   Trainings-Runs: {len(train_features)}")
+    print(f"   Generierte Hypothesen: {len(hypotheses)}")
+    print(f"   Kill-Rate (recent): {kill_stats.get('kill_rate', 0):.1%}")
+
+    # Top-Empfehlungen
+    if hypotheses:
+        print(f"\n💡 Top {top_n} Empfehlungen:")
+        print("-" * 80)
+
+        for i, h in enumerate(hypotheses[:top_n], 1):
+            priority = "🔥" if i <= 2 else "⭐" if i <= 5 else "•"
+            risk_symbol = {"low": "🟢", "medium": "🟡", "high": "🔴"}.get(h.risk_level, "⚪")
+
+            print(f"\n{i}. {priority} {', '.join(h.features_proposed)}")
+            print(f"   Typ: {h.hypothesis_type} | Risiko: {h.risk_level} {risk_symbol}")
+            print(f"   Erwartetes ΔBPB: {h.predicted_delta_bpb:+.4f} (Confidence: {h.confidence:.1%})")
+            print(f"   Begründung: {h.reasoning[:100]}...")
+
+    # Diminishing Returns Features
+    diminishing = generator.get_diminishing_returns_features()
+    if diminishing:
+        print(f"\n⚠️  Features mit sinkendem Grenznutzen:")
+        for feat in diminishing[:5]:
+            rate = generator.feature_success_rates.get(feat, 0)
+            count = generator.feature_counts.get(feat, 0)
+            print(f"   • {feat}: {rate:.1%} Erfolgsrate in {count} Runs")
+
+    # Kill-Threshold Empfehlungen
+    print(f"\n🛑 Kill-Threshold Empfehlungen:")
+    for budget_class in ["low_budget", "medium_budget", "high_budget"]:
+        thresh = kill_manager.get_thresholds(budget_class)
+        print(f"   {budget_class}:")
+        print(f"     Max ΔBPB: {thresh.max_delta_bpb:+.2%}")
+        print(f"     Min Effizienz: {thresh.min_efficiency_gain:+.1f}%")
+
+    print("\n" + "=" * 80)
+
+
 def parse_args() -> argparse.Namespace:
     """Parse command-line arguments."""
     parser = argparse.ArgumentParser(
@@ -524,42 +888,51 @@ Beispiele:
   %(prog)s lineage                    # Lineage-Analyse
   %(prog)s budget                     # Budget-Klassen Analyse
   %(prog)s quant                      # Quantisierungs-Analyse
+  %(prog)s predictions                # Surrogate Scorer Vorhersagen
+  %(prog)s hypotheses --top 10        # Run-Vorschläge generieren
+  %(prog)s pareto                     # Pareto-Frontier anzeigen
+  %(prog)s pareto --plot              # Mit Plot
+  %(prog)s recommendations --top 5    # Top-Empfehlungen
         """,
     )
-    
+
     parser.add_argument(
         "command",
-        choices=["summary", "co-occurrence", "feature-stats", "lineage", "budget", "quant"],
+        choices=[
+            "summary", "co-occurrence", "feature-stats", "lineage",
+            "budget", "quant", "predictions", "hypotheses", "pareto",
+            "recommendations"
+        ],
         help="Dashboard Command",
     )
-    
+
     parser.add_argument(
         "--json",
         type=str,
         help="JSON-Datei mit Meta-Features (default: lade aus Registry)",
     )
-    
+
     parser.add_argument(
         "--top",
         type=int,
         default=10,
         help="Anzahl der Top-Einträge (default: 10)",
     )
-    
+
     parser.add_argument(
         "--limit",
         type=int,
         default=20,
         help="Limit für Ausgabe (default: 20)",
     )
-    
+
     parser.add_argument(
         "--min-count",
         type=int,
         default=1,
         help="Minimale Anzahl für Anzeige (default: 1)",
     )
-    
+
     parser.add_argument(
         "--sort-by",
         type=str,
@@ -567,26 +940,32 @@ Beispiele:
         default="count",
         help="Sortierreihenfolge für feature-stats (default: count)",
     )
-    
+
+    parser.add_argument(
+        "--plot",
+        action="store_true",
+        help="Erstelle Plot (für pareto Command)",
+    )
+
     return parser.parse_args()
 
 
 def main() -> None:
     """Hauptfunktion."""
     args = parse_args()
-    
+
     # Initialisiere Registry und Extractor
     results_dir = Path(__file__).parent.parent / "results"
     registry = RunRegistry(results_dir=str(results_dir))
     extractor = MetaFeatureExtractor(configs_dir=Path(__file__).parent.parent / "configs")
-    
+
     # Lade Features
     features = get_features(registry, extractor, json_path=args.json)
-    
+
     if not features:
         print("❌ Keine Meta-Features gefunden.")
         sys.exit(1)
-    
+
     # Führe Command aus
     if args.command == "summary":
         print_summary(features, top_n=args.top)
@@ -600,6 +979,14 @@ def main() -> None:
         print_budget_analysis(features)
     elif args.command == "quant":
         print_quant_analysis(features)
+    elif args.command == "predictions":
+        print_predictions(features, top_n=args.top)
+    elif args.command == "hypotheses":
+        print_hypotheses(features, top_n=args.top)
+    elif args.command == "pareto":
+        print_pareto_frontier(features, plot=args.plot)
+    elif args.command == "recommendations":
+        print_recommendations(features, top_n=args.top)
 
 
 if __name__ == "__main__":
