@@ -244,9 +244,10 @@ class TextDataLoader:
         for i in range(num_batches):
             batch_seqs = sequences[i * batch_size : (i + 1) * batch_size]
 
-            # Tokens und Targets (um 1 verschoben)
-            batch_tokens = batch_seqs[:, :-1]
-            batch_targets = batch_seqs[:, 1:]
+            # Tokens und Targets
+            # For language modeling: input = tokens, target = same tokens (teacher forcing)
+            batch_tokens = batch_seqs
+            batch_targets = batch_seqs
 
             # Padding-Mask (alle 1 da wir getrimmt haben)
             mask = np.ones_like(batch_tokens, dtype=np.float32)

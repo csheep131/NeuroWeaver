@@ -163,8 +163,13 @@ class Trainer:
 
         # Forward pass
         if isinstance(self.model, nn.Module):
-            # PyTorch model
-            logits = self.model(tokens)
+            # PyTorch model - returns (logits, loss) tuple
+            output = self.model(tokens)
+            # Handle tuple return (logits, loss)
+            if isinstance(output, tuple):
+                logits = output[0]
+            else:
+                logits = output
             
             # FIX: Compute loss with mask support
             # Flatten logits and targets
@@ -183,7 +188,12 @@ class Trainer:
             )
         else:
             # Fallback: use model's forward method
-            logits = self.model.forward(tokens)
+            output = self.model.forward(tokens)
+            # Handle tuple return
+            if isinstance(output, tuple):
+                logits = output[0]
+            else:
+                logits = output
             
             # FIX: Same masking logic for fallback
             logits_flat = logits.view(-1, logits.size(-1))

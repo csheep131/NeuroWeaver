@@ -100,8 +100,8 @@ class BPBEvaluator:
         total_time = 0.0
         total_loss = 0.0
 
-        # Check if data is a data loader
-        if hasattr(data, '__iter__') and hasattr(data, 'batch_size'):
+        # Check if data is a data loader (has __iter__ and is not a list)
+        if hasattr(data, '__iter__') and not isinstance(data, list):
             # Data loader
             for batch in data:
                 start_time = time.perf_counter()
@@ -116,8 +116,12 @@ class BPBEvaluator:
                         targets = batch[1].to(device)
                         num_bytes = tokens.numel()
 
-                    # Forward pass
-                    logits = model(tokens)
+                    # Forward pass (handle tuple output)
+                    output = model(tokens)
+                    if isinstance(output, tuple):
+                        logits = output[0]
+                    else:
+                        logits = output
 
                     # Compute loss (cross-entropy)
                     loss = F.cross_entropy(

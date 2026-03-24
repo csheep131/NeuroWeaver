@@ -3,6 +3,7 @@ __pycache__/
 *.py[cod]
 *$py.class
 *.so
+.qwen
 .Python
 build/
 develop-eggs/
@@ -65,8 +66,10 @@ Cargo.Bazel.lock
 *.model
 *.pkl
 *.pickle
+*.onnx
+*.pb
+*.tflite
 checkpoints/
-models/
 experiments/
 runs/*/checkpoints/
 runs/*/logs/

@@ -29,7 +29,8 @@ Diese Dokumentation bietet einen vollständigen Überblick über die Ablation Ma
 docs/
 ├── README.md                    # Diese Datei – Dokumentations-Übersicht
 ├── architecture/                # Architektur-Dokumente
-│   ├── ARCHITECTURE.md          # System-Architektur (existiert)
+│   ├── ARCHITECTURE.md          # System-Architektur
+│   ├── blueprint.md             # Phase 1 Implementierungs-Blueprint
 │   ├── rust_integration.md      # Rust-Integration Details
 │   └── module_overview.md       # Modul-Übersicht
 ├── setup/                       # Setup & Installation
@@ -40,16 +41,24 @@ docs/
 │   ├── phase_1_audit.md         # Phase 1 Code Audit
 │   ├── phase_2_audit.md         # Phase 2 Code Audit
 │   ├── phase_2_bug_fixes.md     # Phase 2 Bug Fixes
+│   ├── phase_2_implementation.md# Phase 2 Implementierungsbericht
 │   ├── phase_3_audit.md         # Phase 3 Code Audit
-│   └── phase_3_performance.md   # Phase 3 Performance Optimizations
+│   ├── phase_3_performance.md   # Phase 3 Performance Optimizations
+│   └── phase_3_implementation.md# Phase 3 Implementierungsbericht
 ├── guides/                      # Anleitungen & How-Tos
+│   ├── README.md                # Guides-Übersicht
 │   ├── configuration.md         # Konfigurations-Handbuch
 │   ├── runs_guide.md            # Runs starten
+│   ├── runs_development.md      # Runs Entwicklung
 │   ├── sweep_guide.md           # Sweep Runner
 │   ├── promotion_guide.md       # Promotion System
-│   └── dashboard_guide.md       # Dashboard CLI
+│   ├── ablation_plan.md         # Ablation-Plan (10-Run Roadmap)
+│   ├── roadmap_runs.md          # Detaillierte Run-Roadmap
+│   ├── run_tabelle.md           # Run-Übersichtstabelle
+│   ├── trainings_plan.md        # Trainings-Planung
+│   └── auto_approve.md          # Phase 4: Autonome Selbstverbesserung
 └── api/                         # API-Dokumentation
-    └── modules.md               # Modul-API Übersicht
+    └── README.md                # API-Docs Übersicht
 ```
 
 ---
@@ -88,6 +97,7 @@ python3 -m orchestrator.dashboard
 | Dokument | Beschreibung |
 |----------|--------------|
 | [ARCHITECTURE.md](architecture/ARCHITECTURE.md) | System-Architektur, Komponenten, Datenfluss |
+| [blueprint.md](architecture/blueprint.md) | Phase 1 Implementierungs-Blueprint |
 | [rust_integration.md](architecture/rust_integration.md) | Rust/Python-Integration, Performance-kritische Komponenten |
 | [module_overview.md](architecture/module_overview.md) | Modul-Übersicht, Abhängigkeiten, Exporte |
 
@@ -106,24 +116,32 @@ python3 -m orchestrator.dashboard
 | [phase_1_audit.md](reports/phase_1_audit.md) | Phase 1 Code Audit (Experiment Core) |
 | [phase_2_audit.md](reports/phase_2_audit.md) | Phase 2 Code Audit (Research Engine) |
 | [phase_2_bug_fixes.md](reports/phase_2_bug_fixes.md) | Phase 2 Bug Fixes Summary |
+| [phase_2_implementation.md](reports/phase_2_implementation.md) | Phase 2 Implementierungsbericht |
 | [phase_3_audit.md](reports/phase_3_audit.md) | Phase 3 Code Audit (Production Pipeline) |
 | [phase_3_performance.md](reports/phase_3_performance.md) | Phase 3 Performance Optimizations |
+| [phase_3_implementation.md](reports/phase_3_implementation.md) | Phase 3 Implementierungsbericht |
 
 ### 📖 Guides (`guides/`)
 
 | Dokument | Beschreibung |
 |----------|--------------|
+| [README.md](guides/README.md) | Guides-Übersicht |
 | [configuration.md](guides/configuration.md) | Konfigurations-Handbuch, YAML-Schema |
 | [runs_guide.md](guides/runs_guide.md) | Runs starten, Configs erstellen |
+| [runs_development.md](guides/runs_development.md) | Runs Entwicklung |
 | [sweep_guide.md](guides/sweep_guide.md) | Sweep Runner, Parameter-Sweeps |
 | [promotion_guide.md](guides/promotion_guide.md) | Promotion System, Stage-Management |
-| [dashboard_guide.md](guides/dashboard_guide.md) | Dashboard CLI, Commands |
+| [ablation_plan.md](guides/ablation_plan.md) | Ablation-Plan (10-Run Roadmap) |
+| [roadmap_runs.md](guides/roadmap_runs.md) | Detaillierte Run-Roadmap |
+| [run_tabelle.md](guides/run_tabelle.md) | Run-Übersichtstabelle |
+| [trainings_plan.md](guides/trainings_plan.md) | Trainings-Planung |
+| [auto_approve.md](guides/auto_approve.md) | Phase 4: Autonome Selbstverbesserung |
 
 ### 🔌 API (`api/`)
 
 | Dokument | Beschreibung |
 |----------|--------------|
-| [modules.md](api/modules.md) | Modul-API Übersicht, Klassen, Funktionen |
+| [README.md](api/README.md) | API-Dokumentation Übersicht |
 
 ---
 
@@ -174,17 +192,20 @@ python3 -m orchestrator.dashboard
 
 - [Haupt-README](../README.md) – Projekt-Übersicht
 - [HERMES.md](../HERMES.md) – Entwicklungs-Konventionen
-- [Roadmap](../roadmap_runs_audit_report.md) – Zukünftige Entwicklungen
+- [Ablation-Plan](guides/ablation_plan.md) – 10-Run Roadmap
+- [Run-Roadmap](guides/roadmap_runs.md) – Detaillierte Run-Spezifikation
 
 ---
 
 ## Dokumentation aktualisieren
 
-Diese Dokumentation wird automatisch aus dem Codebase generiert, wo immer möglich. Bei Änderungen an:
+Diese Dokumentation wird automatisch aus der Codebase generiert, wo immer möglich. Bei Änderungen an:
 
-- **API-Schnittstellen** → `docs/api/modules.md` aktualisieren
+- **API-Schnittstellen** → `docs/api/README.md` aktualisieren
 - **Konfiguration** → `docs/guides/configuration.md` aktualisieren
 - **Architektur** → `docs/architecture/` aktualisieren
 - **Setup-Prozess** → `docs/setup/SETUP.md` aktualisieren
+- **Run-Roadmap** → `docs/guides/roadmap_runs.md` aktualisieren
+- **Reports** → `docs/reports/` aktualisieren
 
 **Prinzip:** Dokumentation, die nicht mit der Realität übereinstimmt, ist schlechter als keine Dokumentation. Immer aus der Source of Truth generieren.

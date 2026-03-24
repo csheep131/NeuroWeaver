@@ -55,15 +55,23 @@ class ModelConfig:
     def from_dict(cls, d: dict[str, Any]) -> "ModelConfig":
         """Create from dictionary."""
         model_cfg = d.get("model", d)
+        num_heads = model_cfg.get("num_heads", 8)
+        attention_type = model_cfg.get("attention", {}).get("type", "gqa")
+        kv_heads = model_cfg.get("attention", {}).get("kv_heads", 4)
+        
+        # FIX: For standard attention, kv_heads must equal num_heads
+        if attention_type == "standard":
+            kv_heads = num_heads
+        
         return cls(
             d_model=model_cfg.get("d_model", 512),
             num_layers=model_cfg.get("num_layers", 6),
-            num_heads=model_cfg.get("num_heads", 8),
+            num_heads=num_heads,
             mlp_ratio=model_cfg.get("mlp_ratio", 4),
             vocab_size=model_cfg.get("vocab_size", 256),
             max_seq_len=model_cfg.get("max_seq_len", 1024),
-            attention_type=model_cfg.get("attention", {}).get("type", "gqa"),
-            kv_heads=model_cfg.get("attention", {}).get("kv_heads", 4),
+            attention_type=attention_type,
+            kv_heads=kv_heads,
             use_rope=model_cfg.get("attention", {}).get("rope", True),
             activation=model_cfg.get("activation", "gelu"),
             xsa_enabled=model_cfg.get("xsa", {}).get("enabled", False),
@@ -345,15 +353,15 @@ class RotaryEmbedding(nn.Module):
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """Apply RoPE zu x (batch, heads, seq, dim)."""
         seq_len = x.shape[2]
+        dim = x.shape[3]
 
         # Positionen
         t = torch.arange(seq_len, device=x.device).type_as(self.inv_freq)
-        freqs = torch.einsum("i,j->ij", t, self.inv_freq)
-        emb = torch.cat((freqs, freqs), dim=-1)
+        freqs = torch.einsum("i,j->ij", t, self.inv_freq)  # (seq_len, dim/2)
 
-        # RoPE anwenden
-        cos = emb.cos()
-        sin = emb.sin()
+        # RoPE anwenden - cos/sin haben shape (seq_len, dim/2)
+        cos = freqs.cos()
+        sin = freqs.sin()
 
         # Rotate x
         x_rot = self._rotate(x, cos, sin)
