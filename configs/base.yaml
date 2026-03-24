@@ -1,0 +1,114 @@
+# Base Configuration for Ablation Machine
+# This file contains default values for all runs.
+# Run-specific configs override these values.
+
+# Run identification
+run_id: ""
+parent_run_id: null
+seed: 42
+
+# Model configuration
+model:
+  # Architecture
+  d_model: 512
+  num_layers: 6
+  num_heads: 8
+  mlp_ratio: 4
+  max_seq_len: 1024
+  vocab_size: 256  # byte-level
+
+  # Recurrence
+  recurrence:
+    enabled: false
+    depth: 1
+    tied: false
+    type: "tied"  # tied, stacked
+    loop_embeddings: false
+
+  # Attention
+  attention:
+    type: "gqa"  # gqa, mha, mqa, none
+    kv_heads: 4
+    gqa_groups: 4  # Für GQA
+    kv_sharing: true  # Für GQA
+    rope: true
+    partial_rope: false
+
+  # Activations
+  activation: "gelu"  # gelu, leaky_relu, star_relu, gated
+  leakiness: 0.01  # Für LeakyReLU
+  beta: 0.5  # Für Star-ReLU
+
+  # Feature gates
+  xsa:
+    enabled: false
+    layers: null  # null = all, oder "last_N" oder Liste [layer_indices]
+    window: 2048  # XSA window size
+  film:
+    enabled: false
+    layers: "all"  # oder Liste von Layer-Indices
+    cond_dim: 64
+  ttt:
+    enabled: false
+    layers: "last_2"  # Nur letzte N Layer
+    steps: 1  # TTT Update-Schritte
+    lr: 0.0001  # TTT Lernrate
+  gated_mlp:
+    enabled: false
+    type: "swiglu"  # swiglu, geglu
+
+# Tokenizer configuration
+tokenizer:
+  type: "byte"  # byte, bigram_hash, trigram_hash, fallback
+  vocab_size: 256
+  byte_fallback: true
+
+# Training configuration
+training:
+  num_steps: 10000
+  batch_size: 32
+  learning_rate: 3e-4
+  weight_decay: 0.1
+  optimizer: "adamw"
+  scheduler: "cosine"
+  warmup_steps: 100
+  min_lr_ratio: 0.1
+  grad_clip: 1.0
+  ema_decay: null
+  eval_every: 100
+  save_every: 500
+
+# Evaluation configuration
+eval:
+  batch_size: 32
+  sliding_window: 1024
+  stride: 512
+  eval_steps: 100
+
+# Quantization configuration
+quant:
+  enabled: false
+  type: "int6"  # int6, int5_int6_mixed, gptq_lite
+  attention_dtype: "int6"  # int5, int6
+  mlp_dtype: "int6"  # int5, int6
+  embedding_dtype: "int6"  # int5, int6
+  gptq_lite: false
+  calibration_samples: 256
+
+# Feature gates (top-level toggles)
+features:
+  hasher: false
+  leaky_relu: false
+  gated_mlp: false
+  mixed_quant: false
+
+# Lokale 8GB-Proxy-Konfiguration (für lokale Entwicklung)
+# Diese Parameter überschreiben die Standard-Konfiguration für lokale Runs
+local_proxy:
+  enabled: false  # Auf true setzen für lokale 8GB-Proxy-Runs
+  seq_len: 256    # Reduzierte Sequenzlänge für 8GB VRAM
+  microbatch: 1   # Minimiert VRAM-Spitzen
+  grad_accumulation: 8  # Kompensiert kleine Batches
+  eval_size: 100  # Sehr kleine Evaluierung
+  steps: 50       # Kurze Runs für Validierung
+  smoke_test: false  # Nur Smoke-Test (1-2 Steps)
