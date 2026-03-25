@@ -1,0 +1,22 @@
+# PR Konfiguration für Parameter Golf Challenge Submission
+
+# Commit-Type: feat (neue Funktionalität)
+TYPE=feat
+
+# Scope: train (Training-Skripte für Challenge)
+SCOPE=train
+
+# Subject (max 72 Zeichen)
+SUBJECT="add complete Parameter Golf Challenge submission infrastructure"
+
+# Branch-Name (wird automatisch generiert falls leer)
+BRANCH_NAME=""
+
+# Phase (optional)
+PHASE=4
+
+# Issue Referenz (optional)
+FIXES=""
+
+# Breaking Change?
+BREAKING=false

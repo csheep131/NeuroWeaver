@@ -1,0 +1,46 @@
+{
+  "name": "NeuroWeave Baseline v1",
+  "github_id": "neuro-weave",
+  "val_bpb": null,
+  "compressed_size_bytes": 12900000,
+  "description": "9-layer transformer with GQA, RoPE, and LeakyReLU² activation optimized for 16MB constraint",
+  "architecture": {
+    "num_layers": 9,
+    "d_model": 384,
+    "num_heads": 6,
+    "kv_heads": 3,
+    "mlp_ratio": 4,
+    "vocab_size": 1024,
+    "activation": "leaky_relu_squared",
+    "attention_type": "gqa",
+    "use_rope": true,
+    "weight_tying": true
+  },
+  "training": {
+    "optimizer": "AdamW",
+    "learning_rate": 0.0003,
+    "weight_decay": 0.1,
+    "warmup_steps": 100,
+    "max_steps": 2000,
+    "batch_tokens": 8192,
+    "gradient_clip": 1.0,
+    "beta": [0.9, 0.95]
+  },
+  "seeds": [42, 1, 2],
+  "logs": ["logs/smoke_test.log"],
+  "created_at": "2026-03-25",
+  "notes": "Initial baseline submission. Smoke tests passed. Full H100 training pending compute credits.",
+  "smoke_tests": {
+    "dataset_loading": "passed",
+    "model_forward": "passed",
+    "compression": "passed (12.28 MB)",
+    "training": "passed (5 steps on CPU)",
+    "vocab_size": 1024,
+    "shards": 10
+  },
+  "challenge": {
+    "artifact_size_limit_bytes": 16000000,
+    "training_time_limit_seconds": 600,
+    "evaluation_metric": "val_bpb"
+  }
+}

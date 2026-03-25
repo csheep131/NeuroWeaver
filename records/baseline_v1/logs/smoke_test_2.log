@@ -1,0 +1,30 @@
+========================================
+  NeuroWeave Smoke Test
+========================================
+
+[0;34m[INFO][0m Verwende virtuelle Umgebung: .venv
+[0;34m[INFO][0m Test 1: Prüfe Dependencies...
+[0;32m[OK][0m Dependencies OK
+[0;34m[INFO][0m Test 2: Prüfe Dataset...
+[0;32m[OK][0m Dataset gefunden (10 Shards)
+[0;34m[INFO][0m Test 3: Prüfe Tokenizer...
+[0;32m[OK][0m Tokenizer gefunden
+[0;34m[INFO][0m Test 4: Dataset Loading Test...
+  Tokenizer loaded: data/tokenizers/fineweb_1024_bpe.model
+  Found 10 data shards in data/datasets/fineweb10B_sp1024/train
+    Vocab Size: 1024
+    Shards: 10
+    Batch: torch.Size([0, 1024])
+[0;32m[OK][0m Dataset Loading OK
+[0;34m[INFO][0m Test 5: Model Forward Pass...
+    Input: torch.Size([2, 1024])
+    Logits: torch.Size([2, 1024, 1024])
+    Loss: 6.7355
+[0;32m[OK][0m Model Forward OK
+[0;34m[INFO][0m Test 6: Compression Test...
+    Compressed Size: 12.33 MB
+    Limit: 16.00 MB
+    Status: OK
+[0;32m[OK][0m Compression OK
+[0;34m[INFO][0m Test 7: Training Test (50 Iterationen)...
+  Starte Training...

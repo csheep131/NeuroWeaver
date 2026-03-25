@@ -1,0 +1,14 @@
+# Requirements for NeuroWeave Baseline v1
+# Parameter Golf Challenge Submission
+
+# Core
+torch>=2.0.0
+numpy>=1.24.0
+
+# Dataset & Tokenizer
+datasets>=2.14.0
+sentencepiece>=0.1.99
+tqdm>=4.65.0
+
+# Configuration
+pyyaml>=6.0

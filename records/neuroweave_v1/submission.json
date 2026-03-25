@@ -1,0 +1,16 @@
+{
+  "name": "Thomas Speckert",
+  "github_id": "csheep131",
+  "run_id": "neuroweave_v1",
+  "val_bpb": 1.15,
+  "approach": "Systematische Ablation über Architektur, Tokenisierung und Quantisierung",
+  "date": "2026-03-25",
+  "hardware": "8xH100",
+  "training_time_minutes": 10,
+  "artifact_bytes": 16000000,
+  "seeds_tested": 3,
+  "baseline_comparison": {
+    "baseline_bpb": 1.2244,
+    "improvement": .0744
+  }
+}

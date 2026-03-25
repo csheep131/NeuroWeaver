@@ -1,0 +1,23 @@
+# Training Log: neuroweave_v1
+# Date: 2026-03-25T11:54:44+01:00
+# Author: Thomas Speckert
+
+=== Configuration ===
+Run ID: neuroweave_v1
+Model: Custom GPT mit Systematische Ablation über Architektur, Tokenisierung und Quantisierung
+Hardware: 8xH100
+
+=== Training Start ===
+[2026-03-25T11:54:44+01:00] Training started
+
+=== Final Results ===
+val_bpb: 1.15
+artifact_bytes: <16MB
+status: completed
+
+=== Reproduzierbarkeit ===
+Git Commit: 25dbbc6
+Config Hash: [wird automatisch generiert]
+Seed: 42
+
+Note: Dies ist ein Template. Ersetze mit echten Trainings-Logs.

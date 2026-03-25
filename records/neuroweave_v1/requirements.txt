@@ -1,0 +1,7 @@
+# Requirements für diesen Run
+# Wird nur benötigt wenn zusätzliche Packages nötig
+
+torch>=2.0.0
+numpy
+sentencepiece
+tqdm
