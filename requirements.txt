@@ -19,3 +19,12 @@ pytest-cov>=4.0.0
 
 # Build tools
 maturin>=1.0.0
+
+# Phase 5: Advanced Features
+plotly>=5.14.0          # Interaktive Plots
+dash>=2.9.0             # Dashboard Framework
+websockets>=10.0        # WebSocket Support
+optuna>=3.0.0           # Hyperparameter Optimization
+rich>=13.0.0            # Terminal UI
+fuzzywuzzy>=0.18.0      # Fuzzy Search
+python-Levenshtein>=0.20.0  # Fuzzy Search Speedup (optional)

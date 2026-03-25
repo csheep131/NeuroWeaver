@@ -71,6 +71,11 @@ from orchestrator.approval_interface import create_approval_interface, ApprovalI
 from core.alerting import create_alert_manager, AlertManager, AlertSeverity
 from research.override_learner import create_override_learner, OverrideLearner
 
+# Phase 4 Evaluation Imports
+from research.ab_testing import ABTestFramework, ABTestConfig
+from research.success_metrics import SuccessMetricsTracker
+from research.refinement_engine import RefinementEngine
+
 
 def load_features_from_registry(registry: RunRegistry, extractor: MetaFeatureExtractor) -> List[RunMetaFeatures]:
     """Lade Meta-Features direkt aus dem Registry."""
@@ -1398,6 +1403,278 @@ def print_overrides(hours: int = 24) -> None:
     print("\n" + "=" * 80)
 
 
+# ============================================================================
+# Phase 4 Evaluation Commands (Woche 9-10)
+# ============================================================================
+
+
+def print_success_metrics(registry: RunRegistry) -> None:
+    """
+    Phase 4 Success Metrics anzeigen.
+
+    Zeigt alle 5 Success Metrics mit Status an.
+    """
+    print("\n" + "=" * 80)
+    print("PHASE 4 SUCCESS METRICS")
+    print("=" * 80)
+
+    tracker = SuccessMetricsTracker(registry)
+    metrics = tracker.get_all_metrics()
+
+    targets_met = sum(1 for m in metrics.values() if m.target_met)
+    total_targets = len(metrics)
+
+    print(f"\n📊 **{targets_met}/{total_targets} Ziele erreicht**\n")
+
+    for name, metric in metrics.items():
+        status_icon = "✅" if metric.target_met else "⚠️"
+        print(f"{status_icon} {metric.name}")
+        print(f"   Aktueller Wert: {metric.current_value:.2f} {metric.unit}")
+        print(f"   Zielwert: {metric.target_value:.2f} {metric.unit}")
+        print(f"   Baseline: {metric.baseline_value:.2f} {metric.unit}")
+        print(f"   Richtung: {'höher besser' if metric.direction == 'higher_better' else 'niedriger besser'}")
+        print()
+
+    # Zusammenfassung
+    print("-" * 80)
+    if targets_met == total_targets:
+        print("🎉 Alle Ziele erreicht! Phase 4 erfolgreich abgeschlossen.")
+    elif targets_met >= total_targets * 0.8:
+        print(f"✅ {targets_met}/{total_targets} Ziele erreicht. Knapp verfehlte Ziele analysieren.")
+    else:
+        print(f"⚠️ Nur {targets_met}/{total_targets} Ziele erreicht. Weitere Optimierung empfohlen.")
+
+    # Nicht erreichte Ziele
+    missed = [m for m in metrics.values() if not m.target_met]
+    if missed:
+        print("\nNicht erreichte Ziele:")
+        for m in missed:
+            gap = m.target_value - m.current_value if m.direction == "higher_better" else m.current_value - m.target_value
+            print(f"  - {m.name}: Gap von {gap:.2f} {metric.unit}")
+
+    print("\n" + "=" * 80)
+
+
+def cmd_ab_test(registry: RunRegistry, action: str, test_id: Optional[str] = None) -> None:
+    """
+    A/B-Test Command.
+
+    Actions:
+    - create: Neuen Test erstellen
+    - list: Alle Tests auflisten
+    - analyze: Test analysieren
+    - summary: Test-Zusammenfassung
+    """
+    print("\n" + "=" * 80)
+    print("A/B-TESTING FRAMEWORK")
+    print("=" * 80)
+
+    framework = ABTestFramework(registry)
+
+    if action == "create":
+        # Beispiel-Test erstellen
+        from datetime import timedelta
+        config = ABTestConfig(
+            test_name="autonomous_vs_manual",
+            start_date=datetime.now(),
+            end_date=datetime.now() + timedelta(days=14),
+            treatment_group="autonomous",
+            control_group="manual",
+            success_metrics=["delta_bpb", "efficiency_gain", "human_time_minutes"],
+            min_sample_size=30,
+        )
+        new_test_id = framework.create_test(config)
+        print(f"\n✅ A/B-Test erstellt:")
+        print(f"   Test-ID: {new_test_id}")
+        print(f"   Name: {config.test_name}")
+        print(f"   Treatment: {config.treatment_group}")
+        print(f"   Control: {config.control_group}")
+        print(f"   Success Metrics: {', '.join(config.success_metrics)}")
+        print(f"   Min Sample Size: {config.min_sample_size}")
+        print(f"\nNächste Schritte:")
+        print(f"   1. Runs zuweisen: framework.assign_run_to_group('{new_test_id}')")
+        print(f"   2. Outcomes recorden: framework.record_outcome('{new_test_id}', group, run_id, metrics)")
+        print(f"   3. Analysieren: python -m orchestrator.meta_dashboard ab-test analyze {new_test_id}")
+
+    elif action == "list":
+        tests = framework.list_tests()
+        if not tests:
+            print("\nKeine A/B-Tests gefunden.")
+        else:
+            print(f"\n{'Test-ID':<12} {'Name':<30} {'Status':<12} {'Treatment':<12} {'Control':<10}")
+            print("-" * 80)
+            for test in tests:
+                print(f"{test['test_id']:<12} {test['test_name']:<30} {test['status']:<12} {test['treatment_runs']:<12} {test['control_runs']:<10}")
+
+    elif action == "analyze":
+        if not test_id:
+            print("❌ Fehler: test_id required für analyze")
+            return
+
+        try:
+            results = framework.analyze_test(test_id)
+            if not results:
+                print(f"\n⚠️ Keine ausreichenden Daten für Test '{test_id}'")
+                print("   Mindestens 2 Outcomes pro Gruppe benötigt.")
+                return
+
+            summary = framework.get_test_summary(test_id)
+            print(f"\n📊 A/B-Test: {summary['test_name']}")
+            print(f"   Status: {summary['status']}")
+            print(f"   Treatment ({summary['treatment_group']}): {summary['treatment_runs']} Runs")
+            print(f"   Control ({summary['control_group']}): {summary['control_runs']} Runs")
+
+            print(f"\n{'Metrik':<25} {'Treatment':<12} {'Control':<12} {'Diff':<10} {'p-value':<10} {'Effect':<8} {'Signif.':<8}")
+            print("-" * 95)
+
+            for r in results:
+                diff = r.treatment_mean - r.control_mean
+                sig_icon = "✅" if r.is_significant else ""
+                print(f"{r.metric:<25} {r.treatment_mean:<12.4f} {r.control_mean:<12.4f} {diff:<+10.4f} {r.p_value:<10.4f} {r.effect_size:<8.2f} {sig_icon:<8}")
+
+            print(f"\n💡 Empfehlung: {summary['recommendation']}")
+
+            if summary['significant_wins']:
+                print(f"\nSignifikante Ergebnisse:")
+                for win in summary['significant_wins']:
+                    print(f"  - {win['metric']}: {win['winner']} wins (p={win['p_value']:.4f}, d={win['effect_size']:.2f})")
+
+        except ValueError as e:
+            print(f"❌ Fehler: {e}")
+
+    elif action == "summary":
+        if not test_id:
+            print("❌ Fehler: test_id required für summary")
+            return
+
+        try:
+            summary = framework.get_test_summary(test_id)
+            print(f"\n📊 Test-Zusammenfassung: {summary['test_name']}")
+            print(f"   Test-ID: {summary['test_id']}")
+            print(f"   Status: {summary['status']}")
+            print(f"   Treatment-Gruppe: {summary['treatment_group']} ({summary['treatment_runs']} Runs)")
+            print(f"   Control-Gruppe: {summary['control_group']} ({summary['control_runs']} Runs)")
+
+            if summary['significant_wins']:
+                print(f"\nSignifikante Wins:")
+                for win in summary['significant_wins']:
+                    print(f"  - {win['metric']}: {win['winner']} (p={win['p_value']:.4f})")
+
+            print(f"\n💡 Empfehlung: {summary['recommendation']}")
+
+        except ValueError as e:
+            print(f"❌ Fehler: {e}")
+
+    else:
+        print(f"❌ Unbekannte Action: {action}")
+        print("   Erlaubt: create, list, analyze, summary")
+
+    print("\n" + "=" * 80)
+
+
+def cmd_refinement(registry: RunRegistry, top_n: int = 5) -> None:
+    """
+    Refinement-Vorschläge anzeigen.
+
+    Analysiert Guardrails, Prediction Errors und Human Overrides.
+    """
+    print("\n" + "=" * 80)
+    print("REFINEMENT ENGINE")
+    print("=" * 80)
+
+    # Initialisiere benötigte Komponenten
+    guardrail_manager = create_default_guardrails()
+    override_learner = create_override_learner(history_limit=1000)
+    scorer = SurrogateScorer(model_type="random_forest")
+
+    engine = RefinementEngine(
+        scorer=scorer,
+        guardrail_manager=guardrail_manager,
+        override_learner=override_learner,
+        registry=registry,
+    )
+
+    # Analysieren
+    print("\n🔍 Analysiere Guardrail-Performance...")
+    guardrail_suggestions = engine.analyze_guardrail_performance()
+
+    print("🔍 Analysiere Prediction Errors...")
+    prediction_suggestions = engine.analyze_prediction_errors()
+
+    print("🔍 Analysiere Human Overrides...")
+    override_suggestions = engine.analyze_human_overrides()
+
+    # Kombinieren und sortieren
+    all_suggestions = guardrail_suggestions + prediction_suggestions + override_suggestions
+    all_suggestions = sorted(all_suggestions, key=lambda s: (s.priority, -s.confidence))
+
+    if not all_suggestions:
+        print("\n✅ Keine Refinement-Vorschläge identifiziert.")
+        print("\n" + "=" * 80)
+        return
+
+    print(f"\n📋 **{len(all_suggestions)} Refinement-Vorschläge identifiziert**")
+    print(f"   Priority 1 (Hoch): {sum(1 for s in all_suggestions if s.priority == 1)}")
+    print(f"   Priority 2 (Mittel): {sum(1 for s in all_suggestions if s.priority == 2)}")
+    print(f"   Priority 3-5 (Niedrig): {sum(1 for s in all_suggestions if s.priority >= 3)}")
+
+    # Top N anzeigen
+    print(f"\n## Top {min(top_n, len(all_suggestions))} Refinement-Vorschläge\n")
+
+    for i, sug in enumerate(all_suggestions[:top_n], 1):
+        priority_icon = "🔴" if sug.priority == 1 else "🟡" if sug.priority == 2 else "🟢"
+        print(f"{i}. {sug.component.capitalize()} {priority_icon}")
+        print(f"   Current: {sug.current_behavior[:100]}")
+        print(f"   Change: {sug.suggested_change[:100]}")
+        print(f"   Expected: {sug.expected_improvement}")
+        print(f"   Confidence: {sug.confidence:.0%}")
+        print()
+
+    # Implementierungsempfehlungen
+    high_priority = [s for s in all_suggestions if s.priority == 1]
+    if high_priority:
+        print("## Sofort umsetzen (Priority 1):")
+        for sug in high_priority:
+            print(f"  - {sug.suggested_change[:80]}")
+
+    print("\n" + "=" * 80)
+
+
+def cmd_report(registry: RunRegistry, output_path: str = "reports/phase4_evaluation.md") -> None:
+    """
+    Vollständigen Phase 4 Evaluations-Report generieren.
+    """
+    from scripts.generate_phase4_docs import Phase4DocumentationGenerator
+
+    print("\n" + "=" * 80)
+    print("PHASE 4 EVALUATION REPORT")
+    print("=" * 80)
+
+    generator = Phase4DocumentationGenerator(registry)
+
+    print(f"\n📝 Generiere Report...")
+    report = generator.generate_full_report(output_path=output_path)
+
+    print(f"\n✅ Report gespeichert unter: {output_path}")
+
+    # Kurze Zusammenfassung drucken
+    metrics = generator.metrics_tracker.get_all_metrics()
+    targets_met = sum(1 for m in metrics.values() if m.target_met)
+    total_targets = len(metrics)
+
+    print(f"\n📊 Success Metrics: {targets_met}/{total_targets} Ziele erreicht")
+
+    for name, metric in metrics.items():
+        status = "✅" if metric.target_met else "⚠️"
+        print(f"  {status} {metric.name}: {metric.current_value:.1f}{metric.unit}")
+
+    print("\n" + "=" * 80)
+
+
+# Import für datetime
+from datetime import datetime
+
+
 def parse_args() -> argparse.Namespace:
     """Parse command-line arguments."""
     parser = argparse.ArgumentParser(
@@ -1434,7 +1711,9 @@ Beispiele:
             "budget", "quant", "predictions", "hypotheses", "pareto",
             "recommendations", "anomalies", "failures", "quarantine",
             "drift", "recovery", "guardrails", "approvals", "alerts",
-            "autonomy-stats", "overrides"
+            "autonomy-stats", "overrides",
+            # Phase 4 Evaluation (Woche 9-10)
+            "metrics", "ab-test", "refinement", "report"
         ],
         help="Dashboard Command",
     )
@@ -1480,6 +1759,28 @@ Beispiele:
         help="Erstelle Plot (für pareto Command)",
     )
 
+    # Phase 4 Evaluation Arguments
+    parser.add_argument(
+        "--action",
+        type=str,
+        choices=["create", "list", "analyze", "summary"],
+        default="list",
+        help="Action für ab-test Command (default: list)",
+    )
+
+    parser.add_argument(
+        "--test-id",
+        type=str,
+        help="Test-ID für ab-test analyze/summary",
+    )
+
+    parser.add_argument(
+        "--output",
+        type=str,
+        default="reports/phase4_evaluation.md",
+        help="Output-Pfad für report Command",
+    )
+
     return parser.parse_args()
 
 
@@ -1491,6 +1792,20 @@ def main() -> None:
     results_dir = Path(__file__).parent.parent / "results"
     registry = RunRegistry(results_dir=str(results_dir))
     extractor = MetaFeatureExtractor(configs_dir=Path(__file__).parent.parent / "configs")
+
+    # Phase 4 Evaluation Commands (Woche 9-10) benötigen keine Features
+    phase4_evaluation_commands = ("metrics", "ab-test", "refinement", "report")
+
+    if args.command in phase4_evaluation_commands:
+        if args.command == "metrics":
+            print_success_metrics(registry)
+        elif args.command == "ab-test":
+            cmd_ab_test(registry, args.action, args.test_id)
+        elif args.command == "refinement":
+            cmd_refinement(registry, top_n=args.top)
+        elif args.command == "report":
+            cmd_report(registry, output_path=args.output)
+        return
 
     # Phase 4B und 4C Commands benötigen keine Features
     phase4b_4c_commands = (
