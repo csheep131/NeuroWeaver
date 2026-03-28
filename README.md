@@ -6,6 +6,46 @@ Eine Experimentier-Plattform für systematisches Ablation-Testing von ML-Modelle
 
 ---
 
+## Parameter Golf Challenge
+
+NeuroWeave nimmt an der **OpenAI Parameter Golf Challenge** teil:
+
+> Trainiere das beste Sprachmodell, das in ein **16MB Artifact** passt und in **unter 10 Minuten auf 8xH100** trainiert.
+
+### Quick Start — Challenge
+
+```bash
+# 1. Dependencies installieren
+pip install -r requirements.txt
+
+# 2. Dataset herunterladen
+python data/cached_challenge_fineweb.py --variant sp1024 --train-shards 80
+
+# 3. Smoke Test (lokal)
+RUN_ID=smoke_test ITERATIONS=200 python train_gpt_mlx.py  # Apple Silicon
+RUN_ID=smoke_test ITERATIONS=200 python train_gpt.py      # PyTorch
+
+# 4. Training auf 8xH100
+torchrun --standalone --nproc_per_node=8 train_gpt.py --run_id baseline_v1
+```
+
+### Challenge Dateien
+
+| Datei | Beschreibung |
+|-------|--------------|
+| `train_gpt.py` | Haupt-Trainingsskript für 8xH100 |
+| `train_gpt_mlx.py` | MLX-Version für Apple Silicon (lokal) |
+| `data/cached_challenge_fineweb.py` | FineWeb Dataset Loader |
+| `records/baseline_v1/` | Erste Submission (Baseline) |
+
+### Dokumentation
+
+- [Submission Guide](docs/challenge/submission_guide.md) — Vollständige Anleitung
+- [RunPod Setup](docs/challenge/runpod_setup.md) — Cloud-GPU Setup
+- [Challenge Regeln](regeln.md) — Offizielle Regeln
+
+---
+
 ## Ziel
 
 Diese Software ist eine "Ablation-Maschine", die folgendes ermöglicht:

@@ -29,6 +29,7 @@ try:
     import plotly.graph_objects as go
     from plotly.subplots import make_subplots
     import plotly.express as px
+    from plotly.utils import PlotlyJSONEncoder
     PLOTLY_AVAILABLE = True
 except ImportError:
     PLOTLY_AVAILABLE = False
@@ -180,15 +181,15 @@ class AdvancedDashboard:
             size_change = (run.artifact_bytes / 1e6 - 50) / 50 * 100  # Normalisiert um 50MB
             z_values.append(size_change)
 
-            # Budget-Klasse (basierend auf ΔBPB)
+            # Budget-Klasse (basierend auf ΔBPB) - numerische Werte für Plotly
             if delta_bpb < -0.05:
-                colors.append("Excellent")
+                colors.append(3)  # Excellent
             elif delta_bpb < -0.02:
-                colors.append("Good")
+                colors.append(2)  # Good
             elif delta_bpb < 0:
-                colors.append("Neutral")
+                colors.append(1)  # Neutral
             else:
-                colors.append("Poor")
+                colors.append(0)  # Poor
 
             # Lineage-Tiefe
             lineage = self._registry.get_lineage(run.run_id)
@@ -219,7 +220,8 @@ class AdvancedDashboard:
                 opacity=0.8,
                 colorbar=dict(
                     title="Budget-Klasse",
-                    tickvals=["Excellent", "Good", "Neutral", "Poor"],
+                    tickvals=[0, 1, 2, 3],
+                    ticktext=["Poor", "Neutral", "Good", "Excellent"],
                 ),
             ),
             text=hover_texts,
@@ -513,7 +515,6 @@ class AdvancedDashboard:
             zmid=0,
             colorbar=dict(
                 title="Importance",
-                titleside='right',
             ),
             hoverongaps=False,
             hovertemplate=(
@@ -907,10 +908,10 @@ class AdvancedDashboard:
     ) -> str:
         """Erstelle HTML Dashboard mit Tabs."""
         # Konvertiere Figures zu JSON
-        pareto_json = json.dumps(pareto_fig, cls=go.utils.PlotlyJSONEncoder)
-        metrics_json = json.dumps(metrics_fig, cls=go.utils.PlotlyJSONEncoder)
-        feature_json = json.dumps(feature_fig, cls=go.utils.PlotlyJSONEncoder)
-        guardrail_json = json.dumps(guardrail_fig, cls=go.utils.PlotlyJSONEncoder)
+        pareto_json = json.dumps(pareto_fig, cls=PlotlyJSONEncoder)
+        metrics_json = json.dumps(metrics_fig, cls=PlotlyJSONEncoder)
+        feature_json = json.dumps(feature_fig, cls=PlotlyJSONEncoder)
+        guardrail_json = json.dumps(guardrail_fig, cls=PlotlyJSONEncoder)
 
         html_content = f"""
 <!DOCTYPE html>

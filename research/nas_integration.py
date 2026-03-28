@@ -250,10 +250,13 @@ class SearchSpace:
         """
         violations = []
 
+        # head_dim berechnen falls None
+        head_dim = arch.head_dim if arch.head_dim is not None else arch.width // arch.num_heads
+
         # VRAM-Schätzung (grob: ~4 bytes * params * 2 für gradients)
         estimated_params = (
             arch.depth * arch.width * arch.width * arch.mlp_ratio
-            + arch.depth * arch.width * arch.num_heads * arch.head_dim
+            + arch.depth * arch.width * arch.num_heads * head_dim
         )
         estimated_vram = estimated_params * 4 * 2 / 1e6  # MB
 
@@ -373,8 +376,8 @@ class NASIntegration:
         print(f"   Strategie: {self._strategy.value}")
         print(f"   Constraints: VRAM ≤ {self._search_space.max_vram_mb:.0f}MB")
 
-        # Initiale Population
-        init_size = min(20, budget // 5)
+        # Initiale Population (mindestens 5 für evolution)
+        init_size = max(5, min(20, budget // 5))
         print(f"\n📦 Generiere initiale Population ({init_size} Architekturen)...")
 
         for i in range(init_size):
@@ -514,6 +517,10 @@ class NASIntegration:
         """Erzeuge nächste Generation."""
         # Selektion (Tournament)
         def tournament_select(k: int = 3) -> Architecture:
+            # Sicherstellen dass k nicht größer als Population
+            k = min(k, len(self._population))
+            if k <= 1:
+                return random.choice(self._population)
             candidates = random.sample(self._population, k)
             return max(candidates, key=lambda a: a.fitness)
 
@@ -526,14 +533,18 @@ class NASIntegration:
 
         # Rest durch Crossover und Mutation erzeugen
         while len(new_population) < len(self._population):
-            parent1 = tournament_select()
-            parent2 = tournament_select()
+            if len(self._population) < 2:
+                # Nicht genug für Crossover, neue Architektur sampeln
+                child = self._search_space.sample()
+            else:
+                parent1 = tournament_select()
+                parent2 = tournament_select()
 
-            # Crossover
-            child = self._search_space.crossover(parent1, parent2)
+                # Crossover
+                child = self._search_space.crossover(parent1, parent2)
 
             # Mutation
-            mutation_rate = 0.3 * (1 - self._generation / 20)  # Abnehmend
+            mutation_rate = 0.3 * max(0.1, 1 - self._generation / 20)  # Abnehmend
             child = self._search_space.mutate(child, mutation_rate)
 
             # Constraints prüfen

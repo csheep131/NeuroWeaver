@@ -8,6 +8,7 @@ __pycache__/
 build/
 develop-eggs/
 dist/
+data/
 downloads/
 eggs/
 .eggs/
@@ -79,10 +80,16 @@ runs/*/models/
 !runs/run.py
 
 # Results and artifacts
+# Grosse Artefakte und lokale Registry ignorieren
 results/
 *.json
 *.jsonl
-!configs/*.json
+# ABER: Submission-Logs und Reports explizit tracken
+!results/logs/*.jsonl
+!results/*_final_report.json
+!results/*_artifact_report.json
+!results/registry.json
+!results/leaderboard.md
 *.csv
 *.tsv
 *.parquet
@@ -99,6 +106,10 @@ logs/
 wandb/
 tensorboard/
 mlruns/
+
+# Submissions-Dokumentation — lokal bleiben, nicht ins Repo
+neuroweave_bewerbung.md
+SUBMISSION_CHECKLIST.md
 
 # OS
 .DS_Store
@@ -183,3 +194,4 @@ secrets.yaml
 terraform.tfstate
 terraform.tfstate.*
 .terraform.lock.hcl
+wettbewerb_for_dummies.md

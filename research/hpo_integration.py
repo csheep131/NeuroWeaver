@@ -34,6 +34,15 @@ try:
 except ImportError:
     OPTUNA_AVAILABLE = False
     print("Warnung: Optuna nicht installiert. Installiere mit: pip install optuna")
+    # Mock classes for when optuna is not available
+    class TrialState:
+        RUNNING = "RUNNING"
+        COMPLETE = "COMPLETE"
+        PRUNED = "PRUNED"
+        FAIL = "FAIL"
+    class StudyDirection:
+        MINIMIZE = "MINIMIZE"
+        MAXIMIZE = "MAXIMIZE"
 
 try:
     import numpy as np
@@ -52,7 +61,7 @@ class TrialResult:
     delta_bpb: Optional[float] = None
     efficiency_gain: Optional[float] = None
     size_change: Optional[float] = None
-    state: TrialState = TrialState.RUNNING
+    state: str = "RUNNING"
     value: Optional[float] = None
     values: Optional[List[float]] = None
     datetime_start: Optional[datetime] = None

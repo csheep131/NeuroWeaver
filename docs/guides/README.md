@@ -1,7 +1,7 @@
 # Guides Übersicht
 
 **Letztes Update:** 2026-03-24
-**Gesamtanzahl Guides:** 11
+**Gesamtanzahl Guides:** 12
 
 ---
 
@@ -48,6 +48,12 @@ Dieses Verzeichnis enthält praktische Anleitungen und How-Tos für die Arbeit m
 |-------|--------------|
 | [auto_approve.md](auto_approve.md) | Phase 4 Plan: Adaptive Search, Self-Diagnosis, Guided Autonomy |
 | [phase4_overview.md](phase4_overview.md) | Implementierungs-Übersicht, Quick Start, Architektur |
+
+### 🚀 Phase 5: Advanced Features
+
+| Guide | Beschreibung |
+|-------|--------------|
+| [phase5_overview.md](phase5_overview.md) | Advanced Visualization, Distributed Execution, AutoML |
 
 ---
 
@@ -115,10 +121,11 @@ Dieses Verzeichnis enthält praktische Anleitungen und How-Tos für die Arbeit m
 - [sweep_guide.md](sweep_guide.md)
 - [promotion_guide.md](promotion_guide.md)
 
-### Phase 4: Autonome Selbstverbesserung 🚧 IN PLANUNG → ✅ IMPLEMENTIERT
+# Phase 4: Autonome Selbstverbesserung 🚧 IN PLANUNG → ✅ IMPLEMENTIERT
 - Adaptive Search Engine (4A) ✅
 - Self-Diagnosis & Recovery (4B) ✅
 - Guided Autonomy (4C) ✅
+- Evaluation & Refinement (4D) ✅
 
 **Relevante Guides:**
 - [auto_approve.md](auto_approve.md) – Vollständige Spezifikation
@@ -137,6 +144,33 @@ python3 -m orchestrator.meta_dashboard hypotheses --top 10
 
 # Autonomer Zyklus
 python3 -m orchestrator.phase4_orchestrator run
+```
+
+# Phase 5: Advanced Features ✅ IMPLEMENTIERT
+- Advanced Visualization (Plotly, Dash) ✅
+- Real-time Monitoring ✅
+- Distributed Execution (Multi-GPU) ✅
+- AutoML Integration (HPO, NAS) ✅
+
+**Relevante Guides:**
+- [phase5_overview.md](phase5_overview.md) – Implementierungs-Übersicht
+
+**Quick Start:**
+```bash
+# Advanced Dashboard
+python3 -m orchestrator.phase5 advanced-dashboard
+
+# Run Explorer
+python3 -m orchestrator.phase5 run-explorer
+
+# Live Monitoring
+python3 -m orchestrator.phase5 live-monitor run001
+
+# Hyperparameter-Optimierung
+python3 -m orchestrator.phase5 hpo-optimize --trials 50
+
+# Neural Architecture Search
+python3 -m orchestrator.phase5 nas-search --budget 100
 ```
 
 ---

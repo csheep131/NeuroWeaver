@@ -103,6 +103,42 @@ class Config:
     @classmethod
     def from_env(cls) -> "Config":
         """Create configuration from environment variables."""
+        # Parse XSA layers if provided
+        xsa_layers_str = os.getenv("XSA_LAYERS", "")
+        xsa_layers = [int(x) for x in xsa_layers_str.split(",") if x] if xsa_layers_str else None
+        
+        # Get base architecture from ENV
+        num_layers = int(os.getenv("NUM_LAYERS", "9"))
+        d_model = int(os.getenv("D_MODEL", "384"))
+        num_heads = int(os.getenv("NUM_HEADS", "6"))
+        head_dim = d_model // num_heads
+        
+        # rope_dim defaults to head_dim for full RoPE, or can be set explicitly for partial RoPE
+        rope_dim_default = head_dim  # Full RoPE by default
+        rope_dim = int(os.getenv("ROPE_DIMS", str(rope_dim_default)))
+
+        # Get KV heads, ensure it's a divisor of num_heads for GQA
+        kv_heads = int(os.getenv("KV_HEADS", "3"))
+        attention_type = os.getenv("ATTENTION_TYPE", "gqa")
+        
+        # For GQA, ensure kv_heads divides num_heads evenly
+        if attention_type == "gqa" and num_heads % kv_heads != 0:
+            # Find the largest divisor of num_heads <= kv_heads
+            # Or adjust to a reasonable value
+            if kv_heads > num_heads:
+                kv_heads = num_heads  # Fall back to MHA
+            else:
+                # Try to find a divisor close to the requested value
+                # Common ratios: 2:1, 4:1, 8:1
+                possible_kv = [num_heads // 2, num_heads // 4, num_heads // 8, 1]
+                possible_kv = [k for k in possible_kv if k >= 1 and num_heads % k == 0]
+                if possible_kv:
+                    # Pick the one closest to requested kv_heads
+                    kv_heads = min(possible_kv, key=lambda x: abs(x - kv_heads))
+                else:
+                    # Fall back to MHA
+                    kv_heads = num_heads
+        
         return cls(
             run_id=os.getenv("RUN_ID", "baseline_v1"),
             max_steps=int(os.getenv("ITERATIONS", "2000")),
@@ -113,6 +149,26 @@ class Config:
             data_path=os.getenv("DATA_PATH", "./data/datasets/fineweb10B_sp1024/"),
             tokenizer_path=os.getenv("TOKENIZER_PATH", "./data/tokenizers/fineweb_1024_bpe.model"),
             vocab_size=int(os.getenv("VOCAB_SIZE", "1024")),
+            # Model architecture from ENV
+            num_layers=num_layers,
+            d_model=d_model,
+            num_heads=num_heads,
+            mlp_ratio=int(os.getenv("MLP_RATIO", "4")),
+            max_seq_len=int(os.getenv("MAX_SEQ_LEN", "1024")),
+            use_rope=os.getenv("USE_ROPE", "1") == "1",
+            partial_rope=os.getenv("PARTIAL_ROPE", "0") == "1",
+            rope_dim=rope_dim,
+            # Attention
+            attention_type=attention_type,
+            kv_heads=kv_heads,
+            use_xsa=os.getenv("USE_XSA", "0") == "1" or os.getenv("XSA_ENABLED", "0") == "1",
+            xsa_layers=xsa_layers,
+            # Training
+            learning_rate=float(os.getenv("LEARNING_RATE", "0.0003")),
+            weight_decay=float(os.getenv("WEIGHT_DECAY", "0.1")),
+            warmup_steps=int(os.getenv("WARMUP_STEPS", "100")),
+            grad_clip=float(os.getenv("GRAD_CLIP", "1.0")),
+            ema_decay=float(os.getenv("EMA_DECAY", "0.997")) if os.getenv("EMA_ENABLED", "0") == "1" else None,
         )
 
 
@@ -132,13 +188,17 @@ def star_relu(x: torch.Tensor, beta: float = 0.5) -> torch.Tensor:
 
 class Rope(nn.Module):
     """Rotary Positional Embeddings."""
-    
+
     def __init__(self, dim: int, max_seq_len: int = 1024, partial: bool = False, partial_dim: int = 64):
         super().__init__()
         self.dim = dim
         self.partial = partial
         self.partial_dim = partial_dim if partial else dim
+        
+        # Ensure partial_dim is even for proper RoPE
+        assert self.partial_dim % 2 == 0, f"partial_dim must be even, got {self.partial_dim}"
 
+        # inv_freq shape: [partial_dim // 2]
         inv_freq = 1.0 / (10000 ** (torch.arange(0, self.partial_dim, 2).float() / self.partial_dim))
         self.register_buffer("inv_freq", inv_freq)
 
@@ -161,12 +221,12 @@ class Rope(nn.Module):
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """Apply RoPE to query/key tensors.
-        
+
         Args:
             x: Input tensor of shape [B, num_heads, seq_len, head_dim]
         """
         B, num_heads, seq_len, head_dim = x.shape
-        
+
         self._update_cache(seq_len)
 
         if self.partial:
@@ -187,7 +247,7 @@ class Rope(nn.Module):
             cos = self._cos_cached[:seq_len, :].unsqueeze(0).unsqueeze(0)
             sin = self._sin_cached[:seq_len, :].unsqueeze(0).unsqueeze(0)
             return x * cos + self._rotate_half(x) * sin
-    
+
     @staticmethod
     def _rotate_half(x: torch.Tensor) -> torch.Tensor:
         x1 = x[..., : x.shape[-1] // 2]
@@ -237,10 +297,17 @@ class Attention(nn.Module):
             q = self.rope(q)
             k = self.rope(k)
         
-        # GQA: repeat KV heads
-        if self.gqa_repeats > 1:
-            k = k.repeat_interleave(self.gqa_repeats, dim=1)
-            v = v.repeat_interleave(self.gqa_repeats, dim=1)
+        # GQA: repeat KV heads to match Q heads
+        if self.num_heads != self.kv_heads:
+            # Ensure kv_heads divides num_heads (should be guaranteed by config validation)
+            if self.num_heads % self.kv_heads != 0:
+                raise ValueError(
+                    f"num_heads ({self.num_heads}) must be divisible by kv_heads ({self.kv_heads}) "
+                    f"for Grouped Query Attention"
+                )
+            repeat_factor = self.num_heads // self.kv_heads
+            k = k.repeat_interleave(repeat_factor, dim=1)
+            v = v.repeat_interleave(repeat_factor, dim=1)
         
         # Scaled dot-product attention
         scale = 1.0 / math.sqrt(self.head_dim)
@@ -426,13 +493,21 @@ class FineWebDataset:
         return shards
     
     def _load_shard(self, shard_idx: int) -> np.ndarray:
-        """Load a single shard."""
+        """Load a single shard, skipping the 256-int32 header."""
         if shard_idx >= len(self.shards):
             # Cycle back to first shard
             shard_idx = shard_idx % len(self.shards)
         
         shard_path = self.shards[shard_idx]
-        data = np.memmap(str(shard_path), dtype=np.uint16, mode="r")
+        # Shard files have a 256 x int32 header (1024 bytes) containing metadata.
+        # Read header to get token count, then load only the token data.
+        HEADER_INTS = 256
+        header_bytes = HEADER_INTS * np.dtype("<i4").itemsize  # 1024 bytes
+        header = np.fromfile(str(shard_path), dtype="<i4", count=HEADER_INTS)
+        if header.size != HEADER_INTS or int(header[0]) != 20240520 or int(header[1]) != 1:
+            raise ValueError(f"Unexpected shard header for {shard_path}")
+        num_tokens = int(header[2])
+        data = np.fromfile(str(shard_path), dtype="<u2", count=num_tokens, offset=header_bytes)
         return data
     
     def get_batch(self, batch_tokens: int) -> tuple:
@@ -444,6 +519,9 @@ class FineWebDataset:
         # Load data
         if not self.shards:
             # Generate random data for testing
+            print("WARNUNG: Keine Daten gefunden! Verwende ZUFALLSDATEN!")
+            print(f"   DATA_PATH={self.data_path}")
+            print("   Das Ergebnis wird BPB ~5.0 (Muell) sein!")
             tokens = torch.randint(0, self._vocab_size, (num_sequences, self.seq_len + 1))
         else:
             # Check if we've exhausted all shards
@@ -523,25 +601,28 @@ def compress_model(model: nn.Module, use_zstd: bool = False) -> tuple:
     return len(compressed), compressed
 
 
-def compute_bpb(model: nn.Module, data_loader, device: str = "cuda") -> float:
+def compute_bpb(model: nn.Module, data_loader, device: str = "cuda", max_batches: int = 100) -> float:
     """Compute bits per byte on validation data."""
     model.eval()
     total_loss = 0.0
     total_bytes = 0
     num_batches = 0
-    
+
     with torch.no_grad():
         for x, y in data_loader:
             x = x.to(device)
             y = y.to(device)
-            
+
             _, loss = model(x, y)
-            
+
             if loss is not None:
                 total_loss += loss.item()
                 total_bytes += x.numel()
                 num_batches += 1
-    
+
+            if num_batches >= max_batches:
+                break
+
     if num_batches == 0:
         return float("inf")
     

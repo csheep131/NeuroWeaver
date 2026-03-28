@@ -350,7 +350,11 @@ class TrainingHealthChecker:
         # Trend-Analyse
         if len(gradient_history) >= 10:
             recent_avg = sum(gradient_history[-10:]) / 10
-            earlier_avg = sum(gradient_history[-20:-10]) / 10 if len(gradient_history) >= 20 else earlier_avg
+            # earlier_avg nur berechnen wenn genug Daten vorhanden
+            if len(gradient_history) >= 20:
+                earlier_avg = sum(gradient_history[-20:-10]) / 10
+            else:
+                earlier_avg = sum(gradient_history[:10]) / 10 if len(gradient_history) >= 10 else recent_avg
 
             if earlier_avg > 0 and recent_avg > earlier_avg * 2:
                 return HealthIssue(

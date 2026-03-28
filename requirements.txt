@@ -2,8 +2,13 @@
 numpy>=1.24.0
 pyyaml>=6.0
 
-# Optional: PyTorch for training (if not using pure Rust)
-# torch>=2.0.0
+# PyTorch for training
+torch>=2.0.0
+
+# Dataset & Tokenizer (Parameter Golf Challenge)
+datasets>=2.14.0        # HuggingFace datasets
+tqdm>=4.65.0            # Progress bars
+sentencepiece>=0.1.99   # SentencePiece tokenizer
 
 # Machine Learning (Phase 4A)
 scikit-learn>=1.0.0
@@ -28,3 +33,6 @@ optuna>=3.0.0           # Hyperparameter Optimization
 rich>=13.0.0            # Terminal UI
 fuzzywuzzy>=0.18.0      # Fuzzy Search
 python-Levenshtein>=0.20.0  # Fuzzy Search Speedup (optional)
+
+# Optional: MLX for Apple Silicon (local testing)
+# mlx>=0.10.0           # Nur für Mac mit Apple Silicon
