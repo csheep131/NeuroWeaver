@@ -957,8 +957,13 @@ class GPT(nn.Module):
         n = self.num_layers
         
         # Falls kein dynamisches Softcap übergeben wurde, nutze den Standardwert
-        softcap = current_softcap if current_softcap is not None else self.logit_softcap
-        
+        if current_softcap is not None:
+            # Cast auf Tensor direkt auf dem Device verhindert, dass Dynamo 
+            # das Argument als 'konstanten Code-Bestandteil' missversteht.
+            softcap = torch.as_tensor(current_softcap, dtype=torch.float32, device=input_ids.device)
+        else:
+            softcap = torch.as_tensor(self.logit_softcap, dtype=torch.float32, device=input_ids.device)
+     
         x = self.tok_emb(input_ids)
         if self.bigram is not None:
             x = x + self.bigram(input_ids)
@@ -1575,9 +1580,18 @@ def main() -> None:
     restore_low_dim_params_to_fp32(base_model)
     # No DDP -- Parallel Muon handles bank grad communication via reduce-scatter,
     # and non-bank grads are manually all-reduced before Adam steps.
+
+    
+    import torch._dynamo as dynamo_backend
+    dynamo_backend.config.recompile_limit = 1024
+
+    # WICHTIG: Markiere das Argument als dynamisch, damit Dynamo 
+    # nicht für jede Fließkommazahl neu kompiliert
+  
+    #torch._dynamo.mark_dynamic(base_model, ["current_softcap"])
     compiled_model = torch.compile(base_model, dynamic=False, fullgraph=True)
     model = compiled_model
-
+    
     # Optimizer split:
     # - 4 parameter banks -> Muon (batched Newton-Schulz)
     # - token embedding -> Adam
@@ -1672,11 +1686,25 @@ def main() -> None:
         f"max_wallclock_seconds:{args.max_wallclock_seconds:.3f}"
     )
     log0(f"seed:{args.seed}")
+    resume_step = 0 # Hier den gewünschten Start-Step setzen
+    step = 0 # Da du neu anfängst
     train_loader = DistributedTokenLoader(args.train_files, rank, world_size, device)
+    
+    if resume_step > 0:
+        log0(f"RESUME: Skipping {resume_step * args.train_batch_tokens} tokens to reach step {resume_step}...")
+        # Wir spulen den Stream im Loader vor
+        train_loader.stream.take(resume_step * args.train_batch_tokens)
+        step = resume_step
+    else:
+        step = 0
+    # --------------------
+
     def zero_grad_all() -> None:
         for opt in optimizers:
             opt.zero_grad(set_to_none=True)
+            
     max_wallclock_ms = 1000.0 * args.max_wallclock_seconds if args.max_wallclock_seconds > 0 else None
+
     def lr_mul(step: int, elapsed_ms: float) -> float:
         if args.warmdown_iters <= 0:
             return 1.0
@@ -1724,6 +1752,11 @@ def main() -> None:
     torch.cuda.synchronize()
     t0 = time.perf_counter()
     step = 0
+    if os.path.exists("final_model.pt"):
+        log0("Loading checkpoint: final_model.pt")
+        checkpoint = torch.load("final_model.pt", map_location=device)
+        # strict=False ist wichtig, falls MTP-Köpfe im Checkpoint fehlen
+        base_model.load_state_dict(checkpoint, strict=False)
     while True:
         last_step = step == args.iterations or (stop_after_step is not None and step >= stop_after_step)
         should_validate = last_step or (args.val_loss_every > 0 and step % args.val_loss_every == 0)
