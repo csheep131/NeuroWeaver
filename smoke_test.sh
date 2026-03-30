@@ -1,13 +1,12 @@
 #!/bin/bash
 #
-# smoke_test.sh - Lokaler Smoke Test für Parameter Golf Challenge
+# smoke_test.sh - Lokaler Smoke Test für SOTA train_gpt.py
 #
-# Führt einen schnellen Smoke Test durch um die Infrastruktur zu validieren.
+# Prüft ob die SOTA train_gpt.py korrekt läuft (RTX 3050 / SDPA Fallback)
 #
 
 set -euo pipefail
 
-# Farben
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -19,145 +18,133 @@ log_success() { echo -e "${GREEN}[OK]${NC} $1"; }
 log_warn() { echo -e "${YELLOW}[WARN]${NC} $1"; }
 log_error() { echo -e "${RED}[ERROR]${NC} $1"; }
 
-# Konfiguration
-ITERATIONS="${ITERATIONS:-50}"
-BATCH_TOKENS="${BATCH_TOKENS:-1024}"
-RUN_ID="${RUN_ID:-smoke_test_$(date +%Y%m%d_%H%M%S)}"
-
-echo "========================================"
-echo "  NeuroWeave Smoke Test"
-echo "========================================"
+echo "════════════════════════════════════════════════"
+echo "  NeuroWeave SOTA Smoke Test"
+echo "════════════════════════════════════════════════"
 echo
 
-# Python-Pfad bestimmen
+# Python + venv
 if [[ -f ".venv/bin/python" ]]; then
     PYTHON=".venv/bin/python"
-    log_info "Verwende virtuelle Umgebung: .venv"
+    source .venv/bin/activate
+    log_info "Verwende venv: .venv"
 elif command -v python3 &> /dev/null; then
     PYTHON="python3"
-    log_warn "Keine venv gefunden, verwende system python3"
+    log_warn "Keine venv, verwende system python3"
 else
     log_error "Python nicht gefunden"
     exit 1
 fi
 
-# Test 1: Dependencies prüfen
-log_info "Test 1: Prüfe Dependencies..."
-if $PYTHON -c "import torch; import numpy; import sentencepiece; import yaml" 2>/dev/null; then
-    log_success "Dependencies OK"
-else
-    log_error "Dependencies fehlen. Installiere mit: pip install -r requirements.txt"
+# ── Test 1: Dependencies ──
+log_info "Test 1: Dependencies..."
+$PYTHON -c "
+import torch, numpy, sentencepiece
+print(f'  torch={torch.__version__} cuda={torch.cuda.is_available()}')
+print(f'  GPU: {torch.cuda.get_device_name(0) if torch.cuda.is_available() else \"none\"}')
+" 2>&1 && log_success "Dependencies OK" || { log_error "Dependencies fehlen"; exit 1; }
+
+# ── Test 2: SOTA train_gpt.py Integrität ──
+log_info "Test 2: SOTA train_gpt.py Integrität..."
+LINES=$(wc -l < train_gpt.py)
+if [[ $LINES -lt 1500 ]]; then
+    log_error "train_gpt.py hat nur $LINES Zeilen — das ist NICHT der SOTA!"
+    log_error "SOTA hat ~1920 Zeilen. Siehe SOTA_REFERENCE.md"
     exit 1
 fi
 
-# Test 2: Dataset prüfen
-log_info "Test 2: Prüfe Dataset..."
-if [[ -d "./data/datasets/fineweb10B_sp1024/train" ]]; then
-    SHARD_COUNT=$(ls -1 ./data/datasets/fineweb10B_sp1024/train/*.bin 2>/dev/null | wc -l)
-    log_success "Dataset gefunden ($SHARD_COUNT Shards)"
+$PYTHON -c "
+import ast, sys
+with open('train_gpt.py') as f:
+    tree = ast.parse(f.read())
+classes = [n.name for n in ast.walk(tree) if isinstance(n, ast.ClassDef)]
+required = ['Muon', 'GPT', 'CausalSelfAttention', 'SmearGate', 'BigramHashEmbedding', 'Block', 'MLP']
+missing = [c for c in required if c not in classes]
+if missing:
+    print(f'  ❌ Fehlende Klassen: {missing}')
+    sys.exit(1)
+print(f'  ✅ Alle SOTA-Klassen vorhanden ({len(classes)} Klassen, $LINES Zeilen)')
+" 2>&1 && log_success "SOTA Integrität OK" || { log_error "SOTA-Klassen fehlen!"; exit 1; }
+
+# ── Test 3: Dataset + Tokenizer ──
+log_info "Test 3: Dataset + Tokenizer..."
+DATA_PATH="${DATA_PATH:-./data/datasets/fineweb10B_sp1024}"
+TOKENIZER_PATH="${TOKENIZER_PATH:-./data/tokenizers/fineweb_1024_bpe.model}"
+
+if [[ -d "$DATA_PATH" ]]; then
+    TRAIN_SHARDS=$(ls -1 "$DATA_PATH"/fineweb_train_*.bin 2>/dev/null | wc -l)
+    VAL_SHARDS=$(ls -1 "$DATA_PATH"/fineweb_val_*.bin 2>/dev/null | wc -l)
+    log_success "Dataset: $TRAIN_SHARDS train, $VAL_SHARDS val shards"
 else
-    log_warn "Dataset nicht gefunden. Download mit:"
-    echo "  python data/cached_challenge_fineweb.py --variant sp1024 --train-shards 80"
-    log_info "Verwende synthetische Daten für Test..."
-fi
-
-# Test 3: Tokenizer prüfen
-log_info "Test 3: Prüfe Tokenizer..."
-if [[ -f "./data/tokenizers/fineweb_1024_bpe.model" ]] && [[ -s "./data/tokenizers/fineweb_1024_bpe.model" ]]; then
-    log_success "Tokenizer gefunden"
-else
-    log_warn "Tokenizer nicht gefunden. Training verwendet Byte-Level Fallback"
-fi
-
-# Test 4: Dataset Loading Test
-log_info "Test 4: Dataset Loading Test..."
-$PYTHON -c "
-from train_gpt import FineWebDataset
-dataset = FineWebDataset(
-    data_path='./data/datasets/fineweb10B_sp1024/train',
-    tokenizer_path='./data/tokenizers/fineweb_1024_bpe.model',
-    seq_len=1024
-)
-print(f'  Vocab Size: {dataset._vocab_size}')
-print(f'  Shards: {len(dataset.shards)}')
-x, y = dataset.get_batch(batch_tokens=1024)
-print(f'  Batch: {x.shape}')
-" 2>&1 | sed 's/^/  /'
-log_success "Dataset Loading OK"
-
-# Test 5: Model Forward Pass
-log_info "Test 5: Model Forward Pass..."
-$PYTHON -c "
-import torch
-from train_gpt import Config, GPT
-
-cfg = Config(
-    d_model=384,
-    num_layers=9,
-    num_heads=6,
-    kv_heads=3,
-    vocab_size=1024,
-    max_seq_len=1024
-)
-
-model = GPT(cfg)
-x = torch.randint(0, 1024, (2, 1024))
-logits, loss = model(x, x)
-print(f'  Input: {x.shape}')
-print(f'  Logits: {logits.shape}')
-print(f'  Loss: {loss.item():.4f}')
-" 2>&1 | sed 's/^/  /'
-log_success "Model Forward OK"
-
-# Test 6: Compression Test
-log_info "Test 6: Compression Test..."
-$PYTHON -c "
-import torch
-import io
-import zlib
-from train_gpt import Config, GPT, compress_model
-
-cfg = Config(
-    d_model=384,
-    num_layers=9,
-    num_heads=6,
-    kv_heads=3,
-    vocab_size=1024
-)
-
-model = GPT(cfg)
-size, _ = compress_model(model)
-print(f'  Compressed Size: {size / 1024 / 1024:.2f} MB')
-print(f'  Limit: 16.00 MB')
-print(f'  Status: {\"OK\" if size < 16_000_000 else \"TOO LARGE\"}')
-" 2>&1 | sed 's/^/  /'
-log_success "Compression OK"
-
-# Test 7: Kurzes Training
-log_info "Test 7: Training Test ($ITERATIONS Iterationen)..."
-echo "  Starte Training..."
-RUN_ID="$RUN_ID" \
-ITERATIONS="$ITERATIONS" \
-TRAIN_BATCH_TOKENS="$BATCH_TOKENS" \
-VAL_LOSS_EVERY=0 \
-$PYTHON train_gpt.py 2>&1 | sed 's/^/  /' || {
-    log_error "Training fehlgeschlagen"
+    log_error "Dataset nicht gefunden: $DATA_PATH"
+    echo "  Fix: python3 data/cached_challenge_fineweb.py --variant sp1024"
     exit 1
-}
+fi
 
-log_success "Training OK"
+if [[ -f "$TOKENIZER_PATH" ]]; then
+    log_success "Tokenizer: $TOKENIZER_PATH"
+else
+    log_error "Tokenizer nicht gefunden: $TOKENIZER_PATH"
+    exit 1
+fi
+
+# ── Test 4: SDPA Fallback ──
+log_info "Test 4: Flash Attention / SDPA Fallback..."
+$PYTHON -c "
+try:
+    from flash_attn_interface import flash_attn_func
+    print('  ⚡ Flash Attention 3: verfügbar (H100-Pfad)')
+except ImportError:
+    print('  🔄 Flash Attention 3: NICHT verfügbar → SDPA Fallback aktiv (OK für RTX 3050)')
+" 2>&1
+log_success "Attention Backend OK"
+
+# ── Test 5: Quick Training (50 Steps) ──
+log_info "Test 5: Quick Training (50 Steps)..."
+echo "  Starte SOTA-Training mit minimaler Config..."
+
+RUN_ID="smoke_$(date +%Y%m%d_%H%M%S)" \
+DATA_PATH="$DATA_PATH" \
+TOKENIZER_PATH="$TOKENIZER_PATH" \
+VOCAB_SIZE=1024 \
+ITERATIONS=50 \
+TRAIN_BATCH_TOKENS=16384 \
+TRAIN_SEQ_LEN=512 \
+EVAL_SEQ_LEN=512 \
+VAL_BATCH_SIZE=16384 \
+VAL_LOSS_EVERY=50 \
+MAX_WALLCLOCK_SECONDS=120 \
+WARMDOWN_ITERS=10 \
+WARMUP_STEPS=5 \
+TRAIN_LOG_EVERY=10 \
+EVAL_STRIDE=0 \
+TTT_ENABLED=0 \
+SWA_ENABLED=0 \
+torchrun --standalone --nproc_per_node=1 train_gpt.py 2>&1 | tail -30 | sed 's/^/  /'
+
+EXIT_CODE=${PIPESTATUS[0]}
+if [[ $EXIT_CODE -eq 0 ]]; then
+    log_success "Training OK"
+else
+    log_error "Training fehlgeschlagen (exit code: $EXIT_CODE)"
+    exit 1
+fi
 
 echo
-echo "========================================"
-log_success "Alle Smoke Tests bestanden!"
-echo "========================================"
-echo
-echo "Run ID: $RUN_ID"
-echo "Iterationen: $ITERATIONS"
-echo "Batch Tokens: $BATCH_TOKENS"
+echo "════════════════════════════════════════════════"
+log_success "Alle SOTA Smoke Tests bestanden!"
+echo "════════════════════════════════════════════════"
 echo
 echo "Nächste Schritte:"
-echo "  1. Logs in records/baseline_v1/logs/ kopieren"
-echo "  2. submission.json mit Metriken aktualisieren"
-echo "  3. PR einreichen"
+echo "  1. Gezielte Verbesserung in train_gpt.py machen"
+echo "  2. Smoke Test erneut laufen lassen"
+echo "  3. Vollständigen Run starten:"
+echo "     RUN_ID=mein_experiment \\"
+echo "     DATA_PATH=$DATA_PATH \\"
+echo "     TOKENIZER_PATH=$TOKENIZER_PATH \\"
+echo "     VOCAB_SIZE=1024 \\"
+echo "     TRAIN_BATCH_TOKENS=32768 \\"
+echo "     TRAIN_SEQ_LEN=1024 \\"
+echo "     MAX_WALLCLOCK_SECONDS=7200 \\"
+echo "     torchrun --standalone --nproc_per_node=1 train_gpt.py"
 echo
