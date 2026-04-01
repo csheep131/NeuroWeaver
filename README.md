@@ -10,7 +10,7 @@ Eine Experimentier-Plattform für systematisches Ablation-Testing von ML-Modelle
 
 Diese Software ist eine "Ablation-Maschine", die folgendes ermöglicht:
 
-1. **Runs deklarativ beschreiben** - Konfiguration statt Code-Bastelei
+1. **Runs deklarativ beschreiben** - Konfiguration
 2. **Reproduzierbar trainieren** - Same config = same results
 3. **Automatisch quantisieren** - INT6, INT5, mixed precision, GPTQ-lite
 4. **Metriken vergleichen** - BPB, Schrittzeit, Artifact-Größe
