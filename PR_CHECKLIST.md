@@ -1,7 +1,7 @@
 # PR Einreichungs-Checkliste
 
 **Stand:** 2026-03-25
-**Status:** ✅ BEREIT FÜR EINREICHUNG
+**Status:** BEREIT FÜR EINREICHUNG
 
 ---
 
@@ -10,8 +10,8 @@
 ### Core Challenge Dateien (müssen committed werden)
 
 ```
-train_gpt.py                    # Haupt-Trainingsskript für 8xH100
-train_gpt_mlx.py                # MLX-Version für Apple Silicon
+train_gpt.py # Haupt-Trainingsskript für 8xH100
+train_gpt_mlx.py # MLX-Version für Apple Silicon
 data/cached_challenge_fineweb.py # FineWeb Dataset Loader
 ```
 
@@ -19,41 +19,41 @@ data/cached_challenge_fineweb.py # FineWeb Dataset Loader
 
 ```
 records/baseline_v1/
-├── README.md                   # Submission Dokumentation
-├── submission.json             # Metadaten (Architektur, Training)
-├── requirements.txt            # Dependencies
-├── SMOKE_TEST_REPORT.md        # Smoke Test Ergebnisse
-└── logs/
-    ├── .gitignore              # Logs nicht committen
-    ├── .gitkeep                # Verzeichnis tracken
-    └── smoke_test.log          # Smoke Test Log
+README.md # Submission Dokumentation
+submission.json # Metadaten (Architektur, Training)
+requirements.txt # Dependencies
+SMOKE_TEST_REPORT.md # Smoke Test Ergebnisse
+logs/
+.gitignore # Logs nicht committen
+.gitkeep # Verzeichnis tracken
+smoke_test.log # Smoke Test Log
 ```
 
 ### Dokumentation
 
 ```
 docs/challenge/
-├── submission_guide.md         # Vollständige Submission-Anleitung
-└── runpod_setup.md             # Cloud-GPU Setup Guide
+submission_guide.md # Vollständige Submission-Anleitung
+runpod_setup.md # Cloud-GPU Setup Guide
 
-regeln.md                       # Offizielle Challenge-Regeln
+regeln.md # Offizielle Challenge-Regeln
 ```
 
 ### Scripts
 
 ```
-smoke_test.sh                   # Lokaler Smoke Test
-create_pr.sh                    # PR Creation Tool
-prepare_pr.sh                   # PR Vorbereitung
+smoke_test.sh # Lokaler Smoke Test
+create_pr.sh # PR Creation Tool
+prepare_pr.sh # PR Vorbereitung
 ```
 
 ### Status Dateien
 
 ```
-DATASET_STATUS.md               # Dataset & Tokenizer Status
-TEST_REPORT.md                  # Test Report
-FINAL_TEST_REPORT.md            # Final Test Report
-UMSETZUNGS_STATUS.md            # Umsetzungs-Status
+DATASET_STATUS.md # Dataset & Tokenizer Status
+TEST_REPORT.md # Test Report
+FINAL_TEST_REPORT.md # Final Test Report
+UMSETZUNGS_STATUS.md # Umsetzungs-Status
 ```
 
 ---
@@ -79,10 +79,10 @@ Vollständige Infrastruktur für OpenAI Parameter Golf Challenge:
 - docs/challenge/: Submission Guide und RunPod Setup
 
 Challenge Compliance:
-✅ Artifact < 16MB (12.28 MB getestet)
-✅ Training < 10min (Wallclock-Limit implementiert)
-✅ 8xH100 Support (torchrun + DDP)
-✅ Smoke Tests bestanden
+Artifact < 16MB (12.28 MB getestet)
+Training < 10min (Wallclock-Limit implementiert)
+8xH100 Support (torchrun + DDP)
+Smoke Tests bestanden
 
 Bekannt:
 - val_bpb pending (H100 Training erforderlich)
@@ -126,10 +126,10 @@ git push -u origin feat/parameter-golf-challenge-submission
 
 | Metric | Value | Status |
 |--------|-------|--------|
-| **Artifact Size** | 12.28 MB | ✅ < 16 MB |
-| **Training Time** | < 10 min | ✅ Wallclock-Limit |
-| **8xH100 Support** | Yes | ✅ DDP + torchrun |
-| **val_bpb** | Pending | ⏳ H100 Training |
+| **Artifact Size** | 12.28 MB | < 16 MB |
+| **Training Time** | < 10 min | Wallclock-Limit |
+| **8xH100 Support** | Yes | DDP + torchrun |
+| **val_bpb** | Pending | H100 Training |
 
 ## Architecture
 
@@ -148,7 +148,7 @@ git push -u origin feat/parameter-golf-challenge-submission
 
 ## Testing
 
-✅ All smoke tests passed:
+All smoke tests passed:
 - Dataset Loading
 - Model Forward Pass
 - Compression (12.28 MB)
@@ -175,10 +175,10 @@ See `records/baseline_v1/SMOKE_TEST_REPORT.md` for details.
 
 | Criterion | Limit | Status |
 |-----------|-------|--------|
-| Artifact Size | < 16 MB | ✅ 12.28 MB |
-| Training Time | < 10 min | ✅ Implemented |
-| Evaluation Time | < 10 min | ✅ Implemented |
-| Reproducibility | 3 Seeds | ⏳ Pending H100 |
+| Artifact Size | < 16 MB | 12.28 MB |
+| Training Time | < 10 min | Implemented |
+| Evaluation Time | < 10 min | Implemented |
+| Reproducibility | 3 Seeds | Pending H100 |
 
 ## Authors
 
@@ -214,7 +214,7 @@ MIT
 
 ## Fazit
 
-✅ **PR ist bereit für Einreichung**
+**PR ist bereit für Einreichung**
 
 Alle infrastrukturellen Komponenten sind implementiert und getestet. Sobald H100 Compute Credits verfügbar sind, werden die vollständigen Training Runs durchgeführt und die Ergebnisse nachgereicht.
 

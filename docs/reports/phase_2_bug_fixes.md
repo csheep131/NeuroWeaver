@@ -6,34 +6,34 @@
 **File:** `quant/quantizers.py`
 - **Issue:** MixedQuantizer used `q | 0x40` to mark INT6 weights, but 0x40 = 64 exceeds the 6-bit range (0-63)
 - **Fix:** Implemented proper bit encoding scheme:
-  - Bit 7 (0x80) indicates INT6 (1) vs INT5 (0)
-  - For INT6: bits 0-5 contain 6-bit value (0-63) 
-  - For INT5: bits 0-4 contain 5-bit value (0-31)
+- Bit 7 (0x80) indicates INT6 (1) vs INT5 (0)
+- For INT6: bits 0-5 contain 6-bit value (0-63)
+- For INT5: bits 0-4 contain 5-bit value (0-31)
 - **Deployment:** Fixed in both `quantize()` and `dequantize()` methods
 
 ### 2. Feature Gate Dependency Check Inconsistency (FIXED)
 **File:** `models/factories/feature_gate.py`
 - **Issue:** `check_dependencies()` returned `True` for non-required dependencies even if condition failed
 - **Fix:** Now correctly tracks all dependency failures and distinguishes between required and optional:
-  - Returns `False` only if required dependencies fail
-  - Returns `True` if only optional dependencies fail
+- Returns `False` only if required dependencies fail
+- Returns `True` if only optional dependencies fail
 - **Deployment:** Updated `check_dependencies()` method to track dependency types
 
 ### 3. Kill Rule Evaluation with None Values (FIXED)
 **File:** `research/ablation_engine.py`
 - **Issue:** Used `(m.get("delta_ms") or 0)` which treats `None` and `0` identically
 - **Fix:** Added proper None checking in condition logic:
-  - Uses `m.get("delta_ms") is not None` checks before accessing values
-  - Uses safe formatting with `(m.get('delta_ms') or 0)` in f-strings
+- Uses `m.get("delta_ms") is not None` checks before accessing values
+- Uses safe formatting with `(m.get('delta_ms') or 0)` in f-strings
 - **Deployment:** Updated all kill rules to handle None values correctly
 
 ### 4. Rust Import Error Handling (IMPROVED)
 **File:** `models/factories/backbone_factory.py`
 - **Issue:** Catch-all `except (ImportError, AttributeError):` without specific handling
 - **Fix:** Added proper logging and separate exception handling:
-  - Catches ImportError and AttributeError separately
-  - Logs warnings with specific error messages
-  - Falls back to Python stub gracefully
+- Catches ImportError and AttributeError separately
+- Logs warnings with specific error messages
+- Falls back to Python stub gracefully
 - **Deployment:** Updated import error handling with better logging
 
 ## Test Results
@@ -54,11 +54,11 @@ quantized = quantizer.quantize(weights, 1, 5)
 ```python
 from models.factories.feature_gate import FeatureGate, FeatureDependency
 gate = FeatureGate(
-    name='test',
-    dependencies=[
-        FeatureDependency('req', lambda c: c.get('has_req'), required=True),
-        FeatureDependency('opt', lambda c: c.get('has_opt'), required=False),
-    ]
+name='test',
+dependencies=[
+FeatureDependency('req', lambda c: c.get('has_req'), required=True),
+FeatureDependency('opt', lambda c: c.get('has_opt'), required=False),
+]
 )
 
 # Test results:
@@ -110,19 +110,19 @@ The following non-critical issues from the audit report remain for future improv
 ## Next Steps for Phase 3
 
 1. **Prioritize Performance Improvements:**
-   - Add NumPy vectorization to quantizers
-   - Implement caching for feature gate validation
-   - Add memoization for registry lineage
+- Add NumPy vectorization to quantizers
+- Implement caching for feature gate validation
+- Add memoization for registry lineage
 
 2. **Enhance Test Coverage:**
-   - Add unit tests for all fixed bugs
-   - Create integration tests for full pipeline
-   - Add property-based tests for kill rules
+- Add unit tests for all fixed bugs
+- Create integration tests for full pipeline
+- Add property-based tests for kill rules
 
 3. **Documentation Updates:**
-   - Document bit packing scheme for MixedQuantizer
-   - Add examples for custom kill rules
-   - Create architecture diagrams
+- Document bit packing scheme for MixedQuantizer
+- Add examples for custom kill rules
+- Create architecture diagrams
 
 ## Verification Status
 
@@ -130,4 +130,4 @@ All critical bugs have been fixed and verified. The Phase 2 codebase is now stab
 
 **Last Verified:** $(date)
 **Test Status:** All critical fixes pass basic verification
-**Ready for Phase 3:** ✅ YES
+**Ready for Phase 3:** YES

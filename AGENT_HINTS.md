@@ -1,6 +1,6 @@
 # AGENT HINTS - NeuroWeave Train GPT
 
-## ⚠️ WICHTIGSTER HINT: train_gpt.py ist BEREITS der SOTA!
+## WICHTIGSTER HINT: train_gpt.py ist BEREITS der SOTA!
 
 Die aktuelle `train_gpt.py` (1920 Zeilen) IST das Ergebnis von 2 Wochen
 Wettbewerb-Optimierung. Sie erreicht **val_bpb = 1.1194**.
@@ -22,7 +22,7 @@ Wettbewerb-Optimierung. Sie erreicht **val_bpb = 1.1194**.
 
 **Fix:** IMMER auf der bestehenden train_gpt.py aufbauen. SOTA_REFERENCE.md lesen.
 
-**Status:** ✅ Gefixt am 2026-03-28 (SOTA train_gpt.py als Basis, SOTA_REFERENCE.md erstellt)
+**Status:** Gefixt am 2026-03-28 (SOTA train_gpt.py als Basis, SOTA_REFERENCE.md erstellt)
 
 ---
 
@@ -32,7 +32,7 @@ Wettbewerb-Optimierung. Sie erreicht **val_bpb = 1.1194**.
 
 **Ort:** Betrifft nur selbst-geschriebene train_gpt.py Versionen (der SOTA hat dieses Problem nicht).
 
-**Status:** ✅ Nicht relevant im SOTA (verwendet eval_val() mit vorberechneten val_tokens)
+**Status:** Nicht relevant im SOTA (verwendet eval_val() mit vorberechneten val_tokens)
 
 ---
 
@@ -43,13 +43,13 @@ Wettbewerb-Optimierung. Sie erreicht **val_bpb = 1.1194**.
 **Fix:** SDPA-Fallback ist eingebaut (seit 2026-03-28):
 ```python
 try:
-    from flash_attn_interface import flash_attn_func as flash_attn_3_func
-    _USE_FA3 = True
+from flash_attn_interface import flash_attn_func as flash_attn_3_func
+_USE_FA3 = True
 except ImportError:
-    _USE_FA3 = False
+_USE_FA3 = False
 ```
 
-**Status:** ✅ Gefixt (SDPA fallback für RTX 3050)
+**Status:** Gefixt (SDPA fallback für RTX 3050)
 
 ---
 
@@ -65,7 +65,7 @@ export TOKENIZER_PATH=/home/schaf/projects/NeuroWeave/data/tokenizers/fineweb_10
 
 **Verifikation:** 80 Train-Shards + 1 Val-Shard vorhanden.
 
-**Status:** ✅ Automatisch in run.sh integriert (2026-03-28)
+**Status:** Automatisch in run.sh integriert (2026-03-28)
 
 ---
 

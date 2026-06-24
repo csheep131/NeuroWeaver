@@ -132,18 +132,18 @@ Mixed Quantizer: avg error = 0.464906, compression = 6.40x
 ### Ablation Reporter Test
 ```
 RUN STATISTICS
-  Total runs:     4
-  Active:         4
-  Killed:         0
-  Failed:         0
+Total runs: 4
+Active: 4
+Killed: 0
+Failed: 0
 
 BEST RESULTS
-  Best BPB:       run003_xsa (1.4000)
-  Best BPB/MB:    run003_xsa
-  Best BPB/ms:    run003_xsa
+Best BPB: run003_xsa (1.4000)
+Best BPB/MB: run003_xsa
+Best BPB/ms: run003_xsa
 
 [KILL] run004_tired
-       Reason: Artifact size 17,000,000 bytes exceeds 16,000,000 byte limit
+Reason: Artifact size 17,000,000 bytes exceeds 16,000,000 byte limit
 ```
 
 ## Architektur-Übersicht
@@ -152,28 +152,28 @@ BEST RESULTS
 Phase 2 Architektur:
 
 configs/
-  └── runs/
-      ├── run001_control.yaml    # Baseline
-      ├── run002_hash.yaml       # Hash Tokenizer
-      ├── run003_xsa.yaml        # XSA Feature
-      ├── run004_leakyrelu.yaml  # LeakyReLU
-      └── run005_mixed_quant.yaml # Mixed Quant
+runs/
+run001_control.yaml # Baseline
+run002_hash.yaml # Hash Tokenizer
+run003_xsa.yaml # XSA Feature
+run004_leakyrelu.yaml # LeakyReLU
+run005_mixed_quant.yaml # Mixed Quant
 
 models/factories/
-  ├── backbone_factory.py        # Model Builder
-  └── feature_gate.py            # Feature Management
+backbone_factory.py # Model Builder
+feature_gate.py # Feature Management
 
 tokenizers/
-  └── tokenizers.py              # Byte, Bigram, Trigram
+tokenizers.py # Byte, Bigram, Trigram
 
 quant/
-  └── quantizers.py              # INT5, INT6, Mixed, GPTQ-lite
+quantizers.py # INT5, INT6, Mixed, GPTQ-lite
 
 research/
-  └── ablation_engine.py         # Kill Rules, Reports
+ablation_engine.py # Kill Rules, Reports
 
 core/
-  └── registry.py                # +Lineage Tracking
+registry.py # +Lineage Tracking
 ```
 
 ## Feature-Gates im Detail
@@ -196,7 +196,7 @@ core/
 - [ ] Dashboard/CLI für Run-Übersicht
 - [ ] Multi-Seed-Orchestrierung
 
-## MVP Status Phase 2 ✅
+## MVP Status Phase 2
 
 - [x] Backbone Factory mit Feature-Gates
 - [x] Tokenizer-Lab (byte, bigram, trigram)

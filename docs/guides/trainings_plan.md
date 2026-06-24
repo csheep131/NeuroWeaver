@@ -2,33 +2,33 @@
 
 Dieses Dokument beschreibt die notwendigen Schritte für echte Trainingsläufe in allen 3 Phasen.
 
-**Erstellt:** 2026-03-24  
+**Erstellt:** 2026-03-24
 **Status:** Ready für Training
 
 ---
 
-## Voraussetzungen ✅
+## Voraussetzungen
 
 ### Abgeschlossen (2026-03-24)
 
 - [x] **Virtuelles Environment** (`.venv/`)
-  - Python 3.11+
-  - pip 26.0.1+
+- Python 3.11+
+- pip 26.0.1+
 
 - [x] **PyTorch Installation**
-  - Version: 2.11.0+cu130
-  - CUDA Support: ✅ Verfügbar
-  - CPU-Fallback: ✅ Verfügbar
+- Version: 2.11.0+cu130
+- CUDA Support: Verfügbar
+- CPU-Fallback: Verfügbar
 
 - [x] **Rust-Core kompiliert**
-  - maturin: 1.12.6
-  - PyO3: 0.20 (kompatibel)
-  - Build-Status: ✅ SUCCESS
+- maturin: 1.12.6
+- PyO3: 0.20 (kompatibel)
+- Build-Status: SUCCESS
 
 - [x] **Alle Run-Konfigurationen**
-  - Phase 1: 5 Runs ✅
-  - Phase 2: 10 Runs ✅
-  - Phase 3: 2 Combos ✅
+- Phase 1: 5 Runs
+- Phase 2: 10 Runs
+- Phase 3: 2 Combos
 
 ---
 
@@ -46,16 +46,16 @@ Echte Trainingsläufe für alle 5 Phase-1-Runs mit tatsächlichen BPB-Metriken.
 # Datei: data/text_loader.py
 
 class TextDataLoader:
-    """Lädt und tokenisiert Textdaten für Training."""
-    
-    def __init__(self, data_path: str, tokenizer, seq_len: int):
-        self.data_path = data_path
-        self.tokenizer = tokenizer
-        self.seq_len = seq_len
-    
-    def __iter__(self):
-        # Yield batches of tokens
-        pass
+"""Lädt und tokenisiert Textdaten für Training."""
+
+def __init__(self, data_path: str, tokenizer, seq_len: int):
+self.data_path = data_path
+self.tokenizer = tokenizer
+self.seq_len = seq_len
+
+def __iter__(self):
+# Yield batches of tokens
+pass
 ```
 
 **Erforderliche Features:**
@@ -72,19 +72,19 @@ class TextDataLoader:
 
 import torch
 import torch.nn as nn
-from rust_core import Backbone  # Rust-Backend
+from rust_core import Backbone # Rust-Backend
 
 class AblationModel(nn.Module):
-    """PyTorch-Modell mit Rust-Backend."""
-    
-    def __init__(self, config):
-        super().__init__()
-        self.config = config
-        # Rust-Backend initialisieren
-        self.backbone = Backbone(config)
-    
-    def forward(self, x):
-        return self.backbone.forward(x)
+"""PyTorch-Modell mit Rust-Backend."""
+
+def __init__(self, config):
+super().__init__()
+self.config = config
+# Rust-Backend initialisieren
+self.backbone = Backbone(config)
+
+def forward(self, x):
+return self.backbone.forward(x)
 ```
 
 **Erforderliche Features:**
@@ -99,28 +99,28 @@ class AblationModel(nn.Module):
 # TODO: Erweitern in train/trainer.py
 
 def train_step(self, batch) -> float:
-    """Echter Training-Schritt."""
-    # 1. Forward pass
-    logits = self.model(batch)
-    
-    # 2. Loss berechnen
-    loss = self.criterion(logits, targets)
-    
-    # 3. Backward pass
-    loss.backward()
-    
-    # 4. Gradient clipping
-    if self.config.grad_clip:
-        torch.nn.utils.clip_grad_norm_(
-            self.model.parameters(), 
-            self.config.grad_clip
-        )
-    
-    # 5. Optimizer step
-    self.optimizer.step()
-    self.optimizer.zero_grad()
-    
-    return loss.item()
+"""Echter Training-Schritt."""
+# 1. Forward pass
+logits = self.model(batch)
+
+# 2. Loss berechnen
+loss = self.criterion(logits, targets)
+
+# 3. Backward pass
+loss.backward()
+
+# 4. Gradient clipping
+if self.config.grad_clip:
+torch.nn.utils.clip_grad_norm_(
+self.model.parameters(),
+self.config.grad_clip
+)
+
+# 5. Optimizer step
+self.optimizer.step()
+self.optimizer.zero_grad()
+
+return loss.item()
 ```
 
 **Erforderliche Features:**
@@ -135,19 +135,19 @@ def train_step(self, batch) -> float:
 # TODO: Erweitern in eval/bpb_eval.py
 
 def compute_bpb(self, model, data_loader) -> float:
-    """Echte BPB-Berechnung."""
-    total_bits = 0
-    total_bytes = 0
-    
-    for batch in data_loader:
-        with torch.no_grad():
-            logits = model(batch)
-            # Cross-Entropy → Bits
-            bits = self._compute_bits(logits, batch)
-            total_bits += bits
-            total_bytes += batch.num_bytes
-    
-    return total_bits / total_bytes
+"""Echte BPB-Berechnung."""
+total_bits = 0
+total_bytes = 0
+
+for batch in data_loader:
+with torch.no_grad():
+logits = model(batch)
+# Cross-Entropy → Bits
+bits = self._compute_bits(logits, batch)
+total_bits += bits
+total_bytes += batch.num_bytes
+
+return total_bits / total_bytes
 ```
 
 ### Run-Plan Phase 1
@@ -185,16 +185,16 @@ Echte Trainingsläufe für alle 10 Phase-2-Runs mit Feature-spezifischen Metrike
 # oder Python-Implementierung in train/xsa.py
 
 class CrossSequenceAttention(nn.Module):
-    """XSA für lange Abhängigkeiten."""
-    
-    def __init__(self, d_model, window_size=2048):
-        super().__init__()
-        self.window_size = window_size
-        self.attention = nn.MultiheadAttention(d_model, num_heads=8)
-    
-    def forward(self, x, memory=None):
-        # Cross-Sequence Attention Logik
-        pass
+"""XSA für lange Abhängigkeiten."""
+
+def __init__(self, d_model, window_size=2048):
+super().__init__()
+self.window_size = window_size
+self.attention = nn.MultiheadAttention(d_model, num_heads=8)
+
+def forward(self, x, memory=None):
+# Cross-Sequence Attention Logik
+pass
 ```
 
 **FiLM (Feature-wise Linear Modulation):**
@@ -202,17 +202,17 @@ class CrossSequenceAttention(nn.Module):
 # TODO: train/film.py
 
 class FiLMLayer(nn.Module):
-    """FiLM für konditionale Skalierung."""
-    
-    def __init__(self, d_model, cond_dim=64):
-        super().__init__()
-        self.scale = nn.Linear(cond_dim, d_model)
-        self.shift = nn.Linear(cond_dim, d_model)
-    
-    def forward(self, x, condition):
-        gamma = self.scale(condition)
-        beta = self.shift(condition)
-        return gamma * x + beta
+"""FiLM für konditionale Skalierung."""
+
+def __init__(self, d_model, cond_dim=64):
+super().__init__()
+self.scale = nn.Linear(cond_dim, d_model)
+self.shift = nn.Linear(cond_dim, d_model)
+
+def forward(self, x, condition):
+gamma = self.scale(condition)
+beta = self.shift(condition)
+return gamma * x + beta
 ```
 
 **TTT (Test-Time Training):**
@@ -220,16 +220,16 @@ class FiLMLayer(nn.Module):
 # TODO: train/ttt.py
 
 class TestTimeTraining(nn.Module):
-    """TTT für adaptive Inferenz."""
-    
-    def __init__(self, base_model, lr=1e-4):
-        super().__init__()
-        self.model = base_model
-        self.lr = lr
-    
-    def adapt(self, x, steps=1):
-        # Mini-Updates während Inferenz
-        pass
+"""TTT für adaptive Inferenz."""
+
+def __init__(self, base_model, lr=1e-4):
+super().__init__()
+self.model = base_model
+self.lr = lr
+
+def adapt(self, x, steps=1):
+# Mini-Updates während Inferenz
+pass
 ```
 
 #### 2.2 Quantisierung
@@ -238,18 +238,18 @@ class TestTimeTraining(nn.Module):
 # TODO: quant/fake_quant.py
 
 class FakeQuantizer:
-    """Fake-Quantisierung für Training."""
-    
-    def __init__(self, bits=6):
-        self.bits = bits
-        self.qmin = -(2 ** (bits - 1))
-        self.qmax = 2 ** (bits - 1) - 1
-    
-    def quantize(self, x):
-        # Fake-Quantisierung (straight-through estimator)
-        scale = (x.max() - x.min()) / (self.qmax - self.qmin)
-        x_int = torch.round(x / scale).clamp(self.qmin, self.qmax)
-        return x_int * scale  # Straight-through
+"""Fake-Quantisierung für Training."""
+
+def __init__(self, bits=6):
+self.bits = bits
+self.qmin = -(2 ** (bits - 1))
+self.qmax = 2 ** (bits - 1) - 1
+
+def quantize(self, x):
+# Fake-Quantisierung (straight-through estimator)
+scale = (x.max() - x.min()) / (self.qmax - self.qmin)
+x_int = torch.round(x / scale).clamp(self.qmin, self.qmax)
+return x_int * scale # Straight-through
 ```
 
 ### Run-Plan Phase 2
@@ -308,7 +308,7 @@ Der Combo Builder wählt automatisch:
 | Run | Typ | Steps | VRAM | Zeit | Submission |
 |-----|-----|-------|------|------|------------|
 | run016_best_combo_a | Nicht-quantisiert | 10.000 | ~6 GB | ~45 Min | Vorbereitung |
-| run017_best_combo_quantized | Quantisiert | 10.000 | ~5 GB | ~45 Min | ✅ Bereit |
+| run017_best_combo_quantized | Quantisiert | 10.000 | ~5 GB | ~45 Min | Bereit |
 
 ### Erfolgskriterien Phase 3
 
@@ -403,9 +403,9 @@ python3 -m runs.run --config configs/runs/run016_best_combo_a.yaml --mode train
 ```yaml
 # In Config anpassen:
 local_proxy:
-  seq_len: 128  # Reduzieren (256 → 128)
-  microbatch: 1  # Minimieren
-  grad_accumulation: 16  # Erhöhen für effektive Batch-Größe
+seq_len: 128 # Reduzieren (256 → 128)
+microbatch: 1 # Minimieren
+grad_accumulation: 16 # Erhöhen für effektive Batch-Größe
 ```
 
 ### Langsames Training
@@ -413,9 +413,9 @@ local_proxy:
 ```yaml
 # In Config anpassen:
 training:
-  batch_size: 64  # Erhöhen (wenn VRAM verfügbar)
-  # Oder:
-  # flash_attention: true  # Wenn GPU es unterstützt
+batch_size: 64 # Erhöhen (wenn VRAM verfügbar)
+# Oder:
+# flash_attention: true # Wenn GPU es unterstützt
 ```
 
 ### Rust-Core Fehler
@@ -439,6 +439,6 @@ maturin develop --release
 
 ---
 
-*Dokument erstellt: 2026-03-24*  
-*Letzte Aktualisierung: 2026-03-24*  
+*Dokument erstellt: 2026-03-24*
+*Letzte Aktualisierung: 2026-03-24*
 *Status: Ready für Implementierung*

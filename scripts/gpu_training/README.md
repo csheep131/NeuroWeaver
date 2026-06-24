@@ -129,18 +129,18 @@ python3 scripts/gpu_training/train_with_resume.py --config configs/runs/run001_c
 Checkpoints werden gespeichert in:
 ```
 checkpoints/{run_id}/
-├── latest.pt          # Letzter Checkpoint
-├── best.pt            # Bester Checkpoint (niedrigster Val BPB)
-└── checkpoint_*.pt    # Periodische Checkpoints
+latest.pt # Letzter Checkpoint
+best.pt # Bester Checkpoint (niedrigster Val BPB)
+checkpoint_*.pt # Periodische Checkpoints
 ```
 
 Checkpoint-Struktur:
 ```python
 {
-    "step": 5000,                    # Aktueller Step
-    "model_state": {...},            # Modell-Gewichte
-    "optimizer_state": {...},        # Optimizer-State
-    "scheduler_state": {...},        # Scheduler-State
-    "metrics": {"best_val_bpb": ...} # Metriken
+"step": 5000, # Aktueller Step
+"model_state": {...}, # Modell-Gewichte
+"optimizer_state": {...}, # Optimizer-State
+"scheduler_state": {...}, # Scheduler-State
+"metrics": {"best_val_bpb": ...} # Metriken
 }
 ```

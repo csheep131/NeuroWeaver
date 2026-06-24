@@ -4,28 +4,28 @@
 
 ---
 
-## ✅ DATASET ERSTELLT
+## DATASET ERSTELLT
 
 ### Ordnerstruktur
 
 ```
 data/datasets/fineweb10B_sp1024/
-├── train/
-│   ├── shard_00000.bin (20 MB, 10M tokens)
-│   ├── shard_00001.bin (20 MB, 10M tokens)
-│   ├── shard_00002.bin (20 MB, 10M tokens)
-│   ├── shard_00003.bin (20 MB, 10M tokens)
-│   ├── shard_00004.bin (20 MB, 10M tokens)
-│   ├── shard_00005.bin (20 MB, 10M tokens)
-│   ├── shard_00006.bin (20 MB, 10M tokens)
-│   ├── shard_00007.bin (20 MB, 10M tokens)
-│   ├── shard_00008.bin (20 MB, 10M tokens)
-│   └── shard_00009.bin (20 MB, 10M tokens)
-├── val/
-│   └── shard_00000.bin (196 KB, 100K tokens)
-└── test/
-    ├── shard_00000.bin (9.6 MB, 5M tokens)
-    └── shard_00001.bin (9.6 MB, 5M tokens)
+train/
+shard_00000.bin (20 MB, 10M tokens)
+shard_00001.bin (20 MB, 10M tokens)
+shard_00002.bin (20 MB, 10M tokens)
+shard_00003.bin (20 MB, 10M tokens)
+shard_00004.bin (20 MB, 10M tokens)
+shard_00005.bin (20 MB, 10M tokens)
+shard_00006.bin (20 MB, 10M tokens)
+shard_00007.bin (20 MB, 10M tokens)
+shard_00008.bin (20 MB, 10M tokens)
+shard_00009.bin (20 MB, 10M tokens)
+val/
+shard_00000.bin (196 KB, 100K tokens)
+test/
+shard_00000.bin (9.6 MB, 5M tokens)
+shard_00001.bin (9.6 MB, 5M tokens)
 ```
 
 **Gesamt:**
@@ -35,14 +35,14 @@ data/datasets/fineweb10B_sp1024/
 
 ---
 
-## ✅ TOKENIZER ERSTELLT
+## TOKENIZER ERSTELLT
 
 ### Dateien
 
 ```
 data/tokenizers/
-├── fineweb_1024_bpe.model (249 KB)
-└── fineweb_1024_bpe.vocab (12 KB)
+fineweb_1024_bpe.model (249 KB)
+fineweb_1024_bpe.vocab (12 KB)
 ```
 
 **Details:**
@@ -59,7 +59,7 @@ data/tokenizers/
 
 ---
 
-## 📊 USAGE
+## USAGE
 
 ### Training mit Dataset
 
@@ -93,9 +93,9 @@ python train_gpt.py
 from train_gpt import FineWebDataset
 
 dataset = FineWebDataset(
-    data_path="./data/datasets/fineweb10B_sp1024/train",
-    tokenizer_path="./data/tokenizers/fineweb_1024_bpe.model",
-    seq_len=1024
+data_path="./data/datasets/fineweb10B_sp1024/train",
+tokenizer_path="./data/tokenizers/fineweb_1024_bpe.model",
+seq_len=1024
 )
 
 # Batch holen
@@ -105,17 +105,17 @@ print(f"Batch shape: {x.shape}, {y.shape}")
 
 ---
 
-## ⚠️ BEKANNTE ISSUES
+## BEKANNTE ISSUES
 
 ### Training hängt nach mehreren Steps
 
-**Status:** ⚠️ Investigated
+**Status:** Investigated
 
 **Symptom:** Training startet, führt einige Steps aus, hängt sich dann.
 
 **Ursache:** Vermutlich Data Loading bei großen Datasets.
 
-**Workaround:** 
+**Workaround:**
 - Weniger Iterationen für Tests (`ITERATIONS=10`)
 - Kleinere Batch-Größe (`TRAIN_BATCH_TOKENS=1024`)
 
@@ -125,20 +125,20 @@ print(f"Batch shape: {x.shape}, {y.shape}")
 
 ---
 
-## 📝 HINWEISE
+## HINWEISE
 
 ### Synthetisches Dataset
 
 Dies ist ein **synthetisches Test-Dataset** mit zufälligen Tokens. Es ist geeignet für:
-- ✅ Smoke Tests
-- ✅ Development
-- ✅ Integration Tests
-- ✅ Performance Testing
+- Smoke Tests
+- Development
+- Integration Tests
+- Performance Testing
 
 **NICHT geeignet für:**
-- ❌ Echte Modell-Qualitätsbewertung
-- ❌ Challenge Submission
-- ❌ Publication-ready Results
+- Echte Modell-Qualitätsbewertung
+- Challenge Submission
+- Publication-ready Results
 
 ### Für echte Submission
 
@@ -156,7 +156,7 @@ python data/cached_challenge_fineweb.py --variant sp1024 --train-shards 80
 
 ---
 
-## ✅ CHECKLISTE
+## CHECKLISTE
 
 - [x] Dataset Ordnerstruktur erstellt
 - [x] Train Shards erstellt (10 × 20 MB)
@@ -168,4 +168,4 @@ python data/cached_challenge_fineweb.py --variant sp1024 --train-shards 80
 
 ---
 
-**Gesamt:** ✅ Dataset und Tokenizer sind bereit für lokale Tests.
+**Gesamt:** Dataset und Tokenizer sind bereit für lokale Tests.

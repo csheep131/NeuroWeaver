@@ -20,13 +20,13 @@ pip install -r requirements.txt
 Phase 5 benötigt folgende zusätzliche Pakete:
 
 ```txt
-plotly>=5.14.0          # Interaktive Plots
-dash>=2.9.0             # Dashboard Framework
-websockets>=10.0        # WebSocket Support
-optuna>=3.0.0           # Hyperparameter Optimization
-rich>=13.0.0            # Terminal UI
-fuzzywuzzy>=0.18.0      # Fuzzy Search
-python-Levenshtein>=0.20.0  # Fuzzy Search Speedup
+plotly>=5.14.0 # Interaktive Plots
+dash>=2.9.0 # Dashboard Framework
+websockets>=10.0 # WebSocket Support
+optuna>=3.0.0 # Hyperparameter Optimization
+rich>=13.0.0 # Terminal UI
+fuzzywuzzy>=0.18.0 # Fuzzy Search
+python-Levenshtein>=0.20.0 # Fuzzy Search Speedup
 ```
 
 ## Komponenten
@@ -105,16 +105,16 @@ python3 -m orchestrator.phase5 run-explorer --results-dir results
 #### Commands
 
 ```
-/search <query>     - Fuzzy Search nach Runs
-/filter <feature>   - Nach Feature filtern
-/sort <metric>      - Nach Metrik sortieren
-/compare <ids>      - Runs vergleichen
-/details <id>       - Detail-Ansicht
-/list               - Alle Runs anzeigen
-/clear              - Filter zurücksetzen
-/export <format>    - Export (csv, json, markdown)
-/help               - Hilfe
-/quit               - Beenden
+/search <query> - Fuzzy Search nach Runs
+/filter <feature> - Nach Feature filtern
+/sort <metric> - Nach Metrik sortieren
+/compare <ids> - Runs vergleichen
+/details <id> - Detail-Ansicht
+/list - Alle Runs anzeigen
+/clear - Filter zurücksetzen
+/export <format> - Export (csv, json, markdown)
+/help - Hilfe
+/quit - Beenden
 ```
 
 #### Beispiele
@@ -172,12 +172,12 @@ monitor.start_monitoring()
 
 # Metriken aktualisieren (vom Training)
 monitor.update_metrics(LiveMetrics(
-    run_id="run001",
-    step=100,
-    loss=1.234,
-    gradient_norm=50.0,
-    vram_usage_mb=6000,
-    step_time_ms=150.0,
+run_id="run001",
+step=100,
+loss=1.234,
+gradient_norm=50.0,
+vram_usage_mb=6000,
+step_time_ms=150.0,
 ))
 
 # Live Dashboard erstellen
@@ -194,10 +194,10 @@ metrics = monitor.get_live_metrics()
 const ws = new WebSocket('ws://localhost:8765');
 
 ws.onmessage = (event) => {
-    const message = JSON.parse(event.data);
-    if (message.type === 'metrics_update') {
-        console.log('Neue Metriken:', message.data);
-    }
+const message = JSON.parse(event.data);
+if (message.type === 'metrics_update') {
+console.log('Neue Metriken:', message.data);
+}
 };
 ```
 
@@ -233,10 +233,10 @@ from orchestrator.health_checker import TrainingHealthChecker
 checker = TrainingHealthChecker()
 
 metrics = {
-    "loss_history": [1.5, 1.4, 1.35, 1.3, 1.28],
-    "gradient_norm_history": [50, 55, 52, 48, 51],
-    "vram_history": [6000, 6020, 6040, 6060, 6080],
-    "step_time_history": [100, 102, 98, 105, 101],
+"loss_history": [1.5, 1.4, 1.35, 1.3, 1.28],
+"gradient_norm_history": [50, 55, 52, 48, 51],
+"vram_history": [6000, 6020, 6040, 6060, 6080],
+"step_time_history": [100, 102, 98, 105, 101],
 }
 
 report = checker.check_health("run001", metrics)
@@ -254,11 +254,11 @@ warnings = checker.get_early_warning_signs("run001", metrics)
 ```python
 @dataclass
 class HealthReport:
-    run_id: str
-    health_score: float  # 0-100
-    status: HealthStatus  # healthy, warning, critical
-    issues: List[HealthIssue]
-    recommendations: List[str]
+run_id: str
+health_score: float # 0-100
+status: HealthStatus # healthy, warning, critical
+issues: List[HealthIssue]
+recommendations: List[str]
 ```
 
 ---
@@ -294,16 +294,16 @@ python3 -m orchestrator.phase5 distributed-runner --max-concurrent 2
 from orchestrator.distributed_runner import DistributedRunner, WorkerConfig
 
 workers = [
-    WorkerConfig("worker_0", gpu_id=0, max_concurrent_runs=2),
-    WorkerConfig("worker_1", gpu_id=1, max_concurrent_runs=2),
+WorkerConfig("worker_0", gpu_id=0, max_concurrent_runs=2),
+WorkerConfig("worker_1", gpu_id=1, max_concurrent_runs=2),
 ]
 
 runner = DistributedRunner(workers)
 
 # Runs einreichen
 batch_id = runner.submit_runs([
-    {"depth": 12, "width": 512, "run_id": "run_001"},
-    {"depth": 14, "width": 640, "run_id": "run_002"},
+{"depth": 12, "width": 512, "run_id": "run_001"},
+{"depth": 14, "width": 640, "run_id": "run_002"},
 ])
 
 # Status prüfen
@@ -356,11 +356,11 @@ manager = RunQueueManager()
 
 # Runs einreihen
 run_id = manager.enqueue(
-    run_config={"depth": 12, "width": 512},
-    priority=0.8,
-    deadline=datetime.utcnow() + timedelta(hours=2),
-    hypothesis_confidence=0.75,
-    tags=["gqa", "film"],
+run_config={"depth": 12, "width": 512},
+priority=0.8,
+deadline=datetime.utcnow() + timedelta(hours=2),
+hypothesis_confidence=0.75,
+tags=["gqa", "film"],
 )
 
 # Nächsten Run für Worker holen
@@ -433,13 +433,13 @@ optimizer.export_study("hpo_results.json")
 
 ```python
 optimizer._search_space = {
-    "depth": (8, 16),
-    "width": (256, 1024),
-    "mlp_ratio": (2.0, 5.0),
-    "learning_rate": (1e-5, 1e-2),
-    "weight_decay": (0.01, 0.1),
-    "attention_type": ["standard", "gqa", "xsa"],
-    "activation": ["gelu", "swiglu", "leaky_relu"],
+"depth": (8, 16),
+"width": (256, 1024),
+"mlp_ratio": (2.0, 5.0),
+"learning_rate": (1e-5, 1e-2),
+"weight_decay": (0.01, 0.1),
+"attention_type": ["standard", "gqa", "xsa"],
+"activation": ["gelu", "swiglu", "leaky_relu"],
 }
 ```
 
@@ -467,12 +467,12 @@ python3 -m orchestrator.phase5 nas-search --budget 100
 
 # Mit custom Constraints
 python3 -m orchestrator.phase5 nas-search \
-    --budget 100 \
-    --max-vram 8000 \
-    --max-size 500 \
-    --min-depth 8 \
-    --max-depth 16 \
-    --output nas_results.json
+--budget 100 \
+--max-vram 8000 \
+--max-size 500 \
+--min-depth 8 \
+--max-depth 16 \
+--output nas_results.json
 ```
 
 #### Programmatische Nutzung
@@ -484,10 +484,10 @@ nas = NASIntegration(registry)
 
 # Search Space definieren
 nas.define_search_space(
-    max_vram_mb=8000,
-    max_size_mb=500,
-    depth_range=(8, 16),
-    width_range=(256, 1024),
+max_vram_mb=8000,
+max_size_mb=500,
+depth_range=(8, 16),
+width_range=(256, 1024),
 )
 
 # Suche durchführen
@@ -506,20 +506,20 @@ nas.export_architectures("nas_architectures.json")
 ```python
 @dataclass
 class Architecture:
-    arch_id: str
-    depth: int
-    width: int
-    mlp_ratio: float
-    attention_type: Literal["standard", "gqa", "xsa"]
-    activation: Literal["gelu", "swiglu", "leaky_relu"]
-    num_heads: int = 8
-    head_dim: Optional[int] = None
-    
-    # Metriken
-    delta_bpb: Optional[float] = None
-    efficiency_gain: Optional[float] = None
-    size_mb: Optional[float] = None
-    fitness: float = 0.0
+arch_id: str
+depth: int
+width: int
+mlp_ratio: float
+attention_type: Literal["standard", "gqa", "xsa"]
+activation: Literal["gelu", "swiglu", "leaky_relu"]
+num_heads: int = 8
+head_dim: Optional[int] = None
+
+# Metriken
+delta_bpb: Optional[float] = None
+efficiency_gain: Optional[float] = None
+size_mb: Optional[float] = None
+fitness: float = 0.0
 ```
 
 ---
@@ -571,28 +571,28 @@ pytest tests/test_phase5.py::TestNASIntegration -v
 
 ```
 NeuroWeave/
-├── orchestrator/
-│   ├── dashboard_advanced.py    # Advanced Dashboard
-│   ├── run_explorer.py          # Run Explorer CLI
-│   ├── realtime_monitor.py      # Real-time Monitor
-│   ├── health_checker.py        # Health Checker
-│   ├── distributed_runner.py    # Distributed Runner
-│   ├── run_queue.py             # Run Queue Manager
-│   └── phase5.py                # Phase 5 CLI
-├── research/
-│   ├── hpo_integration.py       # HPO Integration
-│   └── nas_integration.py       # NAS Integration
-├── tests/
-│   └── test_phase5.py           # Phase 5 Tests
-├── plots/                       # Generated Plots
-│   ├── phase5_dashboard.html
-│   ├── pareto_3d.html
-│   ├── metrics_timeseries.html
-│   ├── feature_importance.html
-│   ├── live_monitor_*.html
-│   ├── hpo_study.html
-│   └── nas_architectures.json
-└── requirements.txt
+orchestrator/
+dashboard_advanced.py # Advanced Dashboard
+run_explorer.py # Run Explorer CLI
+realtime_monitor.py # Real-time Monitor
+health_checker.py # Health Checker
+distributed_runner.py # Distributed Runner
+run_queue.py # Run Queue Manager
+phase5.py # Phase 5 CLI
+research/
+hpo_integration.py # HPO Integration
+nas_integration.py # NAS Integration
+tests/
+test_phase5.py # Phase 5 Tests
+plots/ # Generated Plots
+phase5_dashboard.html
+pareto_3d.html
+metrics_timeseries.html
+feature_importance.html
+live_monitor_*.html
+hpo_study.html
+nas_architectures.json
+requirements.txt
 ```
 
 ---
@@ -679,15 +679,15 @@ pip install optuna
 
 ### v5.0.0 (2026-03-25)
 
-- ✅ Advanced Dashboard mit Plotly
-- ✅ Run Explorer CLI mit Rich
-- ✅ Real-time Monitor mit WebSocket
-- ✅ Health Checker mit Anomaly Detection
-- ✅ Distributed Runner mit Multi-GPU
-- ✅ Run Queue Manager mit Priority
-- ✅ HPO Integration mit Optuna
-- ✅ NAS Integration mit Evolutionary Search
-- ✅ ~165 Tests für alle Komponenten
+- Advanced Dashboard mit Plotly
+- Run Explorer CLI mit Rich
+- Real-time Monitor mit WebSocket
+- Health Checker mit Anomaly Detection
+- Distributed Runner mit Multi-GPU
+- Run Queue Manager mit Priority
+- HPO Integration mit Optuna
+- NAS Integration mit Evolutionary Search
+- ~165 Tests für alle Komponenten
 
 ---
 

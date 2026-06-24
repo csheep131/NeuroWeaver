@@ -72,50 +72,50 @@ Das ist wichtig, weil bei der Challenge sehr viele kleine Änderungen gegeneinan
 
 Empfohlene Dateistruktur Phase 1
 project/
-├─ configs/
-│  ├─ base.yaml
-│  ├─ runs/
-│  │  ├─ run001_control.yaml
-│  │  ├─ run002_hash.yaml
-│  │  └─ ...
-├─ core/
-│  ├─ config.py
-│  ├─ registry.py
-│  ├─ logging.py
-│  ├─ seed.py
-│  └─ artifacts.py
-├─ models/
-│  ├─ backbone.py
-│  ├─ recurrent_blocks.py
-│  ├─ attention.py
-│  ├─ xsa.py
-│  ├─ activations.py
-│  └─ film.py
-├─ tokenizers/
-│  ├─ byte.py
-│  ├─ bigram_hash.py
-│  ├─ trigram_hash.py
-│  └─ fallback.py
-├─ train/
-│  ├─ trainer.py
-│  ├─ optimizer_factory.py
-│  ├─ scheduler.py
-│  └─ ema.py
-├─ eval/
-│  ├─ bpb_eval.py
-│  ├─ sliding_window.py
-│  └─ benchmark.py
-├─ quant/
-│  ├─ quantize.py
-│  ├─ mixed_precision.py
-│  ├─ gptq_lite.py
-│  └─ pack.py
-├─ reports/
-│  ├─ compare_runs.py
-│  └─ leaderboard.py
-├─ runs/
-│  └─ run.py
-└─ results/
+configs/
+base.yaml
+runs/
+run001_control.yaml
+run002_hash.yaml
+...
+core/
+config.py
+registry.py
+logging.py
+seed.py
+artifacts.py
+models/
+backbone.py
+recurrent_blocks.py
+attention.py
+xsa.py
+activations.py
+film.py
+tokenizers/
+byte.py
+bigram_hash.py
+trigram_hash.py
+fallback.py
+train/
+trainer.py
+optimizer_factory.py
+scheduler.py
+ema.py
+eval/
+bpb_eval.py
+sliding_window.py
+benchmark.py
+quant/
+quantize.py
+mixed_precision.py
+gptq_lite.py
+pack.py
+reports/
+compare_runs.py
+leaderboard.py
+runs/
+run.py
+results/
 Kernfunktionen in Phase 1
 A. Run starten
 
@@ -263,15 +263,15 @@ Runs zum Killen
 Runs für 3-Seed-Finale
 Dateierweiterung in Phase 2
 models/
-├─ factories/
-│  ├─ model_factory.py
-│  └─ feature_gate.py
+factories/
+model_factory.py
+feature_gate.py
 
 research/
-├─ ablation_engine.py
-├─ kill_rules.py
-├─ rank_runs.py
-└─ lineage.py
+ablation_engine.py
+kill_rules.py
+rank_runs.py
+lineage.py
 Kill-Regeln in Phase 2
 
 Die würde ich fest in Code gießen:
@@ -339,11 +339,11 @@ README skeleton
 lineage summary
 Module für Phase 3
 orchestrator/
-├─ sweep.py
-├─ promote.py
-├─ rerun_topk.py
-├─ finalize.py
-└─ submit_bundle.py
+sweep.py
+promote.py
+rerun_topk.py
+finalize.py
+submit_bundle.py
 Stage-Logik
 Stage A — Screening
 

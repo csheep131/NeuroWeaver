@@ -7,10 +7,10 @@
 | Metric | Value |
 |--------|-------|
 | **val_bpb** | _pending_ |
-| **Compressed Size** | ~12.9 MB ✅ |
+| **Compressed Size** | ~12.9 MB |
 | **Parameters** | ~15M |
 | **Training Time** | < 10 min on 8xH100 |
-| **Artifact Size** | < 16 MB ✅ |
+| **Artifact Size** | < 16 MB |
 
 ## Architecture
 
@@ -113,13 +113,13 @@ Based on challenge leaderboard:
 
 ```
 records/baseline_v1/
-├── README.md           # This file
-├── submission.json     # Submission metadata
-├── train_gpt.py        # Symlink to ../../train_gpt.py
-└── logs/
-    ├── run1.log        # Training log (seed 1)
-    ├── run2.log        # Training log (seed 2)
-    └── run3.log        # Training log (seed 3)
+README.md # This file
+submission.json # Submission metadata
+train_gpt.py # Symlink to ../../train_gpt.py
+logs/
+run1.log # Training log (seed 1)
+run2.log # Training log (seed 2)
+run3.log # Training log (seed 3)
 ```
 
 ## Notes

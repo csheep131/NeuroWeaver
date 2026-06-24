@@ -13,13 +13,13 @@ Dieses Verzeichnis enthält praktische Anleitungen und How-Tos für die Arbeit m
 
 ## Guides nach Kategorie
 
-### 🔧 Konfiguration & Setup
+### Konfiguration & Setup
 
 | Guide | Beschreibung |
 |-------|--------------|
 | [configuration.md](configuration.md) | Konfigurations-Handbuch, YAML-Schema, Base- und Run-Configs |
 
-### 🏃 Runs & Training
+### Runs & Training
 
 | Guide | Beschreibung |
 |-------|--------------|
@@ -27,7 +27,7 @@ Dieses Verzeichnis enthält praktische Anleitungen und How-Tos für die Arbeit m
 | [runs_development.md](runs_development.md) | Runs Entwicklung, Testing, Debugging |
 | [trainings_plan.md](trainings_plan.md) | Trainings-Planung, Hyperparameter, Scheduling |
 
-### 📊 Ablation-Testing
+### Ablation-Testing
 
 | Guide | Beschreibung |
 |-------|--------------|
@@ -35,21 +35,21 @@ Dieses Verzeichnis enthält praktische Anleitungen und How-Tos für die Arbeit m
 | [roadmap_runs.md](roadmap_runs.md) | Detaillierte Run-Roadmap mit 28+ Runs, Phasen, Gate-Freeze |
 | [run_tabelle.md](run_tabelle.md) | Run-Übersichtstabelle mit Priorisierung und Status |
 
-### 🔄 Automation
+### Automation
 
 | Guide | Beschreibung |
 |-------|--------------|
 | [sweep_guide.md](sweep_guide.md) | Sweep Runner, Parameter-Sweeps, Kombinationen generieren |
 | [promotion_guide.md](promotion_guide.md) | Promotion System, Stage-Management, Candidate → Promoted → Submitted |
 
-### 🤖 Phase 4: Autonome Selbstverbesserung
+### Phase 4: Autonome Selbstverbesserung
 
 | Guide | Beschreibung |
 |-------|--------------|
 | [auto_approve.md](auto_approve.md) | Phase 4 Plan: Adaptive Search, Self-Diagnosis, Guided Autonomy |
 | [phase4_overview.md](phase4_overview.md) | Implementierungs-Übersicht, Quick Start, Architektur |
 
-### 🚀 Phase 5: Advanced Features
+### Phase 5: Advanced Features
 
 | Guide | Beschreibung |
 |-------|--------------|
@@ -90,7 +90,7 @@ Dieses Verzeichnis enthält praktische Anleitungen und How-Tos für die Arbeit m
 
 ## Phasen-Übersicht
 
-### Phase 1: Experiment Core ✅
+### Phase 1: Experiment Core
 - Config-first Run-System
 - Modultrennung (Python/Rust)
 - Run Registry
@@ -100,7 +100,7 @@ Dieses Verzeichnis enthält praktische Anleitungen und How-Tos für die Arbeit m
 - [configuration.md](configuration.md)
 - [runs_guide.md](runs_guide.md)
 
-### Phase 2: Research Engine ✅
+### Phase 2: Research Engine
 - Backbone Factory
 - Feature-Gates
 - Tokenizer-Lab
@@ -111,7 +111,7 @@ Dieses Verzeichnis enthält praktische Anleitungen und How-Tos für die Arbeit m
 - [ablation_plan.md](ablation_plan.md)
 - [roadmap_runs.md](roadmap_runs.md)
 
-### Phase 3: Production Pipeline ✅
+### Phase 3: Production Pipeline
 - Sweep Runner
 - Promotion System
 - Submission Bundle
@@ -121,11 +121,11 @@ Dieses Verzeichnis enthält praktische Anleitungen und How-Tos für die Arbeit m
 - [sweep_guide.md](sweep_guide.md)
 - [promotion_guide.md](promotion_guide.md)
 
-# Phase 4: Autonome Selbstverbesserung 🚧 IN PLANUNG → ✅ IMPLEMENTIERT
-- Adaptive Search Engine (4A) ✅
-- Self-Diagnosis & Recovery (4B) ✅
-- Guided Autonomy (4C) ✅
-- Evaluation & Refinement (4D) ✅
+# Phase 4: Autonome Selbstverbesserung IN PLANUNG → IMPLEMENTIERT
+- Adaptive Search Engine (4A)
+- Self-Diagnosis & Recovery (4B)
+- Guided Autonomy (4C)
+- Evaluation & Refinement (4D)
 
 **Relevante Guides:**
 - [auto_approve.md](auto_approve.md) – Vollständige Spezifikation
@@ -146,11 +146,11 @@ python3 -m orchestrator.meta_dashboard hypotheses --top 10
 python3 -m orchestrator.phase4_orchestrator run
 ```
 
-# Phase 5: Advanced Features ✅ IMPLEMENTIERT
-- Advanced Visualization (Plotly, Dash) ✅
-- Real-time Monitoring ✅
-- Distributed Execution (Multi-GPU) ✅
-- AutoML Integration (HPO, NAS) ✅
+# Phase 5: Advanced Features IMPLEMENTIERT
+- Advanced Visualization (Plotly, Dash)
+- Real-time Monitoring
+- Distributed Execution (Multi-GPU)
+- AutoML Integration (HPO, NAS)
 
 **Relevante Guides:**
 - [phase5_overview.md](phase5_overview.md) – Implementierungs-Übersicht
@@ -183,9 +183,9 @@ Bevor Phase 3 (Kombinations-Runs) beginnt, müssen alle Phase-2-Runs abgeschloss
 
 | Gate-Label | Bedeutung | Verwendung |
 |------------|-----------|------------|
-| ✅ PASS | Stabil positiv in ≥2 Runs | Darf kombiniert werden |
-| ⚠️ WATCH | Gemischt oder knapp positiv | Nur einzeln weiter testen |
-| ❌ FAIL | Negativ oder keine Verbesserung | Nicht in Phase 3 verwenden |
+| PASS | Stabil positiv in ≥2 Runs | Darf kombiniert werden |
+| WATCH | Gemischt oder knapp positiv | Nur einzeln weiter testen |
+| FAIL | Negativ oder keine Verbesserung | Nicht in Phase 3 verwenden |
 
 **Mehr Details:** [roadmap_runs.md](roadmap_runs.md#gate-freeze-vor-phase-3)
 

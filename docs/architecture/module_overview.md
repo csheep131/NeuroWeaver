@@ -1,6 +1,6 @@
 # Modul-Übersicht
 
-**Letztes Update:** 2026-03-24  
+**Letztes Update:** 2026-03-24
 **Gesamtanzahl Module:** 11 Hauptmodule | 25+ Submodule
 
 ---
@@ -9,66 +9,66 @@
 
 ```
 wettkampf/
-│
-├── core/                      # Phase 1: Experiment Core
-│   ├── config.py              # Config-Loading, YAML-Parsing
-│   ├── registry.py            # Run-Registry, RunEntry
-│   ├── logging.py             # Standardisiertes Logging
-│   ├── seed.py                # Seed-Management (Reproduzierbarkeit)
-│   └── artifacts.py           # Artifact-Tracking, Size-Limits
-│
-├── models/
-│   └── factories/             # Phase 2: Model Factories
-│       ├── backbone_factory.py    # BackboneFactory, ArchitectureConfig
-│       └── feature_gate.py        # FeatureGate, FeatureGateManager
-│
-├── tokenizers/                # Phase 2: Tokenizer Lab
-│   └── tokenizers.py          # Byte, BigramHash, TrigramHash, Fallback
-│
-├── quant/                     # Phase 2: Quantization Lab
-│   └── quantizers.py          # Int6Quantizer, Int5Quantizer, MixedQuantizer, GPTQLiteQuantizer
-│
-├── train/                     # Phase 1: Training
-│   ├── trainer.py             # Training-Loop
-│   ├── optimizer_factory.py   # OptimizerFactory (Adam, AdamW, etc.)
-│   ├── scheduler.py           # Learning Rate Scheduler
-│   └── ema.py                 # Exponential Moving Average
-│
-├── eval/                      # Phase 1: Evaluation
-│   ├── bpb_eval.py            # BPB-Evaluation (Bits Per Byte)
-│   ├── sliding_window.py      # Sliding Window Evaluation
-│   └── benchmark.py           # Performance Benchmarking
-│
-├── research/                  # Phase 2: Research Engine
-│   ├── ablation_engine.py     # AblationReporter, KillRules, KillReasons
-│   ├── phase1_evaluator.py    # Phase1Evaluator, SuccessCriteria
-│   ├── phase2_evaluator.py    # Phase2Evaluator, SuccessCriteria
-│   └── phase3_evaluator.py    # Phase3Evaluator, SuccessCriteria
-│
-├── orchestrator/              # Phase 3: Production Pipeline
-│   ├── sweep.py               # SweepRunner, SweepConfig, SweepParameter
-│   ├── promote.py             # PromotionSystem, Stage (Candidate/Promoted/Submitted)
-│   ├── submit_bundle.py       # SubmissionBuilder, SubmissionBundle
-│   ├── dashboard.py           # Dashboard CLI (interaktiv)
-│   ├── multi_seed.py          # MultiSeedOrchestrator
-│   └── combo_builder.py       # DynamicComboBuilder, ComboConfig
-│
-├── reports/                   # Phase 1: Reporting
-│   ├── compare_runs.py        # RunComparator, RunComparison
-│   └── leaderboard.py         # LeaderboardGenerator
-│
-├── runs/                      # Phase 1: Run-System
-│   ├── run.py                 # Haupt-Run-Logik
-│   └── __main__.py            # CLI-Entry-Point
-│
-├── rust-core/                 # Rust-Core (Performance-kritisch)
-│   ├── src/lib.rs             # Python-Bindings (PyO3)
-│   ├── src/tokenizers.rs      # Rust-Tokenizer
-│   ├── src/quant.rs           # Rust-Quantisierung
-│   ├── src/models.rs          # Rust-Modelle
-│   └── src/eval.rs            # Rust-Evaluation
-│
-└── rust_core/                 # Python-Bindings (auto-generiert)
+
+core/ # Phase 1: Experiment Core
+config.py # Config-Loading, YAML-Parsing
+registry.py # Run-Registry, RunEntry
+logging.py # Standardisiertes Logging
+seed.py # Seed-Management (Reproduzierbarkeit)
+artifacts.py # Artifact-Tracking, Size-Limits
+
+models/
+factories/ # Phase 2: Model Factories
+backbone_factory.py # BackboneFactory, ArchitectureConfig
+feature_gate.py # FeatureGate, FeatureGateManager
+
+tokenizers/ # Phase 2: Tokenizer Lab
+tokenizers.py # Byte, BigramHash, TrigramHash, Fallback
+
+quant/ # Phase 2: Quantization Lab
+quantizers.py # Int6Quantizer, Int5Quantizer, MixedQuantizer, GPTQLiteQuantizer
+
+train/ # Phase 1: Training
+trainer.py # Training-Loop
+optimizer_factory.py # OptimizerFactory (Adam, AdamW, etc.)
+scheduler.py # Learning Rate Scheduler
+ema.py # Exponential Moving Average
+
+eval/ # Phase 1: Evaluation
+bpb_eval.py # BPB-Evaluation (Bits Per Byte)
+sliding_window.py # Sliding Window Evaluation
+benchmark.py # Performance Benchmarking
+
+research/ # Phase 2: Research Engine
+ablation_engine.py # AblationReporter, KillRules, KillReasons
+phase1_evaluator.py # Phase1Evaluator, SuccessCriteria
+phase2_evaluator.py # Phase2Evaluator, SuccessCriteria
+phase3_evaluator.py # Phase3Evaluator, SuccessCriteria
+
+orchestrator/ # Phase 3: Production Pipeline
+sweep.py # SweepRunner, SweepConfig, SweepParameter
+promote.py # PromotionSystem, Stage (Candidate/Promoted/Submitted)
+submit_bundle.py # SubmissionBuilder, SubmissionBundle
+dashboard.py # Dashboard CLI (interaktiv)
+multi_seed.py # MultiSeedOrchestrator
+combo_builder.py # DynamicComboBuilder, ComboConfig
+
+reports/ # Phase 1: Reporting
+compare_runs.py # RunComparator, RunComparison
+leaderboard.py # LeaderboardGenerator
+
+runs/ # Phase 1: Run-System
+run.py # Haupt-Run-Logik
+__main__.py # CLI-Entry-Point
+
+rust-core/ # Rust-Core (Performance-kritisch)
+src/lib.rs # Python-Bindings (PyO3)
+src/tokenizers.rs # Rust-Tokenizer
+src/quant.rs # Rust-Quantisierung
+src/models.rs # Rust-Modelle
+src/eval.rs # Rust-Evaluation
+
+rust_core/ # Python-Bindings (auto-generiert)
 ```
 
 ---
@@ -90,12 +90,12 @@ wettkampf/
 **Data Flow:**
 ```
 Config YAML → Config.load() → Config-Objekt
-                    ↓
-              RunRegistry.register()
-                    ↓
-              RunLogger.log_metrics()
-                    ↓
-              ArtifactTracker.save()
+↓
+RunRegistry.register()
+↓
+RunLogger.log_metrics()
+↓
+ArtifactTracker.save()
 ```
 
 ---
@@ -112,16 +112,16 @@ Config YAML → Config.load() → Config-Objekt
 **Klassen-Hierarchie:**
 ```
 FeatureGate
-├── name: str
-├── dependencies: List[FeatureDependency]
-├── condition: Callable[[Config], bool]
-└── apply(config: Config) → Config
+name: str
+dependencies: List[FeatureDependency]
+condition: Callable[[Config], bool]
+apply(config: Config) → Config
 
 FeatureGateManager
-├── gates: Dict[str, FeatureGate]
-├── register(gate: FeatureGate)
-├── validate_all(config: Config) → bool
-└── get_active_gates(config: Config) → List[str]
+gates: Dict[str, FeatureGate]
+register(gate: FeatureGate)
+validate_all(config: Config) → bool
+get_active_gates(config: Config) → List[str]
 ```
 
 ---
@@ -188,9 +188,9 @@ INT5: Bit 7 = 0, Bits 0-4 = Wert (0-31)
 **Training-Loop:**
 ```python
 for step in range(num_steps):
-    loss = trainer.step(batch)
-    logger.log_metrics({"loss": loss, "step": step})
-    scheduler.step()
+loss = trainer.step(batch)
+logger.log_metrics({"loss": loss, "step": step})
+scheduler.step()
 ```
 
 ---
@@ -229,20 +229,20 @@ for step in range(num_steps):
 **Kill-Rules:**
 ```python
 KillRule(
-    name="artifact_too_large",
-    condition=lambda m: m.get("artifact_bytes", 0) > 16_000_000,
-    reason=KillReason.ARTIFACT_SIZE,
+name="artifact_too_large",
+condition=lambda m: m.get("artifact_bytes", 0) > 16_000_000,
+reason=KillReason.ARTIFACT_SIZE,
 )
 
 KillRule(
-    name="slow_without_gain",
-    condition=lambda m: (
-        m.get("delta_ms") is not None
-        and m["delta_ms"] > 3.0
-        and m.get("delta_bpb") is not None
-        and m["delta_bpb"] > -0.05
-    ),
-    reason=KillReason.PERFORMANCE,
+name="slow_without_gain",
+condition=lambda m: (
+m.get("delta_ms") is not None
+and m["delta_ms"] > 3.0
+and m.get("delta_bpb") is not None
+and m["delta_bpb"] > -0.05
+),
+reason=KillReason.PERFORMANCE,
 )
 ```
 
@@ -264,9 +264,9 @@ KillRule(
 **Stage-Enum:**
 ```python
 class Stage(Enum):
-    CANDIDATE = "candidate"
-    PROMOTED = "promoted"
-    SUBMITTED = "submitted"
+CANDIDATE = "candidate"
+PROMOTED = "promoted"
+SUBMITTED = "submitted"
 ```
 
 **Performance-Optimierungen:**
@@ -335,44 +335,44 @@ maturin develop --release
 ## Dependency-Graph
 
 ```
-┌──────────────────────────────────────────────────────────────┐
-│                         core/                                 │
-│  (Config, Registry, Logging, Seed, Artifacts)                │
-└──────────────────────────────────────────────────────────────┘
-         │                    │                    │
-         ▼                    ▼                    ▼
-┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐
-│    models/      │ │     train/      │ │      eval/      │
-│  (Factories)    │ │   (Trainer)     │ │  (BPB, Bench)   │
-└─────────────────┘ └─────────────────┘ └─────────────────┘
-         │                    │                    │
-         ▼                    ▼                    ▼
-┌──────────────────────────────────────────────────────────────┐
-│                        research/                              │
-│            (Ablation Engine, Phase Evaluators)                │
-└──────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌──────────────────────────────────────────────────────────────┐
-│                       orchestrator/                           │
-│         (Sweep, Promotion, Submission, Dashboard)             │
-└──────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌──────────────────────────────────────────────────────────────┐
-│                         reports/                              │
-│            (Comparator, Leaderboard)                          │
-└──────────────────────────────────────────────────────────────┘
 
-┌──────────────────────────────────────────────────────────────┐
-│                        rust-core/                             │
-│    (Tokenizers, Quant, Models, Eval – Performance Layer)      │
-└──────────────────────────────────────────────────────────────┘
-         │
-         ▼ (wird importiert von)
-┌──────────────────────────────────────────────────────────────┐
-│  tokenizers/, quant/, eval/, models/factories/               │
-└──────────────────────────────────────────────────────────────┘
+core/
+(Config, Registry, Logging, Seed, Artifacts)
+
+
+
+
+models/ train/ eval/
+(Factories) (Trainer) (BPB, Bench)
+
+
+
+
+research/
+(Ablation Engine, Phase Evaluators)
+
+
+
+
+orchestrator/
+(Sweep, Promotion, Submission, Dashboard)
+
+
+
+
+reports/
+(Comparator, Leaderboard)
+
+
+
+rust-core/
+(Tokenizers, Quant, Models, Eval – Performance Layer)
+
+
+(wird importiert von)
+
+tokenizers/, quant/, eval/, models/factories/
+
 ```
 
 ---

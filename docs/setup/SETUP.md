@@ -40,107 +40,107 @@ python3 -c "import rust_core; print('Rust-Core: OK')"
 
 ```
 wettkampf/
-├── configs/
-│   ├── base.yaml              # Base-Konfiguration
-│   └── runs/                  # 19 Run-Konfigurationen
-│       ├── run001_control.yaml
-│       ├── run002_hash.yaml
-│       ├── run003_xsa.yaml
-│       ├── run004_leakyrelu.yaml
-│       ├── run005_mixed_quant.yaml
-│       ├── run006_film.yaml
-│       ├── run007_ttt.yaml
-│       ├── run008a_star_relu.yaml
-│       ├── run009_gqa.yaml
-│       ├── run010_recurrence.yaml
-│       ├── run016_best_combo_a.yaml
-│       ├── run017_best_combo_quantized.yaml
-│       ├── run018_control_s1.yaml
-│       ├── run019_control_s2.yaml
-│       └── run020_control_s3.yaml
-│
-├── core/                      # Python-Core (Phase 1)
-│   ├── __init__.py
-│   ├── config.py              # Config-Loading, YAML-Parsing
-│   ├── registry.py            # Run-Registry, RunEntry
-│   ├── logging.py             # Standardisiertes Logging
-│   ├── seed.py                # Seed-Management (Reproduzierbarkeit)
-│   └── artifacts.py           # Artifact-Tracking, Size-Limits
-│
-├── models/
-│   └── factories/             # Model Factories (Phase 2)
-│       ├── __init__.py
-│       ├── backbone_factory.py    # BackboneFactory, ArchitectureConfig
-│       └── feature_gate.py        # FeatureGate, FeatureGateManager
-│
-├── tokenizers/                # Tokenizer (Phase 2)
-│   ├── __init__.py
-│   └── tokenizers.py          # Byte, BigramHash, TrigramHash, Fallback
-│
-├── quant/                     # Quantization (Phase 2)
-│   ├── __init__.py
-│   └── quantizers.py          # Int6Quantizer, Int5Quantizer, MixedQuantizer, GPTQLiteQuantizer
-│
-├── train/                     # Training (Phase 1)
-│   ├── __init__.py
-│   ├── trainer.py             # Training-Loop
-│   ├── optimizer_factory.py   # OptimizerFactory (Adam, AdamW, etc.)
-│   ├── scheduler.py           # Learning Rate Scheduler
-│   └── ema.py                 # Exponential Moving Average
-│
-├── eval/                      # Evaluation (Phase 1)
-│   ├── __init__.py
-│   ├── bpb_eval.py            # BPB-Evaluation (Bits Per Byte)
-│   ├── sliding_window.py      # Sliding Window Evaluation
-│   └── benchmark.py           # Performance Benchmarking
-│
-├── research/                  # Research Engine (Phase 2)
-│   ├── __init__.py
-│   ├── ablation_engine.py     # AblationReporter, KillRules, KillReasons
-│   ├── phase1_evaluator.py    # Phase1Evaluator, SuccessCriteria
-│   ├── phase2_evaluator.py    # Phase2Evaluator, SuccessCriteria
-│   └── phase3_evaluator.py    # Phase3Evaluator, SuccessCriteria
-│
-├── orchestrator/              # Production Pipeline (Phase 3)
-│   ├── __init__.py
-│   ├── sweep.py               # SweepRunner, SweepConfig, SweepParameter
-│   ├── promote.py             # PromotionSystem, Stage (Candidate/Promoted/Submitted)
-│   ├── submit_bundle.py       # SubmissionBuilder, SubmissionBundle
-│   ├── dashboard.py           # Dashboard CLI (interaktiv)
-│   ├── multi_seed.py          # MultiSeedOrchestrator
-│   └── combo_builder.py       # DynamicComboBuilder, ComboConfig
-│
-├── reports/                   # Reports (Phase 1)
-│   ├── __init__.py
-│   ├── compare_runs.py        # RunComparator, RunComparison
-│   └── leaderboard.py         # LeaderboardGenerator
-│
-├── runs/                      # Run-System (Phase 1)
-│   ├── __init__.py
-│   ├── run.py                 # Haupt-Run-Logik
-│   └── __main__.py            # CLI-Entry-Point
-│
-├── rust-core/                 # Rust-Core (Performance-kritisch)
-│   ├── Cargo.toml
-│   └── src/
-│       ├── lib.rs             # Python-Bindings
-│       ├── tokenizers.rs      # Rust-Tokenizer
-│       ├── quant.rs           # Rust-Quantisierung
-│       ├── models.rs          # Rust-Modelle
-│       └── eval.rs            # Rust-Evaluation
-│
-├── rust_core/                 # Python-Bindings (auto-generiert durch maturin)
-│
-├── results/                   # Ergebnisse (auto-generiert)
-│   ├── runs/                  # Run-Outputs
-│   ├── sweeps/                # Sweep-Ergebnisse
-│   ├── bundles/               # Submission-Bundles
-│   └── leaderboards/          # Leaderboard-Outputs
-│
-└── tests/                     # Tests
-    ├── test_core.py
-    ├── test_orchestrator.py
-    └── test_research.py
+configs/
+base.yaml # Base-Konfiguration
+runs/ # 19 Run-Konfigurationen
+run001_control.yaml
+run002_hash.yaml
+run003_xsa.yaml
+run004_leakyrelu.yaml
+run005_mixed_quant.yaml
+run006_film.yaml
+run007_ttt.yaml
+run008a_star_relu.yaml
+run009_gqa.yaml
+run010_recurrence.yaml
+run016_best_combo_a.yaml
+run017_best_combo_quantized.yaml
+run018_control_s1.yaml
+run019_control_s2.yaml
+run020_control_s3.yaml
+
+core/ # Python-Core (Phase 1)
+__init__.py
+config.py # Config-Loading, YAML-Parsing
+registry.py # Run-Registry, RunEntry
+logging.py # Standardisiertes Logging
+seed.py # Seed-Management (Reproduzierbarkeit)
+artifacts.py # Artifact-Tracking, Size-Limits
+
+models/
+factories/ # Model Factories (Phase 2)
+__init__.py
+backbone_factory.py # BackboneFactory, ArchitectureConfig
+feature_gate.py # FeatureGate, FeatureGateManager
+
+tokenizers/ # Tokenizer (Phase 2)
+__init__.py
+tokenizers.py # Byte, BigramHash, TrigramHash, Fallback
+
+quant/ # Quantization (Phase 2)
+__init__.py
+quantizers.py # Int6Quantizer, Int5Quantizer, MixedQuantizer, GPTQLiteQuantizer
+
+train/ # Training (Phase 1)
+__init__.py
+trainer.py # Training-Loop
+optimizer_factory.py # OptimizerFactory (Adam, AdamW, etc.)
+scheduler.py # Learning Rate Scheduler
+ema.py # Exponential Moving Average
+
+eval/ # Evaluation (Phase 1)
+__init__.py
+bpb_eval.py # BPB-Evaluation (Bits Per Byte)
+sliding_window.py # Sliding Window Evaluation
+benchmark.py # Performance Benchmarking
+
+research/ # Research Engine (Phase 2)
+__init__.py
+ablation_engine.py # AblationReporter, KillRules, KillReasons
+phase1_evaluator.py # Phase1Evaluator, SuccessCriteria
+phase2_evaluator.py # Phase2Evaluator, SuccessCriteria
+phase3_evaluator.py # Phase3Evaluator, SuccessCriteria
+
+orchestrator/ # Production Pipeline (Phase 3)
+__init__.py
+sweep.py # SweepRunner, SweepConfig, SweepParameter
+promote.py # PromotionSystem, Stage (Candidate/Promoted/Submitted)
+submit_bundle.py # SubmissionBuilder, SubmissionBundle
+dashboard.py # Dashboard CLI (interaktiv)
+multi_seed.py # MultiSeedOrchestrator
+combo_builder.py # DynamicComboBuilder, ComboConfig
+
+reports/ # Reports (Phase 1)
+__init__.py
+compare_runs.py # RunComparator, RunComparison
+leaderboard.py # LeaderboardGenerator
+
+runs/ # Run-System (Phase 1)
+__init__.py
+run.py # Haupt-Run-Logik
+__main__.py # CLI-Entry-Point
+
+rust-core/ # Rust-Core (Performance-kritisch)
+Cargo.toml
+src/
+lib.rs # Python-Bindings
+tokenizers.rs # Rust-Tokenizer
+quant.rs # Rust-Quantisierung
+models.rs # Rust-Modelle
+eval.rs # Rust-Evaluation
+
+rust_core/ # Python-Bindings (auto-generiert durch maturin)
+
+results/ # Ergebnisse (auto-generiert)
+runs/ # Run-Outputs
+sweeps/ # Sweep-Ergebnisse
+bundles/ # Submission-Bundles
+leaderboards/ # Leaderboard-Outputs
+
+tests/ # Tests
+test_core.py
+test_orchestrator.py
+test_research.py
 ```
 
 ---
@@ -162,39 +162,39 @@ python3 -m runs.run --config configs/runs/run001_control.yaml --seed 42
 ### Eigene Run-Config erstellen
 
 1. Kopiere eine existierende Config:
-   ```bash
-   cp configs/runs/run001_control.yaml configs/runs/my_custom_run.yaml
-   ```
+```bash
+cp configs/runs/run001_control.yaml configs/runs/my_custom_run.yaml
+```
 
 2. Bearbeite die Parameter:
-   ```yaml
-   run_id: "my_custom_run"
-   seed: 42
+```yaml
+run_id: "my_custom_run"
+seed: 42
 
-   model:
-     d_model: 768
-     num_layers: 8
-     activation: "gelu"
-     use_feature_gate: true
+model:
+d_model: 768
+num_layers: 8
+activation: "gelu"
+use_feature_gate: true
 
-   tokenizer:
-     type: "bigram_hash"
-     vocab_size: 8192
+tokenizer:
+type: "bigram_hash"
+vocab_size: 8192
 
-   quantization:
-     enabled: true
-     type: "mixed"  # int5/int6 mixed precision
+quantization:
+enabled: true
+type: "mixed" # int5/int6 mixed precision
 
-   training:
-     num_steps: 50000
-     learning_rate: 1e-4
-     batch_size: 32
-   ```
+training:
+num_steps: 50000
+learning_rate: 1e-4
+batch_size: 32
+```
 
 3. Starte den Run:
-   ```bash
-   python3 -m runs.run --config configs/runs/my_custom_run.yaml
-   ```
+```bash
+python3 -m runs.run --config configs/runs/my_custom_run.yaml
+```
 
 ---
 
@@ -211,16 +211,16 @@ sweep_id: "my_first_sweep"
 base_config: "configs/runs/run001_control.yaml"
 
 parameters:
-  - name: "model.d_model"
-    values: [256, 512, 768]
-  - name: "model.num_layers"
-    values: [4, 6, 8]
-  - name: "training.learning_rate"
-    values: [1e-4, 3e-4, 1e-3]
+- name: "model.d_model"
+values: [256, 512, 768]
+- name: "model.num_layers"
+values: [4, 6, 8]
+- name: "training.learning_rate"
+values: [1e-4, 3e-4, 1e-3]
 
 execution:
-  max_concurrent: 1
-  continue_on_failure: true
+max_concurrent: 1
+continue_on_failure: true
 ```
 
 **Sweep ausführen**:
@@ -294,9 +294,9 @@ print(f"Submitted: {len(submitted)}")
 from orchestrator import PromotionSystem, StageConfig
 
 config = StageConfig(
-    candidate_threshold={"val_bpb": 1.5, "ms_per_step": 100},
-    promoted_threshold={"val_bpb": 1.2, "ms_per_step": 80},
-    artifact_size_limit=16_000_000,
+candidate_threshold={"val_bpb": 1.5, "ms_per_step": 100},
+promoted_threshold={"val_bpb": 1.2, "ms_per_step": 80},
+artifact_size_limit=16_000_000,
 )
 
 promo = PromotionSystem(config=config)
@@ -316,9 +316,9 @@ builder = create_submission_bundle()
 
 # Bundle aus Runs erstellen
 bundle = builder.build_bundle([
-    "run001_control",
-    "run016_best_combo_a",
-    "run017_best_combo_quantized"
+"run001_control",
+"run016_best_combo_a",
+"run017_best_combo_quantized"
 ])
 
 # Bundle speichern
@@ -334,14 +334,14 @@ print(f"Configs included: {len(bundle.configs)}")
 
 ```
 submission.zip
-├── MANIFEST.json          # Bundle-Metadaten
-├── runs/
-│   ├── run001_control/
-│   │   ├── model.pt
-│   │   ├── config.yaml
-│   │   └── metrics.json
-│   └── ...
-└── README.md              # Bundle-Beschreibung
+MANIFEST.json # Bundle-Metadaten
+runs/
+run001_control/
+model.pt
+config.yaml
+metrics.json
+...
+README.md # Bundle-Beschreibung
 ```
 
 ### 4. Dashboard CLI
@@ -358,16 +358,16 @@ python3 -m orchestrator.dashboard
 
 ```
 Dashboard Commands:
-  list                      Alle Runs auflisten
-  list --stage <stage>      Runs nach Stage filtern
-  metrics <run_id>          Metriken für Run anzeigen
-  compare <run1> <run2>     Zwei Runs vergleichen
-  leaderboard               Leaderboard anzeigen
-  leaderboard --by <metric> Nach Metrik sortieren (bpb, ms_per_step, etc.)
-  sweep <sweep_id>          Sweep-Ergebnisse anzeigen
-  promote <run_id>          Run promoten
-  submit <run_id>           Run zur Submission einreichen
-  exit                      Dashboard verlassen
+list Alle Runs auflisten
+list --stage <stage> Runs nach Stage filtern
+metrics <run_id> Metriken für Run anzeigen
+compare <run1> <run2> Zwei Runs vergleichen
+leaderboard Leaderboard anzeigen
+leaderboard --by <metric> Nach Metrik sortieren (bpb, ms_per_step, etc.)
+sweep <sweep_id> Sweep-Ergebnisse anzeigen
+promote <run_id> Run promoten
+submit <run_id> Run zur Submission einreichen
+exit Dashboard verlassen
 ```
 
 **Beispiel-Session**:
@@ -376,28 +376,28 @@ Dashboard Commands:
 $ python3 -m orchestrator.dashboard
 
 Dashboard> list
-ID                      Stage       Val_BPB    MS/Step
-run001_control          promoted    1.234      45.2
-run016_best_combo_a     submitted   1.156      52.1
-run017_best_combo_quant submitted   1.189      38.7
+ID Stage Val_BPB MS/Step
+run001_control promoted 1.234 45.2
+run016_best_combo_a submitted 1.156 52.1
+run017_best_combo_quant submitted 1.189 38.7
 
 Dashboard> metrics run001_control
 Run: run001_control
-  Val BPB: 1.234
-  MS/Step: 45.2
-  Steps: 10000
-  Artifact Size: 8.5 MB
+Val BPB: 1.234
+MS/Step: 45.2
+Steps: 10000
+Artifact Size: 8.5 MB
 
 Dashboard> compare run001_control run016_best_combo_a
-Metric          run001_control    run016_best_combo_a    Delta
-Val BPB         1.234             1.156                  -6.3%
-MS/Step         45.2              52.1                   +15.3%
+Metric run001_control run016_best_combo_a Delta
+Val BPB 1.234 1.156 -6.3%
+MS/Step 45.2 52.1 +15.3%
 
 Dashboard> leaderboard --by bpb
-Rank  ID                      Val_BPB
-1     run016_best_combo_a     1.156
-2     run017_best_combo_quant 1.189
-3     run001_control          1.234
+Rank ID Val_BPB
+1 run016_best_combo_a 1.156
+2 run017_best_combo_quant 1.189
+3 run001_control 1.234
 ```
 
 ### 5. Multi-Seed Orchestrator
@@ -408,8 +408,8 @@ Führt denselben Run mit mehreren Seeds für statistische Signifikanz aus.
 from orchestrator import MultiSeedOrchestrator, create_multi_seed_orchestrator
 
 orchestrator = create_multi_seed_orchestrator(
-    config_path="configs/runs/run001_control.yaml",
-    seeds=[42, 123, 456],
+config_path="configs/runs/run001_control.yaml",
+seeds=[42, 123, 456],
 )
 
 results = orchestrator.run_all_seeds()
@@ -436,8 +436,8 @@ builder = DynamicComboBuilder(base_config="configs/runs/run001_control.yaml")
 
 # Combos als Runs ausführen
 for combo in combos:
-    config = builder.build_config(combo)
-    # Run mit config starten
+config = builder.build_config(combo)
+# Run mit config starten
 ```
 
 ---

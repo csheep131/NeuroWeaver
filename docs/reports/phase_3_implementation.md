@@ -8,7 +8,7 @@ Phase 3 implementiert die **Produktionspipeline** für echte Runs mit:
 - Gate-Freeze-System für qualifizierte Feature-Kombinationen
 - Multi-Seed-Unterstützung (für H100)
 
-**Status:** ✅ Abgeschlossen (2026-03-24)
+**Status:** Abgeschlossen (2026-03-24)
 
 ---
 
@@ -89,8 +89,8 @@ Evaluiert Phase 3 Runs mit submission-spezifischen Kriterien.
 
 | Run-ID | Typ | Status | Submission-Ready |
 |--------|-----|--------|------------------|
-| `run016_best_combo_a` | Beste nicht-quantisierte Combo | ✅ Smoke-Test | ✅ Ja (nach Validierung) |
-| `run017_best_combo_quantized` | Beste quantisierte Combo | ✅ Smoke-Test | ✅ Ja (nach Validierung) |
+| `run016_best_combo_a` | Beste nicht-quantisierte Combo | Smoke-Test | Ja (nach Validierung) |
+| `run017_best_combo_quantized` | Beste quantisierte Combo | Smoke-Test | Ja (nach Validierung) |
 
 ### Dynamische Zusammensetzung
 
@@ -120,9 +120,9 @@ Die tatsächliche Feature-Zusammensetzung wird **dynamisch** bestimmt aus:
 
 | Status | Bedeutung | Phase 3 Verwendung |
 |--------|-----------|-------------------|
-| ✅ PASS | Stabil positiv in ≥2 Runs | Darf kombiniert werden |
-| ⚠️ WATCH | Gemischt oder knapp positiv | Nur einzeln weiter testen |
-| ❌ FAIL | Negativ oder keine Verbesserung | Nicht in Phase 3 |
+| PASS | Stabil positiv in ≥2 Runs | Darf kombiniert werden |
+| WATCH | Gemischt oder knapp positiv | Nur einzeln weiter testen |
+| FAIL | Negativ oder keine Verbesserung | Nicht in Phase 3 |
 
 ### Gate-Freeze-Bedingungen
 
@@ -155,14 +155,14 @@ from orchestrator import create_submission_bundle
 
 # Erstelle Submission-Bundle
 bundle, output_path = create_submission_bundle(
-    bundle_id="my_submission",
-    run_ids=["run017_best_combo_quantized_seed001", 
-             "run017_best_combo_quantized_seed002",
-             "run017_best_combo_quantized_seed003"],
-    output_dir="submissions",
-    include_configs=True,
-    include_logs=True,
-    include_weights=True,
+bundle_id="my_submission",
+run_ids=["run017_best_combo_quantized_seed001",
+"run017_best_combo_quantized_seed002",
+"run017_best_combo_quantized_seed003"],
+output_dir="submissions",
+include_configs=True,
+include_logs=True,
+include_weights=True,
 )
 
 # Prüfe Submission-Kriterien
@@ -176,12 +176,12 @@ from research import Phase3Evaluator
 
 evaluator = Phase3Evaluator("run016_best_combo_a")
 report = evaluator.evaluate(
-    metrics={
-        "val_bpb": 1.42,
-        "ms_per_step": 45.0,
-        "artifact_bytes": 12_000_000,
-    },
-    parent_metrics={"val_bpb": 1.45},  # Beste Einzel-Features
+metrics={
+"val_bpb": 1.42,
+"ms_per_step": 45.0,
+"artifact_bytes": 12_000_000,
+},
+parent_metrics={"val_bpb": 1.45}, # Beste Einzel-Features
 )
 
 print(report.print_summary())
@@ -207,7 +207,7 @@ print(f"Submission Ready: {report.submission_ready}")
 
 ---
 
-## MVP Status Phase 3 ✅
+## MVP Status Phase 3
 
 - [x] Dynamic Combo Builder mit Gate-Freeze
 - [x] Submission Bundle Creator
@@ -220,7 +220,7 @@ print(f"Submission Ready: {report.submission_ready}")
 
 ## Gesamtsystem Status
 
-### Phase 1 ✅ (Experiment Core)
+### Phase 1 (Experiment Core)
 - Config-first Run-System
 - Run Registry
 - Training/Eval-Skelett
@@ -228,7 +228,7 @@ print(f"Submission Ready: {report.submission_ready}")
 - Artifact-Tracking
 - **Alle 5 Runs konfiguriert und getestet**
 
-### Phase 2 ✅ (Research Engine)
+### Phase 2 (Research Engine)
 - Backbone Factory mit allen Features
 - Feature-Gates mit Validierung
 - Tokenizer-Lab (Byte, Bigram, Trigram)
@@ -236,7 +236,7 @@ print(f"Submission Ready: {report.submission_ready}")
 - Ablation Reporter mit Kill-Regeln
 - **Alle 10 Runs konfiguriert und getestet**
 
-### Phase 3 ✅ (Produktions-Pipeline)
+### Phase 3 (Produktions-Pipeline)
 - Dynamic Combo Builder
 - Gate-Freeze-System
 - Submission Bundle Creator

@@ -19,40 +19,40 @@ Die Differenz kommt von ~15 Features die ALLE zusammenwirken.
 ### Modell: 11L x 512d x 8H GPT mit U-Net Skips
 
 ```
-Hyperparameter          Wert          Warum
-─────────────────────────────────────────────────────
-num_layers              11            Mehr Kapazität, passt noch in 16MB mit INT6
-model_dim               512           Sweet spot für 16MB
-num_heads               8             GQA: 8 query heads, 4 KV heads
-num_kv_heads            4             Spart Parameter für KV-Projektion
-mlp_mult                3.0           3x MLP statt 4x → mehr Layer möglich
-vocab_size              1024          SentencePiece BPE, 1024 tokens
-train_seq_len           2048          Auf H100; 1024 auf RTX 3050
-logit_softcap           30.0          Stabilisiert Training
-rope_base               10000.0       Standard RoPE
-rope_dims               16            Partial RoPE: nur 16 von 64 dims
-xsa_last_n              4             Cross-Scale Attention auf letzten 4 Layern
-tie_embeddings          true          Spart ~262K params
-bigram_vocab_size       2048          BigramHash embedding
-bigram_dim              128           Projiziert auf model_dim
-ve_enabled              true          Value Embeddings auf Layer 9,10
-ve_dim                  128           
-ln_scale                true          Layer-wise LN scaling: 1/√(i+1)
+Hyperparameter Wert Warum
+
+num_layers 11 Mehr Kapazität, passt noch in 16MB mit INT6
+model_dim 512 Sweet spot für 16MB
+num_heads 8 GQA: 8 query heads, 4 KV heads
+num_kv_heads 4 Spart Parameter für KV-Projektion
+mlp_mult 3.0 3x MLP statt 4x → mehr Layer möglich
+vocab_size 1024 SentencePiece BPE, 1024 tokens
+train_seq_len 2048 Auf H100; 1024 auf RTX 3050
+logit_softcap 30.0 Stabilisiert Training
+rope_base 10000.0 Standard RoPE
+rope_dims 16 Partial RoPE: nur 16 von 64 dims
+xsa_last_n 4 Cross-Scale Attention auf letzten 4 Layern
+tie_embeddings true Spart ~262K params
+bigram_vocab_size 2048 BigramHash embedding
+bigram_dim 128 Projiziert auf model_dim
+ve_enabled true Value Embeddings auf Layer 9,10
+ve_dim 128
+ln_scale true Layer-wise LN scaling: 1/√(i+1)
 ```
 
 ### Optimizer: Parallel Muon + Adam
 
 ```
 Muon (für 4 Parameter-Banks):
-  - Newton-Schulz Orthogonalisierung (5 Schritte)
-  - lr=0.025, momentum=0.99 (warmup von 0.92)
-  - weight_decay=0.04
-  - Parallel: reduce-scatter → NS5 → all-gather
+- Newton-Schulz Orthogonalisierung (5 Schritte)
+- lr=0.025, momentum=0.99 (warmup von 0.92)
+- weight_decay=0.04
+- Parallel: reduce-scatter → NS5 → all-gather
 
 Adam (für Embeddings, Scalars, Controls):
-  - embed_lr=0.035 (tied), scalar_lr=0.025
-  - beta1=0.9, beta2=0.95, eps=1e-8
-  - weight_decay=0.04
+- embed_lr=0.035 (tied), scalar_lr=0.025
+- beta1=0.9, beta2=0.95, eps=1e-8
+- weight_decay=0.04
 
 Warmdown: Letzte 3500 Steps, LR → 0
 Late QAT: Aktiviert wenn LR-Scale < 0.15
@@ -62,10 +62,10 @@ Late QAT: Aktiviert wenn LR-Scale < 0.15
 
 Statt einzelne nn.Linear pro Layer werden 4 "Bank"-Tensoren verwendet:
 ```python
-qo_bank:       [2*num_layers, model_dim, model_dim]     # Q und Out Projektionen
-kv_bank:       [2*num_layers, kv_dim, model_dim]         # K und V Projektionen  
-mlp_up_bank:   [num_layers, mlp_dim, model_dim]          # MLP Up
-mlp_down_bank: [num_layers, model_dim, mlp_dim]          # MLP Down
+qo_bank: [2*num_layers, model_dim, model_dim] # Q und Out Projektionen
+kv_bank: [2*num_layers, kv_dim, model_dim] # K und V Projektionen
+mlp_up_bank: [num_layers, mlp_dim, model_dim] # MLP Up
+mlp_down_bank: [num_layers, model_dim, mlp_dim] # MLP Down
 ```
 → Ermöglicht batched Newton-Schulz im Muon Optimizer
 → Ermöglicht Parallel Muon mit reduce-scatter/all-gather
@@ -117,24 +117,24 @@ mlp_down_bank: [num_layers, model_dim, mlp_dim]          # MLP Down
 ### DO: Gezielte Änderungen
 
 ```
-✅ Ein Feature hinzufügen/verbessern (z.B. bessere Quantisierung)
-✅ Hyperparameter tunen (z.B. LR, Warmdown)
-✅ Neuen Trick einbauen der mit dem Rest kompatibel ist
-✅ Komprimierung verbessern (z.B. INT5 für manche Tensoren)
-✅ Eval verbessern (z.B. besseres TTT-Protokoll)
-✅ Architektur-Tweak (z.B. mehr Layer wenn Platz durch bessere Quant)
+Ein Feature hinzufügen/verbessern (z.B. bessere Quantisierung)
+Hyperparameter tunen (z.B. LR, Warmdown)
+Neuen Trick einbauen der mit dem Rest kompatibel ist
+Komprimierung verbessern (z.B. INT5 für manche Tensoren)
+Eval verbessern (z.B. besseres TTT-Protokoll)
+Architektur-Tweak (z.B. mehr Layer wenn Platz durch bessere Quant)
 ```
 
 ### DON'T: Alles neu schreiben
 
 ```
-❌ train_gpt.py von Grund auf neu schreiben
-❌ Parameter Banking entfernen
-❌ Muon Optimizer durch AdamW ersetzen
-❌ Features weglassen "weil einfacher"
-❌ Standard-nn.Linear statt CastedLinear verwenden
-❌ EMA/SWA weglassen
-❌ Quantisierung weglassen oder vereinfachen
+train_gpt.py von Grund auf neu schreiben
+Parameter Banking entfernen
+Muon Optimizer durch AdamW ersetzen
+Features weglassen "weil einfacher"
+Standard-nn.Linear statt CastedLinear verwenden
+EMA/SWA weglassen
+Quantisierung weglassen oder vereinfachen
 ```
 
 ### Ideen für nächste Verbesserungen (von Leaderboard abgeleitet)
@@ -159,17 +159,17 @@ ist ein SDPA-Fallback eingebaut:
 
 ```python
 try:
-    from flash_attn_interface import flash_attn_func as flash_attn_3_func
-    _USE_FA3 = True
+from flash_attn_interface import flash_attn_func as flash_attn_3_func
+_USE_FA3 = True
 except ImportError:
-    _USE_FA3 = False
+_USE_FA3 = False
 
 # In CausalSelfAttention.forward():
 if _USE_FA3:
-    y = flash_attn_3_func(q, k, v, causal=True)  # (B,T,H,D)
+y = flash_attn_3_func(q, k, v, causal=True) # (B,T,H,D)
 else:
-    # SDPA: transpose to (B,H,T,D), expand GQA heads
-    y = F.scaled_dot_product_attention(q_sdpa, k_sdpa, v_sdpa, is_causal=True)
+# SDPA: transpose to (B,H,T,D), expand GQA heads
+y = F.scaled_dot_product_attention(q_sdpa, k_sdpa, v_sdpa, is_causal=True)
 ```
 
 ### Grad Accumulation
@@ -177,7 +177,7 @@ else:
 ```
 8 GPUs: grad_accum_steps = 1
 4 GPUs: grad_accum_steps = 2
-1 GPU:  grad_accum_steps = 8
+1 GPU: grad_accum_steps = 8
 ```
 
 ### Distributed Training

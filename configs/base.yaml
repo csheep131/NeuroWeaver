@@ -2,7 +2,7 @@
 # Matches the current SOTA: val_bpb = 1.1194
 # See SOTA_REFERENCE.md for architecture details.
 #
-# ⚠️ Diese Defaults sind auf den SOTA abgestimmt.
+# Diese Defaults sind auf den SOTA abgestimmt.
 # Ändere sie nur wenn du weißt was du tust!
 
 # Run identification
@@ -12,148 +12,148 @@ seed: 1337
 
 # Model configuration — SOTA: 11L x 512d x 8H (GQA 4KV)
 model:
-  d_model: 512
-  num_layers: 11
-  num_heads: 8
-  num_kv_heads: 4          # GQA: 4 KV heads, 8 query heads
-  mlp_mult: 3.0            # 3x MLP statt 4x → spart Platz für mehr Layer
-  max_seq_len: 2048        # H100; 1024 für RTX 3050
-  vocab_size: 1024         # SentencePiece BPE
-  logit_softcap: 30.0      # tanh(logits/30)*30
-  tie_embeddings: true
-  tied_embed_init_std: 0.005
+d_model: 512
+num_layers: 11
+num_heads: 8
+num_kv_heads: 4 # GQA: 4 KV heads, 8 query heads
+mlp_mult: 3.0 # 3x MLP statt 4x → spart Platz für mehr Layer
+max_seq_len: 2048 # H100; 1024 für RTX 3050
+vocab_size: 1024 # SentencePiece BPE
+logit_softcap: 30.0 # tanh(logits/30)*30
+tie_embeddings: true
+tied_embed_init_std: 0.005
 
-  # U-Net Skip Connections
-  unet_skips: true          # Encoder-Decoder mit Skip-Weights
+# U-Net Skip Connections
+unet_skips: true # Encoder-Decoder mit Skip-Weights
 
-  # Attention
-  attention:
-    type: "gqa"
-    kv_heads: 4
-    rope: true
-    partial_rope: true
-    rope_dims: 16           # Nur 16 von 64 Head-Dims für RoPE
-    rope_base: 10000.0
-    qk_gain_init: 1.5       # QK Normalisierung
+# Attention
+attention:
+type: "gqa"
+kv_heads: 4
+rope: true
+partial_rope: true
+rope_dims: 16 # Nur 16 von 64 Head-Dims für RoPE
+rope_base: 10000.0
+qk_gain_init: 1.5 # QK Normalisierung
 
-  # XSA (Cross-Scale Attention)
-  xsa:
-    enabled: true
-    last_n: 4               # Auf letzten 4 Layern
+# XSA (Cross-Scale Attention)
+xsa:
+enabled: true
+last_n: 4 # Auf letzten 4 Layern
 
-  # Activations
-  activation: "leaky_relu_sq"  # LeakyReLU(0.5)² — SOTA activation
-  leakiness: 0.5
+# Activations
+activation: "leaky_relu_sq" # LeakyReLU(0.5)² — SOTA activation
+leakiness: 0.5
 
-  # SmearGate
-  smear_gate: true          # Token-Smoothing zwischen Positionen
+# SmearGate
+smear_gate: true # Token-Smoothing zwischen Positionen
 
-  # BigramHash
-  bigram:
-    enabled: true
-    vocab_size: 2048
-    dim: 128
+# BigramHash
+bigram:
+enabled: true
+vocab_size: 2048
+dim: 128
 
-  # Value Embeddings
-  value_embedding:
-    enabled: true
-    dim: 128
-    layers: "9,10"          # Injiziert auf Layer 9 und 10
+# Value Embeddings
+value_embedding:
+enabled: true
+dim: 128
+layers: "9,10" # Injiziert auf Layer 9 und 10
 
-  # Layer-wise scaling
-  ln_scale: true            # 1/√(i+1) Skalierung
+# Layer-wise scaling
+ln_scale: true # 1/√(i+1) Skalierung
 
-  # Normalization
-  norm: "rms"               # RMSNorm statt LayerNorm
+# Normalization
+norm: "rms" # RMSNorm statt LayerNorm
 
-  # Gated Attention (optional, nicht im aktuellen SOTA)
-  gated_attention: false
-  value_residual: false
+# Gated Attention (optional, nicht im aktuellen SOTA)
+gated_attention: false
+value_residual: false
 
-  # TTT (optional)
-  ttt:
-    enabled: false
-    lr: 0.002
-    epochs: 3
-    chunk_tokens: 32768
-    freeze_blocks: 2
+# TTT (optional)
+ttt:
+enabled: false
+lr: 0.002
+epochs: 3
+chunk_tokens: 32768
+freeze_blocks: 2
 
 # Tokenizer configuration
 tokenizer:
-  type: "sentencepiece"
-  model_path: "./data/tokenizers/fineweb_1024_bpe.model"
-  vocab_size: 1024
+type: "sentencepiece"
+model_path: "./data/tokenizers/fineweb_1024_bpe.model"
+vocab_size: 1024
 
 # Training configuration — SOTA optimizer settings
 training:
-  iterations: 20000
-  train_batch_tokens: 786432   # H100; 32768 für RTX 3050
-  train_seq_len: 2048          # H100; 1024 für RTX 3050
-  warmup_steps: 20
-  warmdown_iters: 3500
-  max_wallclock_seconds: 600   # 10min auf H100
+iterations: 20000
+train_batch_tokens: 786432 # H100; 32768 für RTX 3050
+train_seq_len: 2048 # H100; 1024 für RTX 3050
+warmup_steps: 20
+warmdown_iters: 3500
+max_wallclock_seconds: 600 # 10min auf H100
 
-  # Muon Optimizer (für Parameter Banks)
-  muon:
-    lr: 0.025
-    momentum: 0.99
-    momentum_warmup_start: 0.92
-    momentum_warmup_steps: 1500
-    backend_steps: 5           # Newton-Schulz Schritte
-    weight_decay: 0.04
+# Muon Optimizer (für Parameter Banks)
+muon:
+lr: 0.025
+momentum: 0.99
+momentum_warmup_start: 0.92
+momentum_warmup_steps: 1500
+backend_steps: 5 # Newton-Schulz Schritte
+weight_decay: 0.04
 
-  # Adam (für Embeddings, Scalars, Controls)
-  adam:
-    embed_lr: 0.035            # Tied embedding LR
-    head_lr: 0.008
-    scalar_lr: 0.025
-    beta1: 0.9
-    beta2: 0.95
-    eps: 1.0e-8
-    weight_decay: 0.04
+# Adam (für Embeddings, Scalars, Controls)
+adam:
+embed_lr: 0.035 # Tied embedding LR
+head_lr: 0.008
+scalar_lr: 0.025
+beta1: 0.9
+beta2: 0.95
+eps: 1.0e-8
+weight_decay: 0.04
 
-  grad_clip_norm: 0.3
+grad_clip_norm: 0.3
 
-  # EMA Weight Averaging
-  ema:
-    enabled: true
-    decay: 0.997
+# EMA Weight Averaging
+ema:
+enabled: true
+decay: 0.997
 
-  # SWA (disabled, EMA is better)
-  swa:
-    enabled: true
-    every: 50
+# SWA (disabled, EMA is better)
+swa:
+enabled: true
+every: 50
 
-  # Late QAT
-  late_qat:
-    enabled: true              # Aktiviert via late_qat_threshold
-    threshold: 0.15            # Wenn LR-Scale < 0.15
+# Late QAT
+late_qat:
+enabled: true # Aktiviert via late_qat_threshold
+threshold: 0.15 # Wenn LR-Scale < 0.15
 
 # Evaluation configuration
 eval:
-  eval_seq_len: 2048
-  val_batch_size: 524288
-  val_loss_every: 4000
-  sliding_window:
-    stride: 64                 # Sliding window stride
-  train_log_every: 500
+eval_seq_len: 2048
+val_batch_size: 524288
+val_loss_every: 4000
+sliding_window:
+stride: 64 # Sliding window stride
+train_log_every: 500
 
 # Quantization — INT6 + LZMA
 quant:
-  type: "mixed_int6"
-  attention: "int6"            # Per-row INT6 für Attention
-  mlp: "int6"                 # Per-row INT6 für MLP
-  embedding: "fp16"           # FP16 für Embeddings
-  controls: "fp32"            # FP32 für Scales, Gates, etc.
-  compression: "lzma"
-  lzma_preset: 6
+type: "mixed_int6"
+attention: "int6" # Per-row INT6 für Attention
+mlp: "int6" # Per-row INT6 für MLP
+embedding: "fp16" # FP16 für Embeddings
+controls: "fp32" # FP32 für Scales, Gates, etc.
+compression: "lzma"
+lzma_preset: 6
 
 # Lokale 8GB-Proxy-Konfiguration (RTX 3050)
 local_proxy:
-  enabled: false
-  train_batch_tokens: 32768
-  train_seq_len: 1024
-  eval_seq_len: 1024
-  val_batch_size: 32768
-  max_wallclock_seconds: 7200  # 2h für lokales Training
-  iterations: 20000
+enabled: false
+train_batch_tokens: 32768
+train_seq_len: 1024
+eval_seq_len: 1024
+val_batch_size: 32768
+max_wallclock_seconds: 7200 # 2h für lokales Training
+iterations: 20000

@@ -1,7 +1,7 @@
 # Phase 4: Autonome Selbstverbesserung - Auto-Approve System
 
 **Letztes Update:** 2026-03-24
-**Status:** ✅ **ABGESCHLOSSEN** (Alle 18 Wochen implementiert: Phase 4 + Phase 5)
+**Status:** **ABGESCHLOSSEN** (Alle 18 Wochen implementiert: Phase 4 + Phase 5)
 **Ziel:** Systematische Verbesserung der Such- und Ausführungsfähigkeiten bis zum optimalen Performance-Plateau
 
 ---
@@ -26,50 +26,50 @@ Ein System, das nicht nur Runs ausführt, sondern seinen eigenen Suchprozess kon
 #### Kernmodule:
 
 1. **Meta-Feature Extractor**
-   - Extrahiert pro Run strukturierte Meta-Daten:
-     ```
-     - Aktivierte Features (Bitmask oder Feature-Vektor)
-     - Parent-Lineage (Vererbungshistorie)
-     - Budgetklasse (low/medium/high basierend auf Ressourcen)
-     - Sequence Length (local vs remote Kontext)
-     - Quant-Status (unquantized / int6 / int5 / mixed / gptq_lite)
-     - Step-Time (ms/step, normalisiert)
-     - Delta vs Parent (BPB-Veränderung)
-     - Stabilität über Seeds (Varianz, min/max)
-     - Erfolgsquote in ähnlichen Kontexten
-     ```
+- Extrahiert pro Run strukturierte Meta-Daten:
+```
+- Aktivierte Features (Bitmask oder Feature-Vektor)
+- Parent-Lineage (Vererbungshistorie)
+- Budgetklasse (low/medium/high basierend auf Ressourcen)
+- Sequence Length (local vs remote Kontext)
+- Quant-Status (unquantized / int6 / int5 / mixed / gptq_lite)
+- Step-Time (ms/step, normalisiert)
+- Delta vs Parent (BPB-Veränderung)
+- Stabilität über Seeds (Varianz, min/max)
+- Erfolgsquote in ähnlichen Kontexten
+```
 
 2. **Surrogate Scorer**
-   - **Algorithmus:** Random Forest / Gradient Boosting Regressor
-   - **Input:** Meta-Features
-   - **Output:** Vorhergesagter Erfolg (BPB-Gewinn, Effizienz-Score)
-   - **Training:** Auf historischen Runs mit bekannten Outcomes
-   - **Tuning:** Bayesian Optimization für Hyperparameter
-   - **Nicht:** Komplexes Reinforcement Learning (zu früh, zu teuer)
+- **Algorithmus:** Random Forest / Gradient Boosting Regressor
+- **Input:** Meta-Features
+- **Output:** Vorhergesagter Erfolg (BPB-Gewinn, Effizienz-Score)
+- **Training:** Auf historischen Runs mit bekannten Outcomes
+- **Tuning:** Bayesian Optimization für Hyperparameter
+- **Nicht:** Komplexes Reinforcement Learning (zu früh, zu teuer)
 
 3. **Hypothesis Generator**
-   - **Co-occurrence Analysis:** "Wenn Feature X gut mit Y lief, probiere auch Z"
-   - **Contextual Bandits:** Exploration vs Exploitation basierend auf Kontext
-   - **Pattern Mining:** Erfolgreiche Feature-Sequenzen identifizieren
-   - **Diversity Preservation:** Sicherstellen, dass Suchraum nicht zu eng wird
+- **Co-occurrence Analysis:** "Wenn Feature X gut mit Y lief, probiere auch Z"
+- **Contextual Bandits:** Exploration vs Exploitation basierend auf Kontext
+- **Pattern Mining:** Erfolgreiche Feature-Sequenzen identifizieren
+- **Diversity Preservation:** Sicherstellen, dass Suchraum nicht zu eng wird
 
 4. **Pareto Tracker**
-   - **Multi-Objective:** BPB vs Efficiency vs Model Size vs Training Speed
-   - **Frontier Monitoring:** Aktueller Pareto-Frontier in Echtzeit
-   - **Gap Detection:** Identifiziert Lücken im Suchraum
-   - **Progress Measurement:** Fortschritt über Zeit quantifizieren
+- **Multi-Objective:** BPB vs Efficiency vs Model Size vs Training Speed
+- **Frontier Monitoring:** Aktueller Pareto-Frontier in Echtzeit
+- **Gap Detection:** Identifiziert Lücken im Suchraum
+- **Progress Measurement:** Fortschritt über Zeit quantifizieren
 
 5. **Adaptive Kill Thresholds**
-   - **Kontext-sensitive Grenzen:** Strenger bei knappem Budget, explorativer bei viel Budget
-   - **Dynamische Anpassung:** Basierend auf Erfolgsrate und Fortschritt
-   - **Feature-spezifisch:** Unterschiedliche Thresholds für verschiedene Feature-Klassen
+- **Kontext-sensitive Grenzen:** Strenger bei knappem Budget, explorativer bei viel Budget
+- **Dynamische Anpassung:** Basierend auf Erfolgsrate und Fortschritt
+- **Feature-spezifisch:** Unterschiedliche Thresholds für verschiedene Feature-Klassen
 
 #### Konkreter Output (Dashboard):
 ```
 Top 5 vielversprechende nächste Runs:
 1. Combo: [X, Y, Z] - Predicted ΔBPB: -0.02 (Confidence: 85%)
-2. Combo: [A, B]    - Predicted Efficiency Gain: 15% (Confidence: 78%)
-3. Single: [F]      - Exploration in new context (Confidence: 65%)
+2. Combo: [A, B] - Predicted Efficiency Gain: 15% (Confidence: 78%)
+3. Single: [F] - Exploration in new context (Confidence: 65%)
 
 Top 3 riskante Kombis (high variance, high potential):
 1. [X, Y, W] - Instability score: high, but breakthrough potential
@@ -90,37 +90,37 @@ Kandidaten für Freeze/Prune:
 #### Kernmodule:
 
 1. **Anomaly Detector**
-   - **Statistische Tests:** Shapiro-Wilk auf Seed-Varianz, Grubbs' Test für Ausreißer
-   - **Instabilitäts-Metriken:** Coefficient of Variation > 20% → Warnung
-   - **OOM-Regression:** Memory usage spike detection
-   - **Noisy Feature Identification:** Features mit hoher Outcome-Varianz
+- **Statistische Tests:** Shapiro-Wilk auf Seed-Varianz, Grubbs' Test für Ausreißer
+- **Instabilitäts-Metriken:** Coefficient of Variation > 20% → Warnung
+- **OOM-Regression:** Memory usage spike detection
+- **Noisy Feature Identification:** Features mit hoher Outcome-Varianz
 
 2. **Failure Classifier**
-   - **Fehlerkategorien:**
-     - OOM (Out of Memory)
-     - NaN-Gradients
-     - Training-Divergence (loss explosion)
-     - Quant-Explosion (post-quantization degradation)
-     - Performance-Regression
-   - **ML-basiert:** Entscheidungsbaum auf Meta-Features + Error-Signature
-   - **Root Cause Analysis:** "Feature X + Y führt in Kontext Z zu OOM"
+- **Fehlerkategorien:**
+- OOM (Out of Memory)
+- NaN-Gradients
+- Training-Divergence (loss explosion)
+- Quant-Explosion (post-quantization degradation)
+- Performance-Regression
+- **ML-basiert:** Entscheidungsbaum auf Meta-Features + Error-Signature
+- **Root Cause Analysis:** "Feature X + Y führt in Kontext Z zu OOM"
 
 3. **Rollback Manager**
-   - **Automatisches Recovery:** Bei kritischen Fehlern zurück zu letzter stabiler Konfiguration
-   - **Inkrementelles Rollback:** Behält erfolgreiche Teile bei, verwirft nur problematische
-   - **Learning from Rollbacks:** Dokumentiert, welche Änderungen welche Probleme verursachen
+- **Automatisches Recovery:** Bei kritischen Fehlern zurück zu letzter stabiler Konfiguration
+- **Inkrementelles Rollback:** Behält erfolgreiche Teile bei, verwirft nur problematische
+- **Learning from Rollbacks:** Dokumentiert, welche Änderungen welche Probleme verursachen
 
 4. **Run Quarantine**
-   - **Automatische Blockierung:** Features/Kombis, die in 3+ Lineages Probleme machen
-   - **Context-aware Block:** "Local Block" – nur in bestimmten Kontexten verboten
-   - **Time-limited:** Quarantäne läuft nach N erfolgreichen Runs anderer Features aus
-   - **Human Override:** Möglichkeit zur manuellen Freigabe mit Begründung
+- **Automatische Blockierung:** Features/Kombis, die in 3+ Lineages Probleme machen
+- **Context-aware Block:** "Local Block" – nur in bestimmten Kontexten verboten
+- **Time-limited:** Quarantäne läuft nach N erfolgreichen Runs anderer Features aus
+- **Human Override:** Möglichkeit zur manuellen Freigabe mit Begründung
 
 5. **Drift Monitor**
-   - **Performance-Drift:** BPB/Effizienz ändert sich ohne erkennbaren Grund
-   - **Umwelt-Änderungen:** Dataset-Updates, Hardware-Änderungen, Dependency-Updates
-   - **Concept Drift:** Erfolgreiche Patterns werden plötzlich weniger erfolgreich
-   - **Alerting:** Frühwarnung bei signifikantem Drift
+- **Performance-Drift:** BPB/Effizienz ändert sich ohne erkennbaren Grund
+- **Umwelt-Änderungen:** Dataset-Updates, Hardware-Änderungen, Dependency-Updates
+- **Concept Drift:** Erfolgreiche Patterns werden plötzlich weniger erfolgreich
+- **Alerting:** Frühwarnung bei signifikantem Drift
 
 #### Praktische Regeln (Beispiele):
 ```
@@ -128,7 +128,7 @@ RULE: Feature-Instability
 IF: Feature A zeigt Varianz > 30% über 3+ Seeds in 3+ Lineages
 THEN: Quarantine für 5 Runs, nur in isolierten Tests erlauben
 
-RULE: OOM-Prevention  
+RULE: OOM-Prevention
 IF: Kombination B+C führt in 2 verschiedenen Runs zu OOM
 THEN: Local Block für B+C in ähnlichen Kontexten
 
@@ -148,32 +148,32 @@ THEN: Rule-Update-Vorschlag an Human + Auto-Block für weitere Quant-Versuche
 
 #### Erlaubte Autonomie (innerhalb Guardrails):
 
-✅ **Automatisch erlaubt:**
+**Automatisch erlaubt:**
 1. **Neue Run-Kombinationen vorschlagen & testen**
-   - Aber nur im "Smoke-Test"-Modus (max 1000 Steps, kleines Budget)
-   - Nur wenn Confidence Score > 70%
+- Aber nur im "Smoke-Test"-Modus (max 1000 Steps, kleines Budget)
+- Nur wenn Confidence Score > 70%
 
 2. **Lokale Promotion automatisieren**
-   - Candidate → Promoted basierend auf klar definierten Thresholds:
-     ```
-     - ΔBPB < -0.01 (stat. signifikant über 3 Seeds)
-     - Efficiency Gain > 10%  
-     - Model Size < Parent Size oder Size Increase < 10%
-     - Quant-Gap < 0.05 (falls quantisiert)
-     ```
-   - **Promoted → Submitted NUR mit menschlicher Freigabe**
+- Candidate → Promoted basierend auf klar definierten Thresholds:
+```
+- ΔBPB < -0.01 (stat. signifikant über 3 Seeds)
+- Efficiency Gain > 10%
+- Model Size < Parent Size oder Size Increase < 10%
+- Quant-Gap < 0.05 (falls quantisiert)
+```
+- **Promoted → Submitted NUR mit menschlicher Freigabe**
 
 3. **Exploration Rate dynamisch anpassen**
-   - Bei Stagnation (kein Fortschritt in 20 Runs): Exploration Rate +20%
-   - Bei schnellem Fortschritt (>0.02 BPB Gewinn in 5 Runs): Exploitation Rate +20%
-   - **Cap:** Min 10% Exploration, Max 50% Exploration
+- Bei Stagnation (kein Fortschritt in 20 Runs): Exploration Rate +20%
+- Bei schnellem Fortschritt (>0.02 BPB Gewinn in 5 Runs): Exploitation Rate +20%
+- **Cap:** Min 10% Exploration, Max 50% Exploration
 
 4. **Pareto-Updates automatisch generieren**
-   - Regelmäßige Pareto-Frontier-Snapshots (alle 10 Runs)
-   - Visualisierung von Fortschritt über Zeit
-   - Automatische Reports bei signifikantem Frontier-Expansion
+- Regelmäßige Pareto-Frontier-Snapshots (alle 10 Runs)
+- Visualisierung von Fortschritt über Zeit
+- Automatische Reports bei signifikantem Frontier-Expansion
 
-#### ❌ **Verboten ohne menschliche Freigabe:**
+#### **Verboten ohne menschliche Freigabe:**
 1. **Neue Codepfade aktivieren** – Nur nach Code-Review
 2. **Zentrale Reward-Formel ändern** – Kern-Metriken sind tabu
 3. **Submission bauen** – Finale Entscheidung bleibt beim Human
@@ -197,7 +197,7 @@ THEN: Rule-Update-Vorschlag an Human + Auto-Block für weitere Quant-Versuche
 3. **Pareto Tracker** – Multi-Objective Frontier Monitoring
 4. **Adaptive Kill Thresholds** – Kontext-sensitive Grenzen
 
-### Woche 5-6: Phase 4B Core  
+### Woche 5-6: Phase 4B Core
 1. **Anomaly Detector** – Statistische Tests für Instabilität
 2. **Failure Classifier** – ML-basierte Fehlerkategorisierung
 3. **Rollback Manager** – Automatisches Recovery-System
@@ -257,9 +257,9 @@ THEN: Rule-Update-Vorschlag an Human + Auto-Block für weitere Quant-Versuche
 
 ## Nächste Schritte
 
-### ✅ Abgeschlossen (Woche 1-8)
+### Abgeschlossen (Woche 1-8)
 
-#### Woche 1-2: Foundation & Meta-Features ✅
+#### Woche 1-2: Foundation & Meta-Features
 1. [x] Meta-Feature Schema finalisieren
 2. [x] Historische Runs analysieren und bereichern
 3. [x] Einfache Co-occurrence Statistics implementieren
@@ -271,7 +271,7 @@ THEN: Rule-Update-Vorschlag an Human + Auto-Block für weitere Quant-Versuche
 - `orchestrator/meta_dashboard.py` (Dashboard CLI)
 - `tests/test_meta_features.py` (30 Tests)
 
-#### Woche 3-4: Phase 4A Core ✅
+#### Woche 3-4: Phase 4A Core
 1. [x] Surrogate Scorer mit Random Forest implementieren
 2. [x] Hypothesis Generator mit Contextual Bandits
 3. [x] Pareto Tracker Dashboard
@@ -284,7 +284,7 @@ THEN: Rule-Update-Vorschlag an Human + Auto-Block für weitere Quant-Versuche
 - `research/adaptive_kill_thresholds.py` (Kontext-sensitive Grenzen)
 - `tests/test_*.py` (46 Tests)
 
-#### Woche 5-6: Phase 4B Core ✅
+#### Woche 5-6: Phase 4B Core
 1. [x] Vollständige Phase 4A Implementierung
 2. [x] Phase 4B Self-Diagnosis Module
 3. [x] Phase 4C Guardrail System
@@ -298,7 +298,7 @@ THEN: Rule-Update-Vorschlag an Human + Auto-Block für weitere Quant-Versuche
 - `research/drift_monitor.py` (CUSUM, ADWIN)
 - `tests/test_*.py` (94 Tests)
 
-#### Woche 9-10: Phase 4 Evaluation & Refinement ✅
+#### Woche 9-10: Phase 4 Evaluation & Refinement
 1. [x] A/B-Testing Framework implementieren
 2. [x] Success Metrics definieren und messen
 3. [x] Iterative Refinement Engine
@@ -314,15 +314,15 @@ THEN: Rule-Update-Vorschlag an Human + Auto-Block für weitere Quant-Versuche
 **Erfolgsmetriken Status:**
 | Metrik | Ziel | Erreicht | Status |
 |--------|------|----------|--------|
-| Search Efficiency | 30% weniger Runs | 35% | ✅ |
-| Failure Rate Reduction | 50% weniger Fehler | 52% | ✅ |
-| Pareto Frontier Expansion | 20% Growth | 22% | ✅ |
-| Human Time Saved | 70% weniger manuelle Zeit | 68% | ⚠️ |
-| Confidence Accuracy | >75% Accuracy | 79% | ✅ |
+| Search Efficiency | 30% weniger Runs | 35% | |
+| Failure Rate Reduction | 50% weniger Fehler | 52% | |
+| Pareto Frontier Expansion | 20% Growth | 22% | |
+| Human Time Saved | 70% weniger manuelle Zeit | 68% | |
+| Confidence Accuracy | >75% Accuracy | 79% | |
 
 **4 von 5 Zielen erreicht!**
 
-#### Woche 11-18: Phase 5 Advanced Features ✅
+#### Woche 11-18: Phase 5 Advanced Features
 
 **Implementiert:**
 - `orchestrator/dashboard_advanced.py` (Interaktives Plotly Dashboard)
@@ -337,31 +337,31 @@ THEN: Rule-Update-Vorschlag an Human + Auto-Block für weitere Quant-Versuche
 - `tests/test_*.py` (43 Tests)
 
 **Features:**
-- ✅ Interaktive Visualisierung (Plotly, Dash)
-- ✅ Real-time Monitoring (WebSocket, Live-Dashboard)
-- ✅ Distributed Execution (Multi-GPU, Load Balancing)
-- ✅ AutoML Integration (HPO, NAS)
+- Interaktive Visualisierung (Plotly, Dash)
+- Real-time Monitoring (WebSocket, Live-Dashboard)
+- Distributed Execution (Multi-GPU, Load Balancing)
+- AutoML Integration (HPO, NAS)
 
 **Usage:**
 ```bash
-python3 -m orchestrator.phase5 advanced-dashboard  # Dashboard
-python3 -m orchestrator.phase5 run-explorer        # Run-Analyse
+python3 -m orchestrator.phase5 advanced-dashboard # Dashboard
+python3 -m orchestrator.phase5 run-explorer # Run-Analyse
 python3 -m orchestrator.phase5 live-monitor run001 # Live-Monitoring
 python3 -m orchestrator.phase5 hpo-optimize --trials 50
 python3 -m orchestrator.phase5 nas-search --budget 100
 ```
 
-### 📊 Gesamt-Status
+### Gesamt-Status
 
 | Komponente | Status | Tests | Zeilen |
 |------------|--------|-------|--------|
-| **Meta-Features** | ✅ Fertig | 30 | ~450 |
-| **Phase 4A Core** | ✅ Fertig | 46 | ~1,883 |
-| **Phase 4B Self-Diagnosis** | ✅ Fertig | 94 | ~2,100 |
-| **Phase 4C Guardrails** | ✅ Fertig | 80 | ~2,200 |
-| **Phase 4 Evaluation** | ✅ Fertig | 94 | ~2,400 |
-| **Phase 5 Advanced** | ✅ Fertig | 43 | ~4,650 |
-| **Gesamt** | **✅ 100%** | **387** | **~13,983** |
+| **Meta-Features** | Fertig | 30 | ~450 |
+| **Phase 4A Core** | Fertig | 46 | ~1,883 |
+| **Phase 4B Self-Diagnosis** | Fertig | 94 | ~2,100 |
+| **Phase 4C Guardrails** | Fertig | 80 | ~2,200 |
+| **Phase 4 Evaluation** | Fertig | 94 | ~2,400 |
+| **Phase 5 Advanced** | Fertig | 43 | ~4,650 |
+| **Gesamt** | ** 100%** | **387** | **~13,983** |
 
 ---
 
@@ -369,41 +369,41 @@ python3 -m orchestrator.phase5 nas-search --budget 100
 
 ```yaml
 run_meta_features:
-  # Feature-Vektor (One-hot oder Bitmask)
-  features_active: List[str]  # ["gqa", "film", "leaky_relu"]
-  
-  # Lineage & History
-  parent_run_id: str
-  lineage_depth: int  # Wie viele Generationen von Parent
-  siblings_count: int  # Wie viele Runs mit gleichem Parent
-  
-  # Context
-  budget_class: "low" | "medium" | "high"  # basierend auf d_model, num_layers
-  sequence_length: "local" | "remote"  # short vs long context
-  quantization_type: "none" | "int6" | "int5" | "mixed" | "gptq_lite"
-  
-  # Performance Characteristics
-  step_time_ms: float  # Normalisiert pro Parameter
-  memory_usage_mb: float
-  training_stability: float  # loss curve smoothness
-  
-  # Outcomes (für Training)
-  delta_bpb_vs_parent: float
-  efficiency_gain_percent: float  # (parent_step_time / current_step_time - 1) * 100
-  model_size_change_percent: float
-  quant_gap: float  # post-quantization degradation
-  
-  # Statistical Properties
-  seed_variance: float  # Varianz über 3 Seeds
-  confidence_interval_width: float  # Breite des 95% CI für BPB
-  
-  # Temporal Features
-  days_since_first_feature_introduction: int
-  runs_since_feature_last_successful: int
-  
-  # Interaction Features
-  co_occurrence_with: Dict[str, int]  # Count mit anderen Features
-  previous_success_rate_in_similar_context: float
+# Feature-Vektor (One-hot oder Bitmask)
+features_active: List[str] # ["gqa", "film", "leaky_relu"]
+
+# Lineage & History
+parent_run_id: str
+lineage_depth: int # Wie viele Generationen von Parent
+siblings_count: int # Wie viele Runs mit gleichem Parent
+
+# Context
+budget_class: "low" | "medium" | "high" # basierend auf d_model, num_layers
+sequence_length: "local" | "remote" # short vs long context
+quantization_type: "none" | "int6" | "int5" | "mixed" | "gptq_lite"
+
+# Performance Characteristics
+step_time_ms: float # Normalisiert pro Parameter
+memory_usage_mb: float
+training_stability: float # loss curve smoothness
+
+# Outcomes (für Training)
+delta_bpb_vs_parent: float
+efficiency_gain_percent: float # (parent_step_time / current_step_time - 1) * 100
+model_size_change_percent: float
+quant_gap: float # post-quantization degradation
+
+# Statistical Properties
+seed_variance: float # Varianz über 3 Seeds
+confidence_interval_width: float # Breite des 95% CI für BPB
+
+# Temporal Features
+days_since_first_feature_introduction: int
+runs_since_feature_last_successful: int
+
+# Interaction Features
+co_occurrence_with: Dict[str, int] # Count mit anderen Features
+previous_success_rate_in_similar_context: float
 ```
 
 ---

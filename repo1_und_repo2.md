@@ -5,22 +5,22 @@
 Dieses Projekt arbeitet mit ZWEI getrennten Repositories:
 
 ```
-REPO 1 (Entwicklung)          REPO 2 (Einreichung)
-~/projects/NeuroWeave/         Fork von openai/parameter-golf
-│                              │
-├── train_gpt.py ──kopieren──→ ├── records/
-├── train_gpt_mlx.py           │   ├── track_10min_16mb/
-├── orchestrator/               │   │   └── YYYY-MM-DD_NeuroWeave_.../
-├── research/                   │   │       ├── train_gpt.py  ← NUR DIESE
-├── rust_core/                  │   │       ├── README.md
-├── configs/                    │   │       ├── submission.json
-├── checkpoints/                │   │       └── train.log
-├── data/                       │   └── track_non_record_16mb/
-├── records/                    │       └── ...
-├── plots/                      ├── data/          (upstream, nicht aendern)
-├── AGENTS.md                   ├── train_gpt.py   (upstream, nicht aendern)
-├── regeln.md                   └── README.md      (upstream, nicht aendern)
-└── ...                        
+REPO 1 (Entwicklung) REPO 2 (Einreichung)
+~/projects/NeuroWeave/ Fork von openai/parameter-golf
+
+train_gpt.py kopieren→ records/
+train_gpt_mlx.py track_10min_16mb/
+orchestrator/ YYYY-MM-DD_NeuroWeave_.../
+research/ train_gpt.py ← NUR DIESE
+rust_core/ README.md
+configs/ submission.json
+checkpoints/ train.log
+data/ track_non_record_16mb/
+records/ ...
+plots/ data/ (upstream, nicht aendern)
+AGENTS.md train_gpt.py (upstream, nicht aendern)
+regeln.md README.md (upstream, nicht aendern)
+...
 ```
 
 ---
@@ -63,11 +63,11 @@ AUSSCHLIESSLICH ein neuer Ordner unter records/:
 
 ```
 records/track_non_record_16mb/YYYY-MM-DD_NeuroWeave_GQA_LeakyReLU2/
-  ├── train_gpt.py       Pflicht. Muss standalone laufen.
-  ├── README.md           Pflicht. Erklaert den Ansatz (Englisch).
-  ├── submission.json     Pflicht. Echte Metriken.
-  ├── train.log           Pflicht. Mindestens 1 Log, besser 3.
-  └── requirements.txt    Optional. Nur wenn Extra-Pakete noetig.
+train_gpt.py Pflicht. Muss standalone laufen.
+README.md Pflicht. Erklaert den Ansatz (Englisch).
+submission.json Pflicht. Echte Metriken.
+train.log Pflicht. Mindestens 1 Log, besser 3.
+requirements.txt Optional. Nur wenn Extra-Pakete noetig.
 ```
 
 ### Regeln fuer Repo 2
@@ -114,7 +114,7 @@ git checkout -b submission/neuroweave-v1
 ```bash
 # 1. In Repo 1: Sicherstellen dass train_gpt.py standalone laeuft
 cd ~/projects/NeuroWeave
-python train_gpt.py --help  # Kein ImportError?
+python train_gpt.py --help # Kein ImportError?
 
 # 2. Submission-Ordner in Repo 2 anlegen (einmalig)
 SUBMISSION_DIR=~/projects/parameter-golf-fork/records/track_non_record_16mb/2026-03-XX_NeuroWeave_GQA_LeakyReLU2
@@ -124,20 +124,20 @@ mkdir -p $SUBMISSION_DIR
 cp ~/projects/NeuroWeave/train_gpt.py $SUBMISSION_DIR/
 
 # 4. Pfade in der kopierten Datei pruefen!
-#    DATA_PATH muss relativ sein: ../../data/datasets/...
-#    TOKENIZER_PATH muss relativ sein: ../../data/tokenizers/...
+# DATA_PATH muss relativ sein: ../../data/datasets/...
+# TOKENIZER_PATH muss relativ sein: ../../data/tokenizers/...
 
 # 5. README.md, submission.json, train.log erstellen/kopieren
-#    (siehe AGENTS.md fuer Inhalt)
+# (siehe AGENTS.md fuer Inhalt)
 
 # 6. Standalone-Test
 cd $SUBMISSION_DIR
-python train_gpt.py --help  # Muss OHNE Repo-1-Code laufen
+python train_gpt.py --help # Muss OHNE Repo-1-Code laufen
 
 # 7. Commit + Push
 cd ~/projects/parameter-golf-fork
 git add records/
-git diff --cached --stat  # Nur records/ Dateien? Gut.
+git diff --cached --stat # Nur records/ Dateien? Gut.
 git commit -m "Non-Record Submission: NeuroWeave GQA+LeakyReLU2 val_bpb X.XX"
 git push origin submission/neuroweave-v1
 
@@ -149,7 +149,7 @@ git push origin submission/neuroweave-v1
 ```bash
 # Frischer Clone — simuliert was OpenAI sieht
 git clone -b submission/neuroweave-v1 \
-  https://github.com/csheep131/parameter-golf.git /tmp/test-submission
+https://github.com/csheep131/parameter-golf.git /tmp/test-submission
 cd /tmp/test-submission
 
 # Dataset vorhanden?
@@ -172,12 +172,12 @@ print(f'Budget fuer Modell: {16_000_000 - code_size:,} bytes')
 
 ## Zusammenfassung
 
-| Frage                        | Repo 1 (NeuroWeave)    | Repo 2 (Fork)         |
+| Frage | Repo 1 (NeuroWeave) | Repo 2 (Fork) |
 |------------------------------|------------------------|-----------------------|
-| Wo?                          | ~/projects/NeuroWeave  | ~/projects/parameter-golf-fork |
-| Zweck?                       | Entwickeln             | Einreichen            |
-| Was aendern?                 | Alles                  | NUR records/          |
-| Sprache?                     | Deutsch OK             | Englisch Pflicht      |
-| Tooling committen?           | Ja                     | NEIN                  |
-| Checkpoints committen?       | Lokal OK               | NEIN                  |
-| train_gpt.py bearbeiten?     | Ja, staendig           | Nur Kopie in records/ |
+| Wo? | ~/projects/NeuroWeave | ~/projects/parameter-golf-fork |
+| Zweck? | Entwickeln | Einreichen |
+| Was aendern? | Alles | NUR records/ |
+| Sprache? | Deutsch OK | Englisch Pflicht |
+| Tooling committen? | Ja | NEIN |
+| Checkpoints committen? | Lokal OK | NEIN |
+| train_gpt.py bearbeiten? | Ja, staendig | Nur Kopie in records/ |

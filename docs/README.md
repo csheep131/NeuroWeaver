@@ -1,8 +1,8 @@
 # Wettkampf Dokumentation
 
-**Letztes Update:** 2026-03-24  
-**Projekt:** Ablation Machine – Experimentier-Plattform für systematisches Ablation-Testing  
-**Status:** Phase 1-3 ✅ Alle abgeschlossen | **Performance:** 4-5x Speedup
+**Letztes Update:** 2026-03-24
+**Projekt:** Ablation Machine – Experimentier-Plattform für systematisches Ablation-Testing
+**Status:** Phase 1-3 Alle abgeschlossen | **Performance:** 4-5x Speedup
 
 ---
 
@@ -27,40 +27,40 @@ Diese Dokumentation bietet einen vollständigen Überblick über die Ablation Ma
 
 ```
 docs/
-├── README.md                    # Diese Datei – Dokumentations-Übersicht
-├── architecture/                # Architektur-Dokumente
-│   ├── ARCHITECTURE.md          # System-Architektur
-│   ├── blueprint.md             # Phase 1 Implementierungs-Blueprint
-│   ├── rust_integration.md      # Rust-Integration Details
-│   └── module_overview.md       # Modul-Übersicht
-├── setup/                       # Setup & Installation
-│   ├── SETUP.md                 # Installations-Anleitung
-│   └── development_guide.md     # Entwickler-Guide
-├── reports/                     # Audit-Reports & Analysen
-│   ├── README.md                # Report-Übersicht
-│   ├── phase_1_audit.md         # Phase 1 Code Audit
-│   ├── phase_2_audit.md         # Phase 2 Code Audit
-│   ├── phase_2_bug_fixes.md     # Phase 2 Bug Fixes
-│   ├── phase_2_implementation.md# Phase 2 Implementierungsbericht
-│   ├── phase_3_audit.md         # Phase 3 Code Audit
-│   ├── phase_3_performance.md   # Phase 3 Performance Optimizations
-│   └── phase_3_implementation.md# Phase 3 Implementierungsbericht
-├── guides/                      # Anleitungen & How-Tos
-│   ├── README.md                # Guides-Übersicht
-│   ├── configuration.md         # Konfigurations-Handbuch
-│   ├── runs_guide.md            # Runs starten
-│   ├── runs_development.md      # Runs Entwicklung
-│   ├── sweep_guide.md           # Sweep Runner
-│   ├── promotion_guide.md       # Promotion System
-│   ├── ablation_plan.md         # Ablation-Plan (10-Run Roadmap)
-│   ├── roadmap_runs.md          # Detaillierte Run-Roadmap
-│   ├── run_tabelle.md           # Run-Übersichtstabelle
-│   ├── trainings_plan.md        # Trainings-Planung
-│   ├── auto_approve.md          # Phase 4: Autonome Selbstverbesserung (Spezifikation)
-│   ├── phase4_overview.md       # Phase 4: Implementierungs-Übersicht
-│   └── phase5_overview.md       # Phase 5: Advanced Features
-└── api/                         # API-Dokumentation
-    └── README.md                # API-Docs Übersicht
+README.md # Diese Datei – Dokumentations-Übersicht
+architecture/ # Architektur-Dokumente
+ARCHITECTURE.md # System-Architektur
+blueprint.md # Phase 1 Implementierungs-Blueprint
+rust_integration.md # Rust-Integration Details
+module_overview.md # Modul-Übersicht
+setup/ # Setup & Installation
+SETUP.md # Installations-Anleitung
+development_guide.md # Entwickler-Guide
+reports/ # Audit-Reports & Analysen
+README.md # Report-Übersicht
+phase_1_audit.md # Phase 1 Code Audit
+phase_2_audit.md # Phase 2 Code Audit
+phase_2_bug_fixes.md # Phase 2 Bug Fixes
+phase_2_implementation.md# Phase 2 Implementierungsbericht
+phase_3_audit.md # Phase 3 Code Audit
+phase_3_performance.md # Phase 3 Performance Optimizations
+phase_3_implementation.md# Phase 3 Implementierungsbericht
+guides/ # Anleitungen & How-Tos
+README.md # Guides-Übersicht
+configuration.md # Konfigurations-Handbuch
+runs_guide.md # Runs starten
+runs_development.md # Runs Entwicklung
+sweep_guide.md # Sweep Runner
+promotion_guide.md # Promotion System
+ablation_plan.md # Ablation-Plan (10-Run Roadmap)
+roadmap_runs.md # Detaillierte Run-Roadmap
+run_tabelle.md # Run-Übersichtstabelle
+trainings_plan.md # Trainings-Planung
+auto_approve.md # Phase 4: Autonome Selbstverbesserung (Spezifikation)
+phase4_overview.md # Phase 4: Implementierungs-Übersicht
+phase5_overview.md # Phase 5: Advanced Features
+api/ # API-Dokumentation
+README.md # API-Docs Übersicht
 ```
 
 ---
@@ -94,7 +94,7 @@ python3 -m orchestrator.dashboard
 
 ## Dokumentations-Bereiche
 
-### 📐 Architektur (`architecture/`)
+### Architektur (`architecture/`)
 
 | Dokument | Beschreibung |
 |----------|--------------|
@@ -103,14 +103,14 @@ python3 -m orchestrator.dashboard
 | [rust_integration.md](architecture/rust_integration.md) | Rust/Python-Integration, Performance-kritische Komponenten |
 | [module_overview.md](architecture/module_overview.md) | Modul-Übersicht, Abhängigkeiten, Exporte |
 
-### 🔧 Setup (`setup/`)
+### Setup (`setup/`)
 
 | Dokument | Beschreibung |
 |----------|--------------|
 | [SETUP.md](setup/SETUP.md) | Installation, Projektstruktur, Usage-Beispiele |
 | [development_guide.md](setup/development_guide.md) | Entwickler-Guide, Testing, Rust-Erweiterung |
 
-### 📊 Reports (`reports/`)
+### Reports (`reports/`)
 
 | Dokument | Beschreibung |
 |----------|--------------|
@@ -123,7 +123,7 @@ python3 -m orchestrator.dashboard
 | [phase_3_performance.md](reports/phase_3_performance.md) | Phase 3 Performance Optimizations |
 | [phase_3_implementation.md](reports/phase_3_implementation.md) | Phase 3 Implementierungsbericht |
 
-### 📖 Guides (`guides/`)
+### Guides (`guides/`)
 
 | Dokument | Beschreibung |
 |----------|--------------|
@@ -141,7 +141,7 @@ python3 -m orchestrator.dashboard
 | [phase4_overview.md](guides/phase4_overview.md) | Phase 4: Implementierungs-Übersicht |
 | [phase5_overview.md](guides/phase5_overview.md) | Phase 5: Advanced Features |
 
-### 🔌 API (`api/`)
+### API (`api/`)
 
 | Dokument | Beschreibung |
 |----------|--------------|
@@ -151,7 +151,7 @@ python3 -m orchestrator.dashboard
 
 ## Phasen-Status
 
-### Phase 1: Experiment Core ✅ ABGESCHLOSSEN
+### Phase 1: Experiment Core ABGESCHLOSSEN
 
 - [x] Config-first Run-System
 - [x] Modultrennung (Python/Rust)
@@ -160,7 +160,7 @@ python3 -m orchestrator.dashboard
 - [x] Vergleichbarkeit
 - [x] Core-Komponenten (Config, Registry, Logging, Seed, Artifacts)
 
-### Phase 2: Research Engine ✅ ABGESCHLOSSEN
+### Phase 2: Research Engine ABGESCHLOSSEN
 
 - [x] Backbone Factory
 - [x] Feature-Gates (FeatureGate, FeatureGateManager)
@@ -169,7 +169,7 @@ python3 -m orchestrator.dashboard
 - [x] Ablation Engine (AblationReporter, KillRules)
 - [x] Phase 1/2/3 Evaluatoren
 
-### Phase 3: Production Pipeline ✅ ABGESCHLOSSEN
+### Phase 3: Production Pipeline ABGESCHLOSSEN
 
 - [x] Sweep Runner (itertools.product, O(1) Memory)
 - [x] Promotion System (3-Layer Caching, Stage-Management)

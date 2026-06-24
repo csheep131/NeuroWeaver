@@ -1,7 +1,7 @@
 # neuroweave_v1 — Systematische Ablation über Architektur, Tokenisierung und Quantisierung
 
-**Author:** Thomas Speckert (@csheep131)  
-**Date:** 2026-03-25  
+**Author:** Thomas Speckert (@csheep131)
+**Date:** 2026-03-25
 **Run ID:** neuroweave_v1
 
 ## Ergebnis

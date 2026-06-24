@@ -5,12 +5,12 @@ Repository arbeitet (Hermes, Qwen, Cline, Codex, etc.).
 
 ---
 
-## ⚠️ REGEL 0: NIEMALS train_gpt.py VON NULL SCHREIBEN! ⚠️
+## REGEL 0: NIEMALS train_gpt.py VON NULL SCHREIBEN!
 
 **Die aktuelle `train_gpt.py` IST bereits der SOTA (val_bpb = 1.1194).**
 
-Sie enthält ~15 Features die ALLE zusammenwirken. Wenn du sie komplett 
-neu schreibst, landest du bei ~4.0 BPB statt ~1.12 — das ist SCHLECHTER 
+Sie enthält ~15 Features die ALLE zusammenwirken. Wenn du sie komplett
+neu schreibst, landest du bei ~4.0 BPB statt ~1.12 — das ist SCHLECHTER
 als die Naive Baseline (1.2244).
 
 **→ Lies SOTA_REFERENCE.md BEVOR du irgendetwas änderst!**
@@ -19,18 +19,18 @@ als die Naive Baseline (1.2244).
 
 ### Was passiert wenn du von Null schreibst:
 
-| Feature das fehlt           | BPB-Impact |
+| Feature das fehlt | BPB-Impact |
 |----------------------------|------------|
-| Muon Optimizer fehlt       | +0.5-1.0   |
-| Parameter Banking fehlt    | +0.3-0.5   |
-| INT6 Quantisierung fehlt   | +0.05-0.1  |
-| U-Net Skips fehlen         | +0.02-0.05 |
-| XSA fehlt                  | +0.02-0.03 |
-| BigramHash fehlt           | +0.01-0.02 |
-| SmearGate fehlt            | +0.01-0.02 |
-| EMA fehlt                  | +0.01-0.02 |
-| Sliding Window Eval fehlt  | +0.01-0.02 |
-| Kumulativ                  | ~+3.0 BPB! |
+| Muon Optimizer fehlt | +0.5-1.0 |
+| Parameter Banking fehlt | +0.3-0.5 |
+| INT6 Quantisierung fehlt | +0.05-0.1 |
+| U-Net Skips fehlen | +0.02-0.05 |
+| XSA fehlt | +0.02-0.03 |
+| BigramHash fehlt | +0.01-0.02 |
+| SmearGate fehlt | +0.01-0.02 |
+| EMA fehlt | +0.01-0.02 |
+| Sliding Window Eval fehlt | +0.01-0.02 |
+| Kumulativ | ~+3.0 BPB! |
 
 ---
 
@@ -47,7 +47,7 @@ Wenn du an train_gpt.py arbeitest, beachte:
 - Die Datei MUSS standalone lauffaehig sein
 - Keine Imports aus orchestrator/, research/, rust_core/ etc.
 - Erlaubte Abhaengigkeiten: torch, numpy, sentencepiece, tqdm,
-  und alles was im RunPod-Template vorinstalliert ist
+und alles was im RunPod-Template vorinstalliert ist
 - Artifact (Code + komprimiertes Modell) MUSS < 16.000.000 Bytes sein
 - Training MUSS in < 10 Minuten auf 8xH100 durchlaufen
 - **MUSS auf dem bestehenden SOTA aufbauen, nicht von Grund auf neu!**
@@ -71,15 +71,15 @@ Niemals geschaetzte, gerundete oder Placeholder-Werte einreichen.
 
 ## Regel 4: Wettbewerbs-Constraints
 
-| Constraint          | Limit              |
+| Constraint | Limit |
 |---------------------|--------------------|
-| Artifact Size       | < 16.000.000 Bytes |
-| Training Time       | < 10 min 8xH100   |
-| Eval Time           | < 10 min 8xH100   |
-| Metrik              | val_bpb (bits/byte)|
-| SOTA schlagen um    | >= 0.005 nats      |
-| Seeds fuer Beweis   | min. 3 Runs        |
-| Statistik           | p < 0.01           |
+| Artifact Size | < 16.000.000 Bytes |
+| Training Time | < 10 min 8xH100 |
+| Eval Time | < 10 min 8xH100 |
+| Metrik | val_bpb (bits/byte)|
+| SOTA schlagen um | >= 0.005 nats |
+| Seeds fuer Beweis | min. 3 Runs |
+| Statistik | p < 0.01 |
 
 ## Regel 5: Was Agenten hier tun sollen
 
@@ -109,7 +109,7 @@ Wenn du an diesem Projekt arbeitest, ist dein Ziel:
 ### Verbesserungs-Ideen (priorisiert):
 
 1. **Bessere Quantisierung** → mehr Platz für Layer oder Features
-2. **12 Layer** wenn Quant-Savings es erlauben  
+2. **12 Layer** wenn Quant-Savings es erlauben
 3. **Verbessertes TTT** Protokoll
 4. **Depth Recurrence** für Parameter-Sharing
 5. **Gated Attention** mit Sigmoid-Gate pro Head

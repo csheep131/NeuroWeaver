@@ -1,7 +1,7 @@
 # Konfigurations-Handbuch
 
-**Letztes Update:** 2026-03-24  
-**Version:** 1.0  
+**Letztes Update:** 2026-03-24
+**Version:** 1.0
 **Config-Typen:** Base Config, Run Config, Sweep Config
 
 ---
@@ -30,69 +30,69 @@ Die Base Config enthält Default-Werte, die von allen Runs geerbt werden.
 # Run-Identifikation
 run_id: "default"
 seed: 42
-parent_run_id: null  # Für Lineage-Tracking
+parent_run_id: null # Für Lineage-Tracking
 
 # Modell-Konfiguration
 model:
-  d_model: 512
-  num_layers: 6
-  num_heads: 8
-  activation: "gelu"  # gelu, relu, leaky_relu, star_relu
-  use_layer_norm: true
-  use_feature_gate: false
-  dropout: 0.0
+d_model: 512
+num_layers: 6
+num_heads: 8
+activation: "gelu" # gelu, relu, leaky_relu, star_relu
+use_layer_norm: true
+use_feature_gate: false
+dropout: 0.0
 
 # Tokenizer-Konfiguration
 tokenizer:
-  type: "byte"  # byte, bigram_hash, trigram_hash, fallback
-  vocab_size: 8192
+type: "byte" # byte, bigram_hash, trigram_hash, fallback
+vocab_size: 8192
 
 # Quantisierung
 quantization:
-  enabled: false
-  type: "int6"  # int6, int5, mixed, gptq_lite
-  threshold: 0.3  # Für MixedQuantizer
-  scale: 0.1
+enabled: false
+type: "int6" # int6, int5, mixed, gptq_lite
+threshold: 0.3 # Für MixedQuantizer
+scale: 0.1
 
 # Training-Konfiguration
 training:
-  num_steps: 10000
-  learning_rate: 3e-4
-  batch_size: 32
-  warmup_steps: 1000
-  weight_decay: 0.01
-  use_ema: false
-  ema_decay: 0.999
+num_steps: 10000
+learning_rate: 3e-4
+batch_size: 32
+warmup_steps: 1000
+weight_decay: 0.01
+use_ema: false
+ema_decay: 0.999
 
 # Optimizer
 optimizer:
-  type: "adam"  # adam, adamw, sgd
-  beta1: 0.9
-  beta2: 0.999
-  epsilon: 1e-8
+type: "adam" # adam, adamw, sgd
+beta1: 0.9
+beta2: 0.999
+epsilon: 1e-8
 
 # Scheduler
 scheduler:
-  type: "cosine"  # cosine, linear, constant
-  min_lr: 1e-6
+type: "cosine" # cosine, linear, constant
+min_lr: 1e-6
 
 # Evaluation
 evaluation:
-  eval_steps: 1000
-  use_sliding_window: true
-  window_size: 100
+eval_steps: 1000
+use_sliding_window: true
+window_size: 100
 
 # Logging
 logging:
-  log_steps: 100
-  save_artifacts: true
-  artifact_format: "pt"  # pt, safetensors
+log_steps: 100
+save_artifacts: true
+artifact_format: "pt" # pt, safetensors
 
 # Kill-Rules (für Ablation)
 kill_rules:
-  artifact_size_limit: 16000000  # 16 MB
-  ms_per_step_limit: 100
-  bpb_degradation_limit: 0.1
+artifact_size_limit: 16000000 # 16 MB
+ms_per_step_limit: 100
+bpb_degradation_limit: 0.1
 ```
 
 ---
@@ -111,19 +111,19 @@ run_id: "run001_control"
 seed: 42
 
 model:
-  d_model: 512
-  num_layers: 6
-  activation: "gelu"
+d_model: 512
+num_layers: 6
+activation: "gelu"
 
 tokenizer:
-  type: "byte"
+type: "byte"
 
 quantization:
-  enabled: false
+enabled: false
 
 training:
-  num_steps: 10000
-  learning_rate: 3e-4
+num_steps: 10000
+learning_rate: 3e-4
 ```
 
 ### Beispiel: Feature-Experiment
@@ -132,25 +132,25 @@ training:
 # configs/runs/run006_film.yaml
 run_id: "run006_film"
 seed: 42
-parent_run_id: "run001_control"  # Lineage-Tracking
+parent_run_id: "run001_control" # Lineage-Tracking
 
 model:
-  d_model: 512
-  num_layers: 6
-  activation: "gelu"
-  use_feature_gate: true
-  feature_gates:
-    - name: "film"
-      condition: true
-      params:
-        conditioning_dim: 256
+d_model: 512
+num_layers: 6
+activation: "gelu"
+use_feature_gate: true
+feature_gates:
+- name: "film"
+condition: true
+params:
+conditioning_dim: 256
 
 tokenizer:
-  type: "byte"
+type: "byte"
 
 training:
-  num_steps: 10000
-  learning_rate: 3e-4
+num_steps: 10000
+learning_rate: 3e-4
 ```
 
 ### Beispiel: Quantized Run
@@ -162,21 +162,21 @@ seed: 42
 parent_run_id: "run001_control"
 
 model:
-  d_model: 512
-  num_layers: 6
-  activation: "gelu"
+d_model: 512
+num_layers: 6
+activation: "gelu"
 
 tokenizer:
-  type: "byte"
+type: "byte"
 
 quantization:
-  enabled: true
-  type: "mixed"
-  threshold: 0.3
+enabled: true
+type: "mixed"
+threshold: 0.3
 
 training:
-  num_steps: 10000
-  learning_rate: 3e-4
+num_steps: 10000
+learning_rate: 3e-4
 ```
 
 ### Beispiel: Multi-Seed Run
@@ -184,7 +184,7 @@ training:
 ```yaml
 # configs/runs/run018_control_s1.yaml
 run_id: "run018_control_s1"
-seed: 1  # Variierter Seed
+seed: 1 # Variierter Seed
 parent_run_id: "run001_control"
 
 # Alle anderen Werte von Base Config
@@ -206,17 +206,17 @@ sweep_id: "my_first_sweep"
 base_config: "configs/runs/run001_control.yaml"
 
 parameters:
-  - name: "model.d_model"
-    values: [256, 512, 768]
-  - name: "model.num_layers"
-    values: [4, 6, 8]
-  - name: "training.learning_rate"
-    values: [1e-4, 3e-4, 1e-3]
+- name: "model.d_model"
+values: [256, 512, 768]
+- name: "model.num_layers"
+values: [4, 6, 8]
+- name: "training.learning_rate"
+values: [1e-4, 3e-4, 1e-3]
 
 execution:
-  max_concurrent: 1
-  continue_on_failure: true
-  output_dir: "results/sweeps/my_sweep"
+max_concurrent: 1
+continue_on_failure: true
+output_dir: "results/sweeps/my_sweep"
 ```
 
 ### Beispiel: Architecture Sweep
@@ -227,16 +227,16 @@ sweep_id: "architecture_sweep"
 base_config: "configs/runs/run001_control.yaml"
 
 parameters:
-  - name: "model.d_model"
-    values: [256, 512, 768, 1024]
-  - name: "model.num_layers"
-    values: [4, 6, 8, 12]
-  - name: "model.activation"
-    values: ["gelu", "relu", "leaky_relu", "star_relu"]
+- name: "model.d_model"
+values: [256, 512, 768, 1024]
+- name: "model.num_layers"
+values: [4, 6, 8, 12]
+- name: "model.activation"
+values: ["gelu", "relu", "leaky_relu", "star_relu"]
 
 execution:
-  max_concurrent: 1
-  continue_on_failure: true
+max_concurrent: 1
+continue_on_failure: true
 ```
 
 ### Beispiel: Quantization Sweep
@@ -247,14 +247,14 @@ sweep_id: "quant_sweep"
 base_config: "configs/runs/run001_control.yaml"
 
 parameters:
-  - name: "quantization.type"
-    values: ["int6", "int5", "mixed", "gptq_lite"]
-  - name: "quantization.threshold"
-    values: [0.2, 0.3, 0.5]
+- name: "quantization.type"
+values: ["int6", "int5", "mixed", "gptq_lite"]
+- name: "quantization.threshold"
+values: [0.2, 0.3, 0.5]
 
 execution:
-  max_concurrent: 1
-  continue_on_failure: true
+max_concurrent: 1
+continue_on_failure: true
 ```
 
 ---
@@ -276,48 +276,48 @@ run = load_config("configs/runs/run001_control.yaml")
 config = merge_configs(base, run)
 
 # Zugriff auf Werte
-print(config.run_id)  # "run001_control"
-print(config.model.d_model)  # 512
-print(config.training.learning_rate)  # 3e-4
+print(config.run_id) # "run001_control"
+print(config.model.d_model) # 512
+print(config.training.learning_rate) # 3e-4
 
 # Config-Hash (für Reproduzierbarkeit)
-print(config.config_hash)  # "a1b2c3d4e5f6..."
+print(config.config_hash) # "a1b2c3d4e5f6..."
 ```
 
 ### Config-Klasse
 
 ```python
 class Config:
-    """Konfigurations-Wrapper mit Type-Safety."""
+"""Konfigurations-Wrapper mit Type-Safety."""
 
-    def __init__(self, raw: dict):
-        self._raw = raw
+def __init__(self, raw: dict):
+self._raw = raw
 
-    @property
-    def run_id(self) -> str:
-        return self._raw.get("run_id", "default")
+@property
+def run_id(self) -> str:
+return self._raw.get("run_id", "default")
 
-    @property
-    def seed(self) -> int:
-        return self._raw.get("seed", 42)
+@property
+def seed(self) -> int:
+return self._raw.get("seed", 42)
 
-    @property
-    def model(self) -> ModelConfig:
-        return ModelConfig(self._raw.get("model", {}))
+@property
+def model(self) -> ModelConfig:
+return ModelConfig(self._raw.get("model", {}))
 
-    @property
-    def training(self) -> TrainingConfig:
-        return TrainingConfig(self._raw.get("training", {}))
+@property
+def training(self) -> TrainingConfig:
+return TrainingConfig(self._raw.get("training", {}))
 
-    @property
-    def config_hash(self) -> str:
-        """SHA256-Hash der Config (cached)."""
-        if not hasattr(self, '_cached_hash'):
-            config_str = json.dumps(self._raw, sort_keys=True)
-            self._cached_hash = hashlib.sha256(
-                config_str.encode()
-            ).hexdigest()[:16]
-        return self._cached_hash
+@property
+def config_hash(self) -> str:
+"""SHA256-Hash der Config (cached)."""
+if not hasattr(self, '_cached_hash'):
+config_str = json.dumps(self._raw, sort_keys=True)
+self._cached_hash = hashlib.sha256(
+config_str.encode()
+).hexdigest()[:16]
+return self._cached_hash
 ```
 
 ---
@@ -426,23 +426,23 @@ run_id: "my_custom_run"
 seed: 42
 
 model:
-  d_model: 768
-  num_layers: 8
-  activation: "gelu"
-  use_feature_gate: true
+d_model: 768
+num_layers: 8
+activation: "gelu"
+use_feature_gate: true
 
 tokenizer:
-  type: "bigram_hash"
-  vocab_size: 8192
+type: "bigram_hash"
+vocab_size: 8192
 
 quantization:
-  enabled: true
-  type: "mixed"
+enabled: true
+type: "mixed"
 
 training:
-  num_steps: 50000
-  learning_rate: 1e-4
-  batch_size: 32
+num_steps: 50000
+learning_rate: 1e-4
+batch_size: 32
 ```
 
 ### Schritt 3: Run starten
@@ -463,10 +463,10 @@ Beim Laden einer Config wird automatisch validiert:
 from core.config import Config, ConfigValidationError
 
 try:
-    config = load_config("configs/runs/invalid.yaml")
-    config.validate()  # Wirft ConfigValidationError bei Fehlern
+config = load_config("configs/runs/invalid.yaml")
+config.validate() # Wirft ConfigValidationError bei Fehlern
 except ConfigValidationError as e:
-    print(f"Config-Validierung fehlgeschlagen: {e}")
+print(f"Config-Validierung fehlgeschlagen: {e}")
 ```
 
 ### Validierungs-Regeln

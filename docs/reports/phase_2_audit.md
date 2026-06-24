@@ -114,93 +114,93 @@ A comprehensive audit of the Phase 2 "Research Engine" implementation has been c
 ### Immediate Actions (Before Phase 3)
 
 1. **Fix MixedQuantizer Bit Bug:**
-   ```python
-   # Current buggy code:
-   if self.mask[i]:
-       q = self.int6.quantize([w], 1, 1)[0]
-       quantized.append(q | 0x40)  # WRONG: exceeds 6-bit range
-   else:
-       q = self.int5.quantize([w], 1, 1)[0]
-       quantized.append(q & 0x3F)  # WRONG: clears bit that might be set
-   
-   # Fix: Use separate metadata or proper bit packing
-   # Option 1: Store mask separately
-   # Option 2: Use higher bits for type marker
-   ```
+```python
+# Current buggy code:
+if self.mask[i]:
+q = self.int6.quantize([w], 1, 1)[0]
+quantized.append(q | 0x40) # WRONG: exceeds 6-bit range
+else:
+q = self.int5.quantize([w], 1, 1)[0]
+quantized.append(q & 0x3F) # WRONG: clears bit that might be set
+
+# Fix: Use separate metadata or proper bit packing
+# Option 1: Store mask separately
+# Option 2: Use higher bits for type marker
+```
 
 2. **Improve Kill Rule Evaluation:**
-   ```python
-   # Instead of:
-   condition=lambda m: (
-       (m.get("delta_ms") or 0) > self.MS_THRESHOLD_INCREASE
-       and ((m.get("delta_bpb") or 0) > -self.BPB_MIN_GAIN),
-   )
-   
-   # Use:
-   condition=lambda m: (
-       m.get("delta_ms") is not None 
-       and m["delta_ms"] > self.MS_THRESHOLD_INCREASE
-       and m.get("delta_bpb") is not None
-       and m["delta_bpb"] > -self.BPB_MIN_GAIN
-   )
-   ```
+```python
+# Instead of:
+condition=lambda m: (
+(m.get("delta_ms") or 0) > self.MS_THRESHOLD_INCREASE
+and ((m.get("delta_bpb") or 0) > -self.BPB_MIN_GAIN),
+)
+
+# Use:
+condition=lambda m: (
+m.get("delta_ms") is not None
+and m["delta_ms"] > self.MS_THRESHOLD_INCREASE
+and m.get("delta_bpb") is not None
+and m["delta_bpb"] > -self.BPB_MIN_GAIN
+)
+```
 
 3. **Add Proper Error Handling:**
-   ```python
-   # Instead of catch-all:
-   except (ImportError, AttributeError):
-       pass
-   
-   # Use:
-   except ImportError as e:
-       logger.warning(f"Rust module not available: {e}, using Python fallback")
-   except AttributeError as e:
-       logger.warning(f"Rust module missing expected attribute: {e}")
-   ```
+```python
+# Instead of catch-all:
+except (ImportError, AttributeError):
+pass
+
+# Use:
+except ImportError as e:
+logger.warning(f"Rust module not available: {e}, using Python fallback")
+except AttributeError as e:
+logger.warning(f"Rust module missing expected attribute: {e}")
+```
 
 4. **Implement Quantizer Performance Improvements:**
-   - Add NumPy dependency for vectorized operations
-   - Implement batch processing for large weight tensors
-   - Add progress reporting for large quantizations
+- Add NumPy dependency for vectorized operations
+- Implement batch processing for large weight tensors
+- Add progress reporting for large quantizations
 
 ### Medium-term Improvements
 
 1. **Add Comprehensive Testing:**
-   - Unit tests for all quantizer edge cases
-   - Integration tests for feature gate application
-   - Property-based tests for kill rules
+- Unit tests for all quantizer edge cases
+- Integration tests for feature gate application
+- Property-based tests for kill rules
 
 2. **Improve Documentation:**
-   - Document bit packing scheme for MixedQuantizer
-   - Add examples for custom kill rules
-   - Create architecture diagrams for Phase 2 components
+- Document bit packing scheme for MixedQuantizer
+- Add examples for custom kill rules
+- Create architecture diagrams for Phase 2 components
 
 3. **Optimize Performance:**
-   - Cache lineage computations in registry
-   - Vectorize quantizer operations
-   - Add config validation caching
+- Cache lineage computations in registry
+- Vectorize quantizer operations
+- Add config validation caching
 
 4. **Enhance User Experience:**
-   - Better error messages for config validation
-   - Progress indicators for long operations
-   - Clearer logging for kill rule decisions
+- Better error messages for config validation
+- Progress indicators for long operations
+- Clearer logging for kill rule decisions
 
 ### Long-term Considerations
 
 1. **Quantizer Integration Pipeline:**
-   - Integrate with model checkpoint loading/saving
-   - Add quantization-aware training support
-   - Implement calibration dataset support
+- Integrate with model checkpoint loading/saving
+- Add quantization-aware training support
+- Implement calibration dataset support
 
 2. **Advanced Feature Gates:**
-   - Add feature gate combinations and interactions
-   - Implement feature gate hierarchies
-   - Add A/B testing support for features
+- Add feature gate combinations and interactions
+- Implement feature gate hierarchies
+- Add A/B testing support for features
 
 3. **Enhanced Ablation Analysis:**
-   - Statistical significance testing
-   - Multi-objective optimization
-   - Automated experiment design
+- Statistical significance testing
+- Multi-objective optimization
+- Automated experiment design
 
 ## Technical Debt Assessment
 
@@ -233,17 +233,17 @@ Once these issues are addressed, Phase 2 provides a solid foundation for systema
 ```python
 # Lines 200-210 in quant/quantizers.py:
 if self.mask[i]:
-    q = self.int6.quantize([w], 1, 1)[0]
-    quantized.append(q | 0x40)  # Problem: 0x40 = 64 > 63 (6-bit max)
+q = self.int6.quantize([w], 1, 1)[0]
+quantized.append(q | 0x40) # Problem: 0x40 = 64 > 63 (6-bit max)
 else:
-    q = self.int5.quantize([w], 1, 1)[0]
-    quantized.append(q & 0x3F)  # Problem: Clears bit 6, but q is already 5-bit
+q = self.int5.quantize([w], 1, 1)[0]
+quantized.append(q & 0x3F) # Problem: Clears bit 6, but q is already 5-bit
 
 # Lines 230-240:
-if q & 0x40:  # Problem: INT6 values have bit 6 set, but they're >63
-    d = self.int6.dequantize([q & 0x3F], 1, 1)[0]  # Masks out bit 6
+if q & 0x40: # Problem: INT6 values have bit 6 set, but they're >63
+d = self.int6.dequantize([q & 0x3F], 1, 1)[0] # Masks out bit 6
 else:
-    d = self.int5.dequantize([q & 0x3F], 1, 1)[0]  # q already 5-bit
+d = self.int5.dequantize([q & 0x3F], 1, 1)[0] # q already 5-bit
 ```
 
 **Root Cause:** Confusion between 5-bit/6-bit ranges and bit marking scheme. INT6 produces values 0-63. Setting bit 6 (0x40) makes values 64-127, exceeding the valid range.

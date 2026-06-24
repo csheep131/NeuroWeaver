@@ -13,11 +13,11 @@ Implemented comprehensive performance optimizations for Phase 3 (Production Pipe
 ### Before (Recursive):
 ```python
 def generate(idx: int, current: list[Any]) -> Iterator[list[Any]]:
-    if idx >= len(self.config.parameters):
-        yield current
-        return
-    for value in param.values:
-        yield from generate(idx + 1, current + [value])
+if idx >= len(self.config.parameters):
+yield current
+return
+for value in param.values:
+yield from generate(idx + 1, current + [value])
 ```
 
 ### After (Iterative):
@@ -25,7 +25,7 @@ def generate(idx: int, current: list[Any]) -> Iterator[list[Any]]:
 import itertools
 value_lists = [param.values for param in self.config.parameters]
 for combination in itertools.product(*value_lists):
-    yield list(combination)
+yield list(combination)
 ```
 
 ### Performance Impact:
@@ -58,9 +58,9 @@ for combination in itertools.product(*value_lists):
 ### Implementation:
 ```python
 def _get_run_entry(self, run_id: str) -> RunEntry | None:
-    if run_id not in self._run_cache:
-        self._run_cache[run_id] = self.registry.get(run_id)
-    return self._run_cache[run_id]
+if run_id not in self._run_cache:
+self._run_cache[run_id] = self.registry.get(run_id)
+return self._run_cache[run_id]
 ```
 
 ### Performance Impact:

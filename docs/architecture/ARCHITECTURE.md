@@ -1,7 +1,7 @@
 # Architecture Documentation
 
-**Last Updated:** 2026-03-24  
-**Project:** Ablation Machine / Wettkampf  
+**Last Updated:** 2026-03-24
+**Project:** Ablation Machine / Wettkampf
 **Status:** Phase 1-3 Complete
 
 ---
@@ -11,25 +11,25 @@
 ### Python/Rust Trennung
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                     PYTHON LAYER (High-Level)                    │
-├─────────────────────────────────────────────────────────────────┤
-│  Orchestrator  │  Research  │  Reports  │  Config  │  Registry  │
-│  - Sweep       │  - Phase   │  - Compare │  - YAML  │  - Runs    │
-│  - Promote     │  - Ablate  │  - Board   │  - Seed  │  - Entry   │
-│  - Submit      │  - Kill    │  - Metrics │  - Log   │  - Cache   │
-└─────────────────────────────────────────────────────────────────┘
-                              │
-                              │ PyO3 Bindings
-                              ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                      RUST LAYER (Performance)                    │
-├─────────────────────────────────────────────────────────────────┤
-│  Tokenizers    │  Quant     │  Models    │  Eval      │
-│  - Byte        │  - INT6    │  - Forward │  - BPB     │
-│  - BigramHash  │  - INT5    │  - Backward│  - Window  │
-│  - TrigramHash │  - Mixed   │  - Layers  │  - Metrics │
-└─────────────────────────────────────────────────────────────────┘
+
+PYTHON LAYER (High-Level)
+
+Orchestrator Research Reports Config Registry
+- Sweep - Phase - Compare - YAML - Runs
+- Promote - Ablate - Board - Seed - Entry
+- Submit - Kill - Metrics - Log - Cache
+
+
+PyO3 Bindings
+
+
+RUST LAYER (Performance)
+
+Tokenizers Quant Models Eval
+- Byte - INT6 - Forward - BPB
+- BigramHash - INT5 - Backward - Window
+- TrigramHash - Mixed - Layers - Metrics
+
 ```
 
 ### Design-Prinzipien
@@ -45,74 +45,74 @@
 ## Modul-Abhängigkeiten
 
 ```
-                                    ┌──────────────┐
-                                    │   configs/   │
-                                    │   (YAML)     │
-                                    └──────┬───────┘
-                                           │
-                                           ▼
-┌──────────────────────────────────────────────────────────────────────┐
-│                              core/                                    │
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐ │
-│  │   config    │←─│   registry  │←─│   logging   │  │    seed     │ │
-│  │   artifacts │  │   RunEntry  │  │   Logger    │  │   SeedMgr   │ │
-│  └──────┬──────┘  └──────┬──────┘  └─────────────┘  └─────────────┘ │
-└─────────┼────────────────┼────────────────────────────────────────────┘
-          │                │
-          ▼                ▼
-┌─────────────────┐  ┌─────────────────────────────────────────────────┐
-│    train/       │  │                    models/                       │
-│  - trainer      │  │  ┌─────────────────┐  ┌───────────────────────┐ │
-│  - optimizer    │  │  │ backbone_factory│  │    feature_gate       │ │
-│  - scheduler    │  │  │ ArchitectureCfg │  │ FeatureGateManager    │ │
-│  - ema          │  │  └─────────────────┘  └───────────────────────┘ │
-└────────┬────────┘  └─────────────────────────────────────────────────┘
-         │
-         ▼
-┌─────────────────────────────────────────────────────────────────────┐
-│                         tokenizers/  &  quant/                       │
-│  ┌─────────────────────────────┐  ┌───────────────────────────────┐ │
-│  │ Byte, BigramHash, Trigram   │  │ Int6Quant, Int5Quant, Mixed   │ │
-│  │ Fallback                    │  │ GPTQLite, QuantizerFactory    │ │
-│  └─────────────────────────────┘  └───────────────────────────────┘ │
-└─────────────────────────────────────────────────────────────────────┘
-         │
-         ▼
-┌─────────────────────────────────────────────────────────────────────┐
-│                           eval/                                      │
-│  ┌──────────────┐  ┌──────────────────┐  ┌───────────────────────┐ │
-│  │  bpb_eval    │  │  sliding_window  │  │    benchmark          │ │
-│  │  BPB-Metrics │  │  Window-Eval     │  │  Performance-Measure  │ │
-│  └──────────────┘  └──────────────────┘  └───────────────────────┘ │
-└─────────────────────────────────────────────────────────────────────┘
-         │
-         ▼
-┌─────────────────────────────────────────────────────────────────────┐
-│                        research/  (Phase 2)                         │
-│  ┌──────────────────┐  ┌──────────────────┐  ┌───────────────────┐ │
-│  │ ablation_engine  │  │ phase1_evaluator │  │ phase2_evaluator  │ │
-│  │ phase3_evaluator │  │ phaseX_success   │  │ phaseX_metrics    │ │
-│  │ KillRules        │  │ Phase1Report     │  │ Phase2Report      │ │
-│  └──────────────────┘  └──────────────────┘  └───────────────────┘ │
-└─────────────────────────────────────────────────────────────────────┘
-         │
-         ▼
-┌─────────────────────────────────────────────────────────────────────┐
-│                      orchestrator/  (Phase 3)                       │
-│  ┌────────────┐ ┌────────────┐ ┌──────────────┐ ┌────────────────┐ │
-│  │   sweep    │ │  promote   │ │ submit_bundle│ │   dashboard    │ │
-│  │  multi_seed│ │ combo_bldr │ │              │ │                │ │
-│  └────────────┘ └────────────┘ └──────────────┘ └────────────────┘ │
-└─────────────────────────────────────────────────────────────────────┘
-         │
-         ▼
-┌─────────────────────────────────────────────────────────────────────┐
-│                          reports/                                    │
-│  ┌──────────────────────┐  ┌────────────────────────────────────┐  │
-│  │   RunComparator      │  │   LeaderboardGenerator             │  │
-│  │   RunComparison      │  │   Leaderboard (by_bpb, efficiency) │  │
-│  └──────────────────────┘  └────────────────────────────────────┘  │
-└─────────────────────────────────────────────────────────────────────┘
+
+configs/
+(YAML)
+
+
+
+
+core/
+
+config ← registry ← logging seed
+artifacts RunEntry Logger SeedMgr
+
+
+
+
+
+train/ models/
+- trainer
+- optimizer backbone_factory feature_gate
+- scheduler ArchitectureCfg FeatureGateManager
+- ema
+
+
+
+
+tokenizers/ & quant/
+
+Byte, BigramHash, Trigram Int6Quant, Int5Quant, Mixed
+Fallback GPTQLite, QuantizerFactory
+
+
+
+
+
+eval/
+
+bpb_eval sliding_window benchmark
+BPB-Metrics Window-Eval Performance-Measure
+
+
+
+
+
+research/ (Phase 2)
+
+ablation_engine phase1_evaluator phase2_evaluator
+phase3_evaluator phaseX_success phaseX_metrics
+KillRules Phase1Report Phase2Report
+
+
+
+
+
+orchestrator/ (Phase 3)
+
+sweep promote submit_bundle dashboard
+multi_seed combo_bldr
+
+
+
+
+
+reports/
+
+RunComparator LeaderboardGenerator
+RunComparison Leaderboard (by_bpb, efficiency)
+
+
 ```
 
 ---
@@ -122,67 +122,67 @@
 ### Config → Run → Metrics → Reports
 
 ```
-┌─────────────────────────────────────────────────────────────────────────┐
-│  1. CONFIG LOADING                                                       │
-│     configs/runs/*.yaml → core.config.Config → validated dict           │
-└─────────────────────────────────────────────────────────────────────────┘
-                                   │
-                                   ▼
-┌─────────────────────────────────────────────────────────────────────────┐
-│  2. RUN INITIALIZATION                                                   │
-│     Config → RunEntry (registry) → Seed setup → Artifacts path          │
-└─────────────────────────────────────────────────────────────────────────┘
-                                   │
-                                   ▼
-┌─────────────────────────────────────────────────────────────────────────┐
-│  3. MODEL CREATION                                                       │
-│     BackboneFactory.create() → FeatureGate.apply() → Model ready        │
-│     Tokenizer.load() → Quantizer.configure()                            │
-└─────────────────────────────────────────────────────────────────────────┘
-                                   │
-                                   ▼
-┌─────────────────────────────────────────────────────────────────────────┐
-│  4. TRAINING LOOP                                                        │
-│     for step in range(num_steps):                                       │
-│       forward() → loss → backward() → optimizer.step()                  │
-│       ema.update() → scheduler.step()                                   │
-│       benchmark.measure() → metrics.log()                               │
-└─────────────────────────────────────────────────────────────────────────┘
-                                   │
-                                   ▼
-┌─────────────────────────────────────────────────────────────────────────┐
-│  5. EVALUATION                                                           │
-│     bpb_eval.evaluate() → sliding_window.eval() → quantize()            │
-│     metrics = {val_bpb, ms_per_step, artifact_bytes, ...}               │
-└─────────────────────────────────────────────────────────────────────────┘
-                                   │
-                                   ▼
-┌─────────────────────────────────────────────────────────────────────────┐
-│  6. RESEARCH ASSESSMENT (Phase 2)                                        │
-│     PhaseEvaluator.assess() → KillRules.check() → AblationReport        │
-│     Decision: CONTINUE | KILL | PROMOTE                                 │
-└─────────────────────────────────────────────────────────────────────────┘
-                                   │
-                                   ▼
-┌─────────────────────────────────────────────────────────────────────────┐
-│  7. ORCHESTRATION (Phase 3)                                              │
-│     Sweep.generate() → Promotion.evaluate() → Submission.build()        │
-│     Dashboard.update() → Leaderboard.generate()                         │
-└─────────────────────────────────────────────────────────────────────────┘
-                                   │
-                                   ▼
-┌─────────────────────────────────────────────────────────────────────────┐
-│  8. REPORTS                                                              │
-│     RunComparator.compare() → LeaderboardGenerator.generate()           │
-│     Output: Markdown tables, JSON exports, ZIP bundles                  │
-└─────────────────────────────────────────────────────────────────────────┘
+
+1. CONFIG LOADING
+configs/runs/*.yaml → core.config.Config → validated dict
+
+
+
+
+2. RUN INITIALIZATION
+Config → RunEntry (registry) → Seed setup → Artifacts path
+
+
+
+
+3. MODEL CREATION
+BackboneFactory.create() → FeatureGate.apply() → Model ready
+Tokenizer.load() → Quantizer.configure()
+
+
+
+
+4. TRAINING LOOP
+for step in range(num_steps):
+forward() → loss → backward() → optimizer.step()
+ema.update() → scheduler.step()
+benchmark.measure() → metrics.log()
+
+
+
+
+5. EVALUATION
+bpb_eval.evaluate() → sliding_window.eval() → quantize()
+metrics = {val_bpb, ms_per_step, artifact_bytes, ...}
+
+
+
+
+6. RESEARCH ASSESSMENT (Phase 2)
+PhaseEvaluator.assess() → KillRules.check() → AblationReport
+Decision: CONTINUE | KILL | PROMOTE
+
+
+
+
+7. ORCHESTRATION (Phase 3)
+Sweep.generate() → Promotion.evaluate() → Submission.build()
+Dashboard.update() → Leaderboard.generate()
+
+
+
+
+8. REPORTS
+RunComparator.compare() → LeaderboardGenerator.generate()
+Output: Markdown tables, JSON exports, ZIP bundles
+
 ```
 
 ---
 
 ## Phase-Komponenten-Übersicht
 
-### Phase 1: Experiment Core ✅
+### Phase 1: Experiment Core
 
 | Modul | Komponenten | Zweck |
 |-------|-------------|-------|
@@ -202,7 +202,7 @@
 
 ---
 
-### Phase 2: Research Engine ✅
+### Phase 2: Research Engine
 
 | Modul | Komponenten | Zweck |
 |-------|-------------|-------|
@@ -215,15 +215,15 @@
 ```python
 FeatureGateManager.enable("feature_x")
 FeatureGateManager.disable("feature_y")
-FeatureGateManager.status()  # FeatureStatus enum
+FeatureGateManager.status() # FeatureStatus enum
 ```
 
 **Kill Rules:**
 ```python
 KillRule(
-    condition="artifact_bytes > 16_000_000",
-    action="kill",
-    reason="Model too large"
+condition="artifact_bytes > 16_000_000",
+action="kill",
+reason="Model too large"
 )
 ```
 
@@ -234,7 +234,7 @@ KillRule(
 
 ---
 
-### Phase 3: Production Pipeline ✅
+### Phase 3: Production Pipeline
 
 | Modul | Komponenten | Zweck |
 |-------|-------------|-------|
@@ -248,11 +248,11 @@ KillRule(
 **Stages:**
 ```
 CANDIDATE → PROMOTED → SUBMITTED
-    │           │          │
-    ▼           ▼          ▼
-  new run   passed     ready for
-  awaiting  thresholds  submission
-  evaluation
+
+
+new run passed ready for
+awaiting thresholds submission
+evaluation
 ```
 
 **Performance-Optimierungen:**
@@ -272,31 +272,31 @@ CANDIDATE → PROMOTED → SUBMITTED
 ### Architektur
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│  Python Code                                                 │
-│  from quant import Int6Quantizer                             │
-│  quantizer = Int6Quantizer()                                 │
-└─────────────────────────────────────────────────────────────┘
-                         │
-                         │ PyO3 Binding
-                         ▼
-┌─────────────────────────────────────────────────────────────┐
-│  rust-core/src/lib.rs                                        │
-│  #[pyclass]                                                  │
-│  pub struct Int6Quantizer { ... }                            │
-│                                                              │
-│  #[pymethods]                                                │
-│  impl Int6Quantizer {                                        │
-│      pub fn quantize(&self, data: Vec<f32>) -> Vec<i8>       │
-│  }                                                           │
-└─────────────────────────────────────────────────────────────┘
-                         │
-                         │ Cargo Build
-                         ▼
-┌─────────────────────────────────────────────────────────────┐
-│  rust_core/*.so (shared library)                             │
-│  Auto-generated by maturin                                   │
-└─────────────────────────────────────────────────────────────┘
+
+Python Code
+from quant import Int6Quantizer
+quantizer = Int6Quantizer()
+
+
+PyO3 Binding
+
+
+rust-core/src/lib.rs
+#[pyclass]
+pub struct Int6Quantizer { ... }
+
+#[pymethods]
+impl Int6Quantizer {
+pub fn quantize(&self, data: Vec<f32>) -> Vec<i8>
+}
+
+
+Cargo Build
+
+
+rust_core/*.so (shared library)
+Auto-generated by maturin
+
 ```
 
 ### Module
@@ -330,25 +330,25 @@ use pyo3::prelude::*;
 
 #[pyclass]
 pub struct Int6Quantizer {
-    scale: f32,
+scale: f32,
 }
 
 #[pymethods]
 impl Int6Quantizer {
-    #[new]
-    fn new() -> Self {
-        Int6Quantizer { scale: 1.0 }
-    }
+#[new]
+fn new() -> Self {
+Int6Quantizer { scale: 1.0 }
+}
 
-    fn quantize(&self, data: Vec<f32>) -> Vec<i8> {
-        data.iter().map(|&x| (x / self.scale) as i8).collect()
-    }
+fn quantize(&self, data: Vec<f32>) -> Vec<i8> {
+data.iter().map(|&x| (x / self.scale) as i8).collect()
+}
 }
 
 #[pymodule]
 fn rust_core(_py: Python, m: &PyModule) -> PyResult<()> {
-    m.add_class::<Int6Quantizer>()?;
-    Ok(())
+m.add_class::<Int6Quantizer>()?;
+Ok(())
 }
 ```
 
@@ -359,13 +359,13 @@ fn rust_core(_py: Python, m: &PyModule) -> PyResult<()> {
 ### Config-Hierarchie
 
 ```
-configs/base.yaml          # Default-Werte für alle Runs
-     ↓
-configs/runs/*.yaml        # Run-spezifische Overrides
-     ↓
-Command-line args          # Runtime-Overrides
-     ↓
-Final Config               # Merged & validated
+configs/base.yaml # Default-Werte für alle Runs
+↓
+configs/runs/*.yaml # Run-spezifische Overrides
+↓
+Command-line args # Runtime-Overrides
+↓
+Final Config # Merged & validated
 ```
 
 ### Config-Schema
@@ -376,29 +376,29 @@ run_id: string
 seed: int
 
 model:
-  d_model: int
-  num_layers: int
-  activation: string
-  use_feature_gate: bool
+d_model: int
+num_layers: int
+activation: string
+use_feature_gate: bool
 
 tokenizer:
-  type: "byte" | "bigram_hash" | "trigram_hash" | "fallback"
-  vocab_size: int
+type: "byte" | "bigram_hash" | "trigram_hash" | "fallback"
+vocab_size: int
 
 quantization:
-  enabled: bool
-  type: "int6" | "int5" | "mixed" | "gptq_lite"
+enabled: bool
+type: "int6" | "int5" | "mixed" | "gptq_lite"
 
 training:
-  num_steps: int
-  learning_rate: float
-  batch_size: int
-  optimizer: "adam" | "adamw"
-  scheduler: "cosine" | "linear" | "none"
+num_steps: int
+learning_rate: float
+batch_size: int
+optimizer: "adam" | "adamw"
+scheduler: "cosine" | "linear" | "none"
 
 evaluation:
-  eval_interval: int
-  window_size: int
+eval_interval: int
+window_size: int
 ```
 
 ---
@@ -409,14 +409,14 @@ evaluation:
 
 ```python
 class RunEntry:
-    run_id: str
-    config: dict
-    status: "pending" | "running" | "completed" | "failed" | "killed"
-    metrics: dict  # val_bpb, ms_per_step, artifact_bytes, ...
-    artifacts: dict  # paths to model.pt, config.yaml, metrics.json
-    parent_run_id: str | None
-    created_at: datetime
-    updated_at: datetime
+run_id: str
+config: dict
+status: "pending" | "running" | "completed" | "failed" | "killed"
+metrics: dict # val_bpb, ms_per_step, artifact_bytes, ...
+artifacts: dict # paths to model.pt, config.yaml, metrics.json
+parent_run_id: str | None
+created_at: datetime
+updated_at: datetime
 ```
 
 ### Registry-Operationen
@@ -445,33 +445,33 @@ completed = registry.filter_by_status("completed")
 
 ```
 results/
-├── runs/
-│   └── <run_id>/
-│       ├── model.pt           # Modell-Weights
-│       ├── config.yaml        # Run-Konfiguration
-│       ├── metrics.json       # Trainings-Metriken
-│       └── logs/
-│           └── training.log   # Trainings-Logs
-│
-├── sweeps/
-│   └── <sweep_id>/
-│       ├── results.json       # Alle Sweep-Ergebnisse
-│       ├── configs/           # Generierte Configs
-│       └── summary.md         # Mensch-lesbare Zusammenfassung
-│
-├── bundles/
-│   └── <bundle_id>.zip        # Submission-Bundle
-│
-├── leaderboards/
-│   ├── bpb.md                 # BPB-Leaderboard
-│   ├── efficiency.md          # Effizienz-Leaderboard
-│   └── quantized.md           # Quantized-Leaderboard
-│
-└── research/
-    ├── ablation_report.md     # Ablation-Report
-    ├── phase1_results.json    # Phase 1 Ergebnisse
-    ├── phase2_results.json    # Phase 2 Ergebnisse
-    └── phase3_results.json    # Phase 3 Ergebnisse
+runs/
+<run_id>/
+model.pt # Modell-Weights
+config.yaml # Run-Konfiguration
+metrics.json # Trainings-Metriken
+logs/
+training.log # Trainings-Logs
+
+sweeps/
+<sweep_id>/
+results.json # Alle Sweep-Ergebnisse
+configs/ # Generierte Configs
+summary.md # Mensch-lesbare Zusammenfassung
+
+bundles/
+<bundle_id>.zip # Submission-Bundle
+
+leaderboards/
+bpb.md # BPB-Leaderboard
+efficiency.md # Effizienz-Leaderboard
+quantized.md # Quantized-Leaderboard
+
+research/
+ablation_report.md # Ablation-Report
+phase1_results.json # Phase 1 Ergebnisse
+phase2_results.json # Phase 2 Ergebnisse
+phase3_results.json # Phase 3 Ergebnisse
 ```
 
 ---
@@ -482,11 +482,11 @@ results/
 
 1. Datei erstellen: `tokenizers/my_tokenizer.py`
 2. Interface implementieren:
-   ```python
-   class MyTokenizer:
-       def encode(self, text: str) -> list[int]: ...
-       def decode(self, ids: list[int]) -> str: ...
-   ```
+```python
+class MyTokenizer:
+def encode(self, text: str) -> list[int]: ...
+def decode(self, ids: list[int]) -> str: ...
+```
 3. In `tokenizers/__init__.py` exportieren
 4. Config-Schema erweitern
 

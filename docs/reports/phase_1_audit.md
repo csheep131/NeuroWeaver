@@ -115,47 +115,47 @@ A comprehensive audit of the Phase 1 implementation of the "Ablation Machine" pr
 ### Immediate Actions (Before Phase 2)
 
 1. **Fix silent exception catching:**
-   ```python
-   # Instead of:
-   except Exception:
-       pass
-   
-   # Use:
-   except (ValueError, UnicodeDecodeError) as e:
-       logger.warning(f"Tokenization failed: {e}")
-       return fallback_encode(text)
-   ```
+```python
+# Instead of:
+except Exception:
+pass
+
+# Use:
+except (ValueError, UnicodeDecodeError) as e:
+logger.warning(f"Tokenization failed: {e}")
+return fallback_encode(text)
+```
 
 2. **Optimize training loop memory:**
-   ```python
-   # Instead of unbounded list:
-   step_times = collections.deque(maxlen=1000)
-   ```
+```python
+# Instead of unbounded list:
+step_times = collections.deque(maxlen=1000)
+```
 
 3. **Cache configuration hashes:**
-   ```python
-   @property
-   def config_hash(self) -> str:
-       if not hasattr(self, '_cached_hash'):
-           config_str = json.dumps(self._raw, sort_keys=True)
-           self._cached_hash = hashlib.sha256(config_str.encode()).hexdigest()[:16]
-       return self._cached_hash
-   ```
+```python
+@property
+def config_hash(self) -> str:
+if not hasattr(self, '_cached_hash'):
+config_str = json.dumps(self._raw, sort_keys=True)
+self._cached_hash = hashlib.sha256(config_str.encode()).hexdigest()[:16]
+return self._cached_hash
+```
 
 4. **Implement batch logging:**
-   ```python
-   class RunLogger:
-       def __init__(self, ...):
-           self._log_buffer = []
-           self._buffer_size = 100
-       
-       def _flush_buffer(self):
-           if self._log_buffer:
-               with open(self.log_path, "a") as f:
-                   for entry in self._log_buffer:
-                       f.write(json.dumps(entry) + "\n")
-               self._log_buffer.clear()
-   ```
+```python
+class RunLogger:
+def __init__(self, ...):
+self._log_buffer = []
+self._buffer_size = 100
+
+def _flush_buffer(self):
+if self._log_buffer:
+with open(self.log_path, "a") as f:
+for entry in self._log_buffer:
+f.write(json.dumps(entry) + "\n")
+self._log_buffer.clear()
+```
 
 ### Medium-term Improvements
 

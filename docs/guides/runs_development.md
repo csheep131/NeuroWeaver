@@ -46,7 +46,7 @@ jede Config ändert exakt einen Parameter gegenüber dem Parent.
 
 ## Der Ablation-Plan: 10 Runs in 5 Phasen
 
-### 🧱 Phase A — Stabiles Fundament (Runs 1–3)
+### Phase A — Stabiles Fundament (Runs 1–3)
 
 #### Run 1: Control Baseline
 
@@ -122,7 +122,7 @@ Kill-Kriterium: Langsamer + kein BPB-Gain → sofort raus.
 
 ---
 
-### ⚙️ Phase B — MLP und Aktivierung (Runs 4–5)
+### Phase B — MLP und Aktivierung (Runs 4–5)
 
 #### Run 4: LeakyReLU²
 
@@ -162,7 +162,7 @@ Engineering-Kosten bei Quantisierung und Debugging erheblich.
 
 ---
 
-### 💾 Phase C — Quantisierungsbudget (Runs 6–7)
+### Phase C — Quantisierungsbudget (Runs 6–7)
 
 #### Run 6: Mixed INT5/INT6
 
@@ -205,7 +205,7 @@ Budget besser in Kapazität investiert ist.
 
 ---
 
-### 🚀 Phase D — Frontier-Hebel (Runs 8–9)
+### Phase D — Frontier-Hebel (Runs 8–9)
 
 #### Run 8: XSA-4
 
@@ -217,8 +217,8 @@ Aktiviere XSA nur auf den letzten 4 Layern:
 
 ```yaml
 xsa:
-  enabled: true
-  layers: [8, 9, 10, 11]  # letzte 4 bei 12 Layern
+enabled: true
+layers: [8, 9, 10, 11] # letzte 4 bei 12 Layern
 ```
 
 Was du beobachtest:
@@ -252,7 +252,7 @@ Kill-Kriterium: Volatil / instabil / schlechter als Run 8.
 
 ---
 
-### 🏁 Phase E — Finale (Run 10)
+### Phase E — Finale (Run 10)
 
 #### Run 10: 3-Seed-Finale
 
@@ -269,13 +269,13 @@ Nicht beide. Die Evidenz spricht gegen blindes Stapeln.
 python3 -c "
 from orchestrator import create_multi_seed_orchestrator
 orch = create_multi_seed_orchestrator(
-    base_config_path='configs/runs/run_finale.yaml',
-    num_seeds=3,
-    seeds=[42, 123, 456],
+base_config_path='configs/runs/run_finale.yaml',
+num_seeds=3,
+seeds=[42, 123, 456],
 )
 runs = orch.prepare_runs()
 for r in runs:
-    print(f'Starte: {r.run_id} (seed={r.seed})')
+print(f'Starte: {r.run_id} (seed={r.seed})')
 "
 ```
 
@@ -286,10 +286,10 @@ for r in runs:
 Nach **jedem** Run stellst du exakt diese vier Fragen:
 
 ```
-1. BPB besser?          (Hauptmetrik — niedrig ist besser)
-2. ms/step schlechter?  (Overhead — kostet Schritte)
-3. Artifact-Budget?     (freier Platz unter 16MB?)
-4. Komplexität ok?      (Engineering-Kosten gerechtfertigt?)
+1. BPB besser? (Hauptmetrik — niedrig ist besser)
+2. ms/step schlechter? (Overhead — kostet Schritte)
+3. Artifact-Budget? (freier Platz unter 16MB?)
+4. Komplexität ok? (Engineering-Kosten gerechtfertigt?)
 ```
 
 Wenn 2 von 4 Punkten negativ → Feature fliegt raus.
@@ -306,9 +306,9 @@ registry = RunRegistry()
 reporter = AblationReporter(registry)
 kills = reporter.apply_kills()
 if kills:
-    print('Killed:', kills)
+print('Killed:', kills)
 else:
-    print('Alle Runs bestehen Kill-Rules')
+print('Alle Runs bestehen Kill-Rules')
 
 # Aktuellen Report anzeigen
 report = reporter.generate_report()
@@ -361,9 +361,9 @@ from orchestrator import SubmissionBuilder
 
 builder = SubmissionBuilder()
 bundle = builder.create_bundle(
-    run_ids=["run010_finale_seed001", "run010_finale_seed002", "run010_finale_seed003"],
-    output_dir="submission/",
-    include_configs=True,
+run_ids=["run010_finale_seed001", "run010_finale_seed002", "run010_finale_seed003"],
+output_dir="submission/",
+include_configs=True,
 )
 print(f"Bundle: {bundle.output_dir}")
 print(f"Best BPB: {bundle.metrics_summary['best_bpb']}")
@@ -410,28 +410,28 @@ Wenn alles nach Plan läuft, sieht das Gewinner-Setup so aus:
 ```yaml
 # Backbone
 model:
-  d_model: 512
-  recurrence:
-    enabled: true
-    depth: 2
-    tied: true
+d_model: 512
+recurrence:
+enabled: true
+depth: 2
+tied: true
 
 # Tokenizer
 tokenizer:
-  type: bigram_hash
-  vocab_size: 4096  # nicht übertreiben
+type: bigram_hash
+vocab_size: 4096 # nicht übertreiben
 
 # Aktivierung
-  activation: leaky_relu  # kein Gate wenn nicht klar besser
+activation: leaky_relu # kein Gate wenn nicht klar besser
 
 # Quant
 quant:
-  type: int5_int6_mixed  # MLP=int5, Attn/Embed=int6
+type: int5_int6_mixed # MLP=int5, Attn/Embed=int6
 
 # Frontier
-  xsa:
-    enabled: true
-    layers: [8, 9, 10, 11]  # nur letzte 4
+xsa:
+enabled: true
+layers: [8, 9, 10, 11] # nur letzte 4
 ```
 
 ---
@@ -440,16 +440,16 @@ quant:
 
 | Run | Phase | Änderung | Erwartung | Kill-Kriterium | KEEP |
 |-----|-------|----------|-----------|----------------|------|
-| 1 | A | Baseline Backbone | Stabiler Nullpunkt | Instabil / zu langsam | ✅ Pflicht |
+| 1 | A | Baseline Backbone | Stabiler Nullpunkt | Instabil / zu langsam | Pflicht |
 | 2 | A | Bigram+Trigram Hash | Klarer BPB-Drop | ΔBPB < 0.002 | ggf. |
-| 3 | A | Byte Fallback | Stabilere BPB | Langsamer + kein Gain | ❌ meistens raus |
-| 4 | B | LeakyReLU² | Solider Boost | ΔBPB < 0.002 | wahrscheinlich ✅ |
-| 5 | B | Gated LeakyReLU² | Stärker als Run 4 | Minimal besser + komplexer | ❌ wenn nicht klar besser |
-| 6 | C | Mixed INT5/INT6 | Mehr Platz | Quant-Gap > 0.1 BPB | ✅ wenn stabil |
-| 7 | C | Größer trainieren | Besseres BPB | Kein Gewinn trotz Größe | ✅ nur wenn besser |
-| 8 | D | XSA letzte 4 Layer | Starker Boost | Stepzeit explodiert | 🔥 Favorit |
+| 3 | A | Byte Fallback | Stabilere BPB | Langsamer + kein Gain | meistens raus |
+| 4 | B | LeakyReLU² | Solider Boost | ΔBPB < 0.002 | wahrscheinlich |
+| 5 | B | Gated LeakyReLU² | Stärker als Run 4 | Minimal besser + komplexer | wenn nicht klar besser |
+| 6 | C | Mixed INT5/INT6 | Mehr Platz | Quant-Gap > 0.1 BPB | wenn stabil |
+| 7 | C | Größer trainieren | Besseres BPB | Kein Gewinn trotz Größe | nur wenn besser |
+| 8 | D | XSA letzte 4 Layer | Starker Boost | Stepzeit explodiert | Favorit |
 | 9 | D | TTT minimal (kein XSA) | BPB runter | Volatil / instabil | optional |
-| 10 | E | 3-Seed-Finale | Stabil | Große Varianz | 🏆 |
+| 10 | E | 3-Seed-Finale | Stabil | Große Varianz | |
 
 ---
 

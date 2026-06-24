@@ -87,6 +87,7 @@ class Hyperparameters:
     bigram_vocab_size = int(os.environ.get("BIGRAM_VOCAB_SIZE", 2048))
     bigram_dim = int(os.environ.get("BIGRAM_DIM", 128))
     xsa_last_n = int(os.environ.get("XSA_LAST_N", 4))
+    xsa_all_layer = bool(int(os.environ.get("XSA_ALL_LAYER", "0")))  # XSA on ALL layers (overrides xsa_last_n)
     rope_dims = int(os.environ.get("ROPE_DIMS", 16))
     ln_scale = bool(int(os.environ.get("LN_SCALE", "1")))
     dtg_enabled = bool(int(os.environ.get("DTG_ENABLED", "0")))
@@ -94,8 +95,8 @@ class Hyperparameters:
     ve_enabled = bool(int(os.environ.get("VE_ENABLED", "1")))
     ve_dim = int(os.environ.get("VE_DIM", 128))
     ve_layers = os.environ.get("VE_LAYERS", "9,10")
-    gated_attention = bool(int(os.environ.get("GATED_ATTENTION", "0")))
-    value_residual = bool(int(os.environ.get("VALUE_RESIDUAL", "0")))
+    gated_attention = bool(int(os.environ.get("GATED_ATTENTION", "1")))
+    value_residual = bool(int(os.environ.get("VALUE_RESIDUAL", "1")))
     ttt_enabled = bool(int(os.environ.get("TTT_ENABLED", "0")))
     ttt_lr = float(os.environ.get("TTT_LR", 0.002))
     ttt_epochs = int(os.environ.get("TTT_EPOCHS", 3))
@@ -595,7 +596,7 @@ class Rotary(nn.Module):
             self._cos_cached = freqs.cos()[None, :, None, :]
             self._sin_cached = freqs.sin()[None, :, None, :]
             self._seq_len_cached = seq_len
-        return self._cos_cached.to(dtype=dtype), self._sin_cached.to(dtype=dtype)
+        return self._cos_cached.to(dtype=dtype), self._sin_cached.to(dtype=dtype).clone()
 def apply_rotary_emb(x: Tensor, cos: Tensor, sin: Tensor, rope_dims: int = 0) -> Tensor:
     if rope_dims > 0 and rope_dims < x.size(-1):
         x_rope, x_pass = x[..., :rope_dims], x[..., rope_dims:]
@@ -811,6 +812,7 @@ class GPT(nn.Module):
         bigram_vocab_size: int = 0,
         bigram_dim: int = 128,
         xsa_last_n: int = 0,
+        xsa_all_layer: bool = False,
         rope_dims: int = 0,
         ln_scale: bool = False,
         dtg: bool = False,
@@ -893,7 +895,10 @@ class GPT(nn.Module):
             # am Anfang nicht durch Rauschen instabil macht.
             nn.init.zeros_(head.weight) 
             head._zero_init = True
-        if xsa_last_n > 0:
+        if xsa_all_layer:
+            for i in range(num_layers):
+                self.blocks[i].attn.use_xsa = True
+        elif xsa_last_n > 0:
             for i in range(max(0, num_layers - xsa_last_n), num_layers):
                 self.blocks[i].attn.use_xsa = True
         self._init_weights()
@@ -1279,7 +1284,7 @@ def eval_val_sliding_ttt(
                         y = local[1:].reshape(-1, seq_len)
                         optimizer.zero_grad(set_to_none=True)
                         with torch.autocast(device_type="cuda", dtype=torch.bfloat16):
-                            loss = base_model(x, y)
+                            loss = base_model(x.clone(), y.clone(), current_softcap=100.0)
                         loss.backward()
                         if world_size > 1:
                             for p in ttt_params:
@@ -1560,6 +1565,7 @@ def main() -> None:
         bigram_vocab_size=args.bigram_vocab_size,
         bigram_dim=args.bigram_dim,
         xsa_last_n=args.xsa_last_n,
+        xsa_all_layer=args.xsa_all_layer,
         rope_dims=args.rope_dims,
         ln_scale=args.ln_scale,
         dtg=args.dtg_enabled,
@@ -1671,7 +1677,10 @@ def main() -> None:
     log0(f"model_params:{n_params}")
     log0(f"mtp_num_heads:{args.mtp_num_heads} mtp_loss_weight:{args.mtp_loss_weight} mtp_params:{mtp_params}")
     xsa_layers = [i for i, b in enumerate(base_model.blocks) if b.attn.use_xsa]
-    log0(f"XSA:last_{args.xsa_last_n} active_layers:{xsa_layers}")
+    if args.xsa_all_layer:
+        log0(f"XSA:ALL {args.num_layers} layers active_layers:{xsa_layers}")
+    else:
+        log0(f"XSA:last_{args.xsa_last_n} active_layers:{xsa_layers}")
     log0(f"world_size:{world_size} grad_accum_steps:{grad_accum_steps}")
     log0("sdp_backends:cudnn=False flash=True mem_efficient=False math=False")
     log0(f"attention_mode:gqa num_heads:{args.num_heads} num_kv_heads:{args.num_kv_heads}")
@@ -1686,8 +1695,8 @@ def main() -> None:
         f"max_wallclock_seconds:{args.max_wallclock_seconds:.3f}"
     )
     log0(f"seed:{args.seed}")
-    resume_step = 0 # Hier den gewünschten Start-Step setzen
-    step = 0 # Da du neu anfängst
+    resume_step = 0  # Smoke-test: kein Resume
+    step = resume_step # Da du neu anfängst
     train_loader = DistributedTokenLoader(args.train_files, rank, world_size, device)
     
     if resume_step > 0:
@@ -1951,6 +1960,7 @@ def main() -> None:
         mtp_num_heads=0, mtp_loss_weight=0.0,
         bigram_vocab_size=args.bigram_vocab_size, bigram_dim=args.bigram_dim,
         xsa_last_n=args.xsa_last_n,
+        xsa_all_layer=args.xsa_all_layer,
         rope_dims=args.rope_dims, ln_scale=args.ln_scale, dtg=args.dtg_enabled,
         ve_enabled=args.ve_enabled, ve_dim=args.ve_dim, ve_layers=args.ve_layers,
         gated_attention=args.gated_attention, value_residual=args.value_residual,

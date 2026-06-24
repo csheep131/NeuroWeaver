@@ -5,21 +5,21 @@
 
 ---
 
-## ✅ BESTANDENE TESTS
+## BESTANDENE TESTS
 
 ### 1. Import Tests
 
 | Komponente | Status | Notes |
 |------------|--------|-------|
-| `train_gpt.py` | ✅ PASS | Alle Imports erfolgreich |
-| `train_gpt_mlx.py` | ✅ PASS | Importierbar (auch ohne MLX) |
-| `data/cached_challenge_fineweb.py` | ✅ PASS | Alle Klassen verfügbar |
+| `train_gpt.py` | PASS | Alle Imports erfolgreich |
+| `train_gpt_mlx.py` | PASS | Importierbar (auch ohne MLX) |
+| `data/cached_challenge_fineweb.py` | PASS | Alle Klassen verfügbar |
 
 **Test-Output:**
 ```
-✅ train_gpt.py Import OK - Model: 32.27M params
-✅ train_gpt_mlx.py Import OK - Config verfügbar, MLX verfügbar: False
-✅ cached_challenge_fineweb.py Import OK
+train_gpt.py Import OK - Model: 32.27M params
+train_gpt_mlx.py Import OK - Config verfügbar, MLX verfügbar: False
+cached_challenge_fineweb.py Import OK
 ```
 
 ---
@@ -28,10 +28,10 @@
 
 | Test | Status | Ergebnis |
 |------|--------|----------|
-| Model Creation (2L, 128d) | ✅ PASS | 0.53M Parameter |
-| Forward Pass | ✅ PASS | logits shape = [2, 64, 1024] |
-| Loss Computation | ✅ PASS | loss = 6.04 (zufällig, erwartet) |
-| Compression | ✅ PASS | 0.46 MB (< 16 MB) ✅ |
+| Model Creation (2L, 128d) | PASS | 0.53M Parameter |
+| Forward Pass | PASS | logits shape = [2, 64, 1024] |
+| Loss Computation | PASS | loss = 6.04 (zufällig, erwartet) |
+| Compression | PASS | 0.46 MB (< 16 MB) |
 
 **Test-Code:**
 ```python
@@ -46,10 +46,10 @@ size, _ = compress_model(model)
 ```
 
 **Ergebnisse:**
-- ✅ Model erstellt erfolgreich
-- ✅ Forward Pass funktioniert
-- ✅ Loss wird berechnet (wenn auch zufällig)
-- ✅ Compression ergibt 0.46 MB (weit unter 16 MB Limit)
+- Model erstellt erfolgreich
+- Forward Pass funktioniert
+- Loss wird berechnet (wenn auch zufällig)
+- Compression ergibt 0.46 MB (weit unter 16 MB Limit)
 
 ---
 
@@ -57,9 +57,9 @@ size, _ = compress_model(model)
 
 | Test | Status | Notes |
 |------|--------|-------|
-| FineWebDataset Import | ✅ PASS | Klasse verfügbar |
-| Tokenizer Fallback | ✅ PASS | Graceful degradation ohne Tokenizer |
-| Data Path Fallback | ✅ PASS | Generiert zufällige Daten wenn keine Shards |
+| FineWebDataset Import | PASS | Klasse verfügbar |
+| Tokenizer Fallback | PASS | Graceful degradation ohne Tokenizer |
+| Data Path Fallback | PASS | Generiert zufällige Daten wenn keine Shards |
 
 **Test-Output:**
 ```
@@ -73,10 +73,10 @@ Warning: Data path data/datasets/fineweb10B_sp1024 does not exist
 
 | Test | Status | Notes |
 |------|--------|-------|
-| Training Start | ✅ PASS | Initialisierung erfolgreich |
-| Model auf CUDA | ✅ PASS | Device: cuda |
-| First Step | ✅ PASS | Step 0 wurde ausgeführt |
-| Wallclock Timer | ✅ PASS | 600s Limit konfiguriert |
+| Training Start | PASS | Initialisierung erfolgreich |
+| Model auf CUDA | PASS | Device: cuda |
+| First Step | PASS | Step 0 wurde ausgeführt |
+| Wallclock Timer | PASS | 600s Limit konfiguriert |
 
 **Test-Output:**
 ```
@@ -100,67 +100,67 @@ Training completed
 ```
 
 **Bekannte Issues im Smoke Test:**
-- ⚠️ Loss = "nan" (erwartet, da zufällige Daten ohne Tokenizer)
-- ⚠️ LR = 0.000000 bei Step 0 (Warmup startet bei 0)
-- ⚠️ Nur Step 0 ausgeführt (hängt sich danach auf)
+- Loss = "nan" (erwartet, da zufällige Daten ohne Tokenizer)
+- LR = 0.000000 bei Step 0 (Warmup startet bei 0)
+- Nur Step 0 ausgeführt (hängt sich danach auf)
 
 ---
 
-## ⚠️ BEKANNTE ISSUES
+## BEKANNTE ISSUES
 
 ### 1. Training hängt nach erstStep
 
-**Status:** ⚠️ Investigated
+**Status:** Investigated
 
 **Symptom:** Training startet, führt Step 0 aus, hängt sich dann auf.
 
 **Ursache:** Vermutlich im Data Loading bei zufälligen Daten (kein echtes Dataset).
 
-**Workaround:** 
+**Workaround:**
 - Echtes Dataset herunterladen für vollständige Tests
 - Oder: Data Loading Logik für Smoke Tests ohne Dataset verbessern
 
-**Auswirkung:** 
-- ✅ Code ist korrekt (Syntax, Imports, Model Creation funktionieren)
-- ⚠️ Vollständiges Training benötigt echtes Dataset
+**Auswirkung:**
+- Code ist korrekt (Syntax, Imports, Model Creation funktionieren)
+- Vollständiges Training benötigt echtes Dataset
 
 ---
 
 ### 2. Tokenizer Fallback
 
-**Status:** ✅ Fixed
+**Status:** Fixed
 
 **Problem:** Tokenizer Datei existiert nicht (noch nicht heruntergeladen).
 
 **Lösung:** Graceful Fallback implementiert:
 ```python
 if self.tokenizer_path and Path(self.tokenizer_path).exists():
-    self.sp.Load(str(self.tokenizer_path))
+self.sp.Load(str(self.tokenizer_path))
 else:
-    print(f"Warning: Tokenizer not found, using byte-level fallback")
-    self.sp = None
+print(f"Warning: Tokenizer not found, using byte-level fallback")
+self.sp = None
 ```
 
 ---
 
-## 📊 ZUSAMMENFASSUNG
+## ZUSAMMENFASSUNG
 
 ### Test-Abdeckung
 
 | Kategorie | Tests | Bestanden | Failed | Skip |
 |-----------|-------|-----------|--------|------|
-| **Imports** | 3 | 3 ✅ | 0 | 0 |
-| **Model** | 4 | 4 ✅ | 0 | 0 |
-| **Dataset** | 3 | 3 ✅ | 0 | 0 |
-| **Training** | 4 | 3 ✅ | 0 | 1 ⚠️ |
-| **Compression** | 1 | 1 ✅ | 0 | 0 |
-| **GESAMT** | 15 | 14 ✅ | 0 | 1 ⚠️ |
+| **Imports** | 3 | 3 | 0 | 0 |
+| **Model** | 4 | 4 | 0 | 0 |
+| **Dataset** | 3 | 3 | 0 | 0 |
+| **Training** | 4 | 3 | 0 | 1 |
+| **Compression** | 1 | 1 | 0 | 0 |
+| **GESAMT** | 15 | 14 | 0 | 1 |
 
 ### Erfolgsquote: 93% (14/15)
 
 ---
 
-## 🎯 NÄCHSTE SCHRITTE
+## NÄCHSTE SCHRITTE
 
 ### Priorität 1: Dataset herunterladen
 
@@ -198,7 +198,7 @@ model = GPT(cfg)
 size, _ = compress_model(model)
 print(f'Compressed: {size / 1_000_000:.2f} MB')
 assert size < 16_000_000, 'Artifact zu groß!'
-print('✅ Meets 16MB limit')
+print(' Meets 16MB limit')
 "
 ```
 
@@ -208,7 +208,7 @@ print('✅ Meets 16MB limit')
 
 ---
 
-## 🔧 TECHNISCHE DETAILS
+## TECHNISCHE DETAILS
 
 ### Test-Umgebung
 
@@ -223,15 +223,15 @@ Device: cuda:0
 
 ```python
 Config(
-    num_layers=11,
-    d_model=512,
-    num_heads=8,
-    kv_heads=4,
-    mlp_ratio=4,
-    vocab_size=1024,
-    max_seq_len=1024,
-    activation="leaky_relu_squared",
-    leakiness=0.5
+num_layers=11,
+d_model=512,
+num_heads=8,
+kv_heads=4,
+mlp_ratio=4,
+vocab_size=1024,
+max_seq_len=1024,
+activation="leaky_relu_squared",
+leakiness=0.5
 )
 ```
 
@@ -251,21 +251,21 @@ Config(
 
 ---
 
-## ✅ FAZIT
+## FAZIT
 
 ### Was funktioniert
 
-1. ✅ **Alle Imports** — Code ist syntaktisch korrekt
-2. ✅ **Model Creation** — GPT Modell erstellt erfolgreich
-3. ✅ **Forward Pass** — Logits und Loss werden berechnet
-4. ✅ **Compression** — INT8 + zlib funktioniert
-5. ✅ **Dataset Fallback** — Graceful degradation ohne Dataset
+1. **Alle Imports** — Code ist syntaktisch korrekt
+2. **Model Creation** — GPT Modell erstellt erfolgreich
+3. **Forward Pass** — Logits und Loss werden berechnet
+4. **Compression** — INT8 + zlib funktioniert
+5. **Dataset Fallback** — Graceful degradation ohne Dataset
 
 ### Was noch Arbeit braucht
 
-1. ⚠️ **Dataset Download** — Muss für vollständige Tests ausgeführt werden
-2. ⚠️ **Training Loop** — Hängt nach erstem Step (vermutlich Data Loading Issue)
-3. ⚠️ **Validation** — Benötigt echtes Dataset
+1. **Dataset Download** — Muss für vollständige Tests ausgeführt werden
+2. **Training Loop** — Hängt nach erstem Step (vermutlich Data Loading Issue)
+3. **Validation** — Benötigt echtes Dataset
 
 ### Empfehlung
 

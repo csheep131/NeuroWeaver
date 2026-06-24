@@ -1,6 +1,6 @@
 # Entwickler-Guide
 
-**Letztes Update:** 2026-03-24  
+**Letztes Update:** 2026-03-24
 **Zielgruppe:** Entwickler, die am Wettkampf-Projekt arbeiten
 
 ---
@@ -29,9 +29,9 @@ cd wettkampf
 ```bash
 # Python 3.10+ empfohlen
 python3 -m venv .venv
-source .venv/bin/activate  # Linux/Mac
+source .venv/bin/activate # Linux/Mac
 # oder
-.venv\Scripts\activate  # Windows
+.venv\Scripts\activate # Windows
 
 # Dependencies installieren
 pip install -r requirements.txt
@@ -70,72 +70,72 @@ python3 -c "import rust_core; print('Rust-Core: OK')"
 
 ```
 wettkampf/
-├── configs/                   # YAML-Konfigurationen
-│   ├── base.yaml              # Base-Konfiguration
-│   └── runs/                  # Run-Konfigurationen (19)
-│
-├── core/                      # Phase 1: Experiment Core
-│   ├── config.py              # Config-Loading
-│   ├── registry.py            # Run-Registry
-│   ├── logging.py             # Logging
-│   ├── seed.py                # Seed-Management
-│   └── artifacts.py           # Artifact-Tracking
-│
-├── models/factories/          # Phase 2: Model Factories
-│   ├── backbone_factory.py    # BackboneFactory
-│   └── feature_gate.py        # FeatureGate, FeatureGateManager
-│
-├── tokenizers/                # Phase 2: Tokenizer Lab
-│   └── tokenizers.py          # Byte, BigramHash, TrigramHash
-│
-├── quant/                     # Phase 2: Quantization Lab
-│   └── quantizers.py          # Int6Quantizer, Int5Quantizer, MixedQuantizer
-│
-├── train/                     # Phase 1: Training
-│   ├── trainer.py             # Training-Loop
-│   ├── optimizer_factory.py   # OptimizerFactory
-│   ├── scheduler.py           # Learning Rate Scheduler
-│   └── ema.py                 # Exponential Moving Average
-│
-├── eval/                      # Phase 1: Evaluation
-│   ├── bpb_eval.py            # BPB-Evaluation
-│   ├── sliding_window.py      # Sliding Window Evaluation
-│   └── benchmark.py           # Performance Benchmarking
-│
-├── research/                  # Phase 2: Research Engine
-│   ├── ablation_engine.py     # AblationReporter, KillRules
-│   ├── phase1_evaluator.py    # Phase1Evaluator
-│   ├── phase2_evaluator.py    # Phase2Evaluator
-│   └── phase3_evaluator.py    # Phase3Evaluator
-│
-├── orchestrator/              # Phase 3: Production Pipeline
-│   ├── sweep.py               # SweepRunner
-│   ├── promote.py             # PromotionSystem
-│   ├── submit_bundle.py       # SubmissionBuilder
-│   ├── dashboard.py           # Dashboard CLI
-│   ├── multi_seed.py          # MultiSeedOrchestrator
-│   └── combo_builder.py       # DynamicComboBuilder
-│
-├── reports/                   # Phase 1: Reporting
-│   ├── compare_runs.py        # RunComparator
-│   └── leaderboard.py         # LeaderboardGenerator
-│
-├── runs/                      # Phase 1: Run-System
-│   ├── run.py                 # Haupt-Run-Logik
-│   └── __main__.py            # CLI-Entry-Point
-│
-├── rust-core/                 # Rust-Core (Performance-kritisch)
-│   ├── Cargo.toml
-│   └── src/
-│       ├── lib.rs             # Python-Bindings
-│       ├── tokenizers.rs      # Rust-Tokenizer
-│       ├── quant.rs           # Rust-Quantisierung
-│       ├── models.rs          # Rust-Modelle
-│       └── eval.rs            # Rust-Evaluation
-│
-├── rust_core/                 # Python-Bindings (auto-generiert)
-├── results/                   # Ergebnisse (auto-generiert)
-└── tests/                     # Tests (in Entwicklung)
+configs/ # YAML-Konfigurationen
+base.yaml # Base-Konfiguration
+runs/ # Run-Konfigurationen (19)
+
+core/ # Phase 1: Experiment Core
+config.py # Config-Loading
+registry.py # Run-Registry
+logging.py # Logging
+seed.py # Seed-Management
+artifacts.py # Artifact-Tracking
+
+models/factories/ # Phase 2: Model Factories
+backbone_factory.py # BackboneFactory
+feature_gate.py # FeatureGate, FeatureGateManager
+
+tokenizers/ # Phase 2: Tokenizer Lab
+tokenizers.py # Byte, BigramHash, TrigramHash
+
+quant/ # Phase 2: Quantization Lab
+quantizers.py # Int6Quantizer, Int5Quantizer, MixedQuantizer
+
+train/ # Phase 1: Training
+trainer.py # Training-Loop
+optimizer_factory.py # OptimizerFactory
+scheduler.py # Learning Rate Scheduler
+ema.py # Exponential Moving Average
+
+eval/ # Phase 1: Evaluation
+bpb_eval.py # BPB-Evaluation
+sliding_window.py # Sliding Window Evaluation
+benchmark.py # Performance Benchmarking
+
+research/ # Phase 2: Research Engine
+ablation_engine.py # AblationReporter, KillRules
+phase1_evaluator.py # Phase1Evaluator
+phase2_evaluator.py # Phase2Evaluator
+phase3_evaluator.py # Phase3Evaluator
+
+orchestrator/ # Phase 3: Production Pipeline
+sweep.py # SweepRunner
+promote.py # PromotionSystem
+submit_bundle.py # SubmissionBuilder
+dashboard.py # Dashboard CLI
+multi_seed.py # MultiSeedOrchestrator
+combo_builder.py # DynamicComboBuilder
+
+reports/ # Phase 1: Reporting
+compare_runs.py # RunComparator
+leaderboard.py # LeaderboardGenerator
+
+runs/ # Phase 1: Run-System
+run.py # Haupt-Run-Logik
+__main__.py # CLI-Entry-Point
+
+rust-core/ # Rust-Core (Performance-kritisch)
+Cargo.toml
+src/
+lib.rs # Python-Bindings
+tokenizers.rs # Rust-Tokenizer
+quant.rs # Rust-Quantisierung
+models.rs # Rust-Modelle
+eval.rs # Rust-Evaluation
+
+rust_core/ # Python-Bindings (auto-generiert)
+results/ # Ergebnisse (auto-generiert)
+tests/ # Tests (in Entwicklung)
 ```
 
 ---
@@ -157,18 +157,18 @@ wettkampf/
 ```yaml
 # configs/base.yaml
 model:
-  d_model: 512
-  num_layers: 6
-  activation: "gelu"
-  use_layer_norm: true  # NEU
+d_model: 512
+num_layers: 6
+activation: "gelu"
+use_layer_norm: true # NEU
 ```
 
 ```python
 # core/config.py
 class Config:
-    @property
-    def use_layer_norm(self) -> bool:
-        return self._raw.get("model", {}).get("use_layer_norm", True)
+@property
+def use_layer_norm(self) -> bool:
+return self._raw.get("model", {}).get("use_layer_norm", True)
 ```
 
 ---
@@ -191,15 +191,15 @@ from models.factories.feature_gate import FeatureGate, FeatureDependency
 
 # Neues Feature-Gate für LayerNorm
 layer_norm_gate = FeatureGate(
-    name="layer_norm",
-    dependencies=[
-        FeatureDependency(
-            name="use_layer_norm",
-            condition=lambda c: c.get("model", {}).get("use_layer_norm", False),
-            required=True,
-        ),
-    ],
-    condition=lambda c: c.get("model", {}).get("use_layer_norm", False),
+name="layer_norm",
+dependencies=[
+FeatureDependency(
+name="use_layer_norm",
+condition=lambda c: c.get("model", {}).get("use_layer_norm", False),
+required=True,
+),
+],
+condition=lambda c: c.get("model", {}).get("use_layer_norm", False),
 )
 
 # Registrieren
@@ -211,20 +211,20 @@ FeatureGateManager.register(layer_norm_gate)
 ```python
 # tokenizers/tokenizers.py
 class UnigramHashTokenizer:
-    def __init__(self, vocab_size: int = 8192):
-        self.vocab_size = vocab_size
+def __init__(self, vocab_size: int = 8192):
+self.vocab_size = vocab_size
 
-    def encode(self, text: str) -> list[int]:
-        # Unigram-Hash-Implementierung
-        tokens = []
-        for char in text:
-            token = hash(char) % self.vocab_size
-            tokens.append(token)
-        return tokens
+def encode(self, text: str) -> list[int]:
+# Unigram-Hash-Implementierung
+tokens = []
+for char in text:
+token = hash(char) % self.vocab_size
+tokens.append(token)
+return tokens
 
-    def decode(self, tokens: list[int]) -> str:
-        # Placeholder-Decoding
-        return "?" * len(tokens)
+def decode(self, tokens: list[int]) -> str:
+# Placeholder-Decoding
+return "?" * len(tokens)
 ```
 
 ---
@@ -244,16 +244,16 @@ class UnigramHashTokenizer:
 ```python
 # orchestrator/dashboard.py
 class DashboardCLI:
-    def cmd_stats(self, args: list[str]) -> None:
-        """Statistiken über alle Runs anzeigen"""
-        runs = self.registry.get_all_runs()
-        total = len(runs)
-        completed = sum(1 for r in runs if r.status == "completed")
-        failed = sum(1 for r in runs if r.status == "failed")
+def cmd_stats(self, args: list[str]) -> None:
+"""Statistiken über alle Runs anzeigen"""
+runs = self.registry.get_all_runs()
+total = len(runs)
+completed = sum(1 for r in runs if r.status == "completed")
+failed = sum(1 for r in runs if r.status == "failed")
 
-        print(f"Total Runs: {total}")
-        print(f"Completed: {completed} ({completed/total*100:.1f}%)")
-        print(f"Failed: {failed} ({failed/total*100:.1f}%)")
+print(f"Total Runs: {total}")
+print(f"Completed: {completed} ({completed/total*100:.1f}%)")
+print(f"Failed: {failed} ({failed/total*100:.1f}%)")
 ```
 
 ---
@@ -269,19 +269,19 @@ use pyo3::prelude::*;
 
 #[pyclass]
 pub struct MyComponent {
-    value: f64,
+value: f64,
 }
 
 #[pymethods]
 impl MyComponent {
-    #[new]
-    fn new(value: f64) -> Self {
-        MyComponent { value }
-    }
+#[new]
+fn new(value: f64) -> Self {
+MyComponent { value }
+}
 
-    fn process(&self, data: Vec<f64>) -> PyResult<Vec<f64>> {
-        Ok(data.iter().map(|&x| x * self.value).collect())
-    }
+fn process(&self, data: Vec<f64>) -> PyResult<Vec<f64>> {
+Ok(data.iter().map(|&x| x * self.value).collect())
+}
 }
 ```
 
@@ -293,9 +293,9 @@ use my_module::MyComponent;
 
 #[pymodule]
 fn rust_core(_py: Python, m: &PyModule) -> PyResult<()> {
-    m.add_class::<MyComponent>()?;
-    // ... andere exports
-    Ok(())
+m.add_class::<MyComponent>()?;
+// ... andere exports
+Ok(())
 }
 ```
 
@@ -321,15 +321,15 @@ result = component.process([1.0, 2.0, 3.0])
 // rust-core/src/my_module.rs
 #[cfg(test)]
 mod tests {
-    use super::*;
+use super::*;
 
-    #[test]
-    fn test_process() {
-        let component = MyComponent::new(2.0);
-        let data = vec![1.0, 2.0, 3.0];
-        let result = component.process(data).unwrap();
-        assert_eq!(result, vec![2.0, 4.0, 6.0]);
-    }
+#[test]
+fn test_process() {
+let component = MyComponent::new(2.0);
+let data = vec![1.0, 2.0, 3.0];
+let result = component.process(data).unwrap();
+assert_eq!(result, vec![2.0, 4.0, 6.0]);
+}
 }
 ```
 
@@ -387,30 +387,30 @@ from quant.quantizers import Int6Quantizer, MixedQuantizer
 
 
 class TestInt6Quantizer:
-    def test_quantize_roundtrip(self):
-        quantizer = Int6Quantizer(scale=0.1)
-        weights = [0.5, -0.3, 0.8, -0.1]
-        quantized = quantizer.quantize(weights)
-        dequantized = quantizer.dequantize(quantized)
+def test_quantize_roundtrip(self):
+quantizer = Int6Quantizer(scale=0.1)
+weights = [0.5, -0.3, 0.8, -0.1]
+quantized = quantizer.quantize(weights)
+dequantized = quantizer.dequantize(quantized)
 
-        for orig, recon in zip(weights, dequantized):
-            assert abs(orig - recon) < 0.1
+for orig, recon in zip(weights, dequantized):
+assert abs(orig - recon) < 0.1
 
-    def test_empty_weights(self):
-        quantizer = Int6Quantizer(scale=0.1)
-        quantized = quantizer.quantize([])
-        assert quantized == []
+def test_empty_weights(self):
+quantizer = Int6Quantizer(scale=0.1)
+quantized = quantizer.quantize([])
+assert quantized == []
 
 
 class TestMixedQuantizer:
-    def test_bit_encoding(self):
-        quantizer = MixedQuantizer(threshold=0.3)
-        weights = [0.1, -0.5, 0.9, -0.2, 0.7]
-        quantized = quantizer.quantize(weights)
+def test_bit_encoding(self):
+quantizer = MixedQuantizer(threshold=0.3)
+weights = [0.1, -0.5, 0.9, -0.2, 0.7]
+quantized = quantizer.quantize(weights)
 
-        # Alle Werte sollten im validen Bereich sein
-        for q in quantized:
-            assert 0 <= q <= 127  # 7-bit encoding
+# Alle Werte sollten im validen Bereich sein
+for q in quantized:
+assert 0 <= q <= 127 # 7-bit encoding
 ```
 
 ---
@@ -424,19 +424,19 @@ Verwende moderne Type Hints (Python 3.10+):
 ```python
 # Gut (modern)
 def process(value: float) -> list[float]:
-    ...
+...
 
 def get_config() -> Config | None:
-    ...
+...
 
 # Veraltet (vermeiden)
 from typing import Optional, List
 
 def process(value: float) -> List[float]:
-    ...
+...
 
 def get_config() -> Optional[Config]:
-    ...
+...
 ```
 
 ### Error Handling
@@ -444,50 +444,50 @@ def get_config() -> Optional[Config]:
 ```python
 # Gut: Spezifische Exceptions
 try:
-    result = rust_component.process(data)
+result = rust_component.process(data)
 except ValueError as e:
-    logger.error(f"Invalid input: {e}")
-    return fallback_result
+logger.error(f"Invalid input: {e}")
+return fallback_result
 except ImportError as e:
-    logger.warning(f"Rust module not available: {e}")
-    return python_fallback(data)
+logger.warning(f"Rust module not available: {e}")
+return python_fallback(data)
 
 # Schlecht: Catch-all
 try:
-    result = rust_component.process(data)
+result = rust_component.process(data)
 except Exception:
-    pass
+pass
 ```
 
 ### Documentation
 
 ```python
 class RunComparator:
-    """Vergleicht Runs anhand von Metriken.
+"""Vergleicht Runs anhand von Metriken.
 
-    Attributes:
-        registry: RunRegistry-Instanz für Run-Zugriff
-        metrics: Liste der zu vergleichenden Metriken
+Attributes:
+registry: RunRegistry-Instanz für Run-Zugriff
+metrics: Liste der zu vergleichenden Metriken
 
-    Example:
-        >>> comparator = RunComparator(registry)
-        >>> comparison = comparator.compare_runs(["run001", "run002"])
-        >>> print(comparator.print_summary(comparison))
-    """
+Example:
+>>> comparator = RunComparator(registry)
+>>> comparison = comparator.compare_runs(["run001", "run002"])
+>>> print(comparator.print_summary(comparison))
+"""
 
-    def compare_runs(self, run_ids: list[str]) -> RunComparison:
-        """Vergleicht mehrere Runs.
+def compare_runs(self, run_ids: list[str]) -> RunComparison:
+"""Vergleicht mehrere Runs.
 
-        Args:
-            run_ids: Liste der Run-IDs zum Vergleichen
+Args:
+run_ids: Liste der Run-IDs zum Vergleichen
 
-        Returns:
-            RunComparison-Objekt mit Vergleichsergebnissen
+Returns:
+RunComparison-Objekt mit Vergleichsergebnissen
 
-        Raises:
-            ValueError: Wenn eine Run-ID nicht existiert
-        """
-        ...
+Raises:
+ValueError: Wenn eine Run-ID nicht existiert
+"""
+...
 ```
 
 ---
@@ -564,10 +564,10 @@ chmod -R 755 results/
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from other_module import OtherClass
+from other_module import OtherClass
 
 def my_function(obj: "OtherClass"):
-    ...
+...
 ```
 
 ---

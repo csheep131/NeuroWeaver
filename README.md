@@ -2,7 +2,7 @@
 
 Eine Experimentier-Plattform für systematisches Ablation-Testing von ML-Modellen.
 
-**Status:** Phase 1-3 ✅ Alle abgeschlossen | **Performance:** 4-5x Speedup | **Configs:** 19 Run-Konfigurationen
+**Status:** Phase 1-3 Alle abgeschlossen | **Performance:** 4-5x Speedup | **Configs:** 19 Run-Konfigurationen
 
 ---
 
@@ -22,8 +22,8 @@ pip install -r requirements.txt
 python data/cached_challenge_fineweb.py --variant sp1024 --train-shards 80
 
 # 3. Smoke Test (lokal)
-RUN_ID=smoke_test ITERATIONS=200 python train_gpt_mlx.py  # Apple Silicon
-RUN_ID=smoke_test ITERATIONS=200 python train_gpt.py      # PyTorch
+RUN_ID=smoke_test ITERATIONS=200 python train_gpt_mlx.py # Apple Silicon
+RUN_ID=smoke_test ITERATIONS=200 python train_gpt.py # PyTorch
 
 # 4. Training auf 8xH100
 torchrun --standalone --nproc_per_node=8 train_gpt.py --run_id baseline_v1
@@ -65,73 +65,73 @@ Diese Software ist eine "Ablation-Maschine", die folgendes ermöglicht:
 
 ```
 wettkampf/
-├── configs/
-│   ├── base.yaml              # Base-Konfiguration
-│   └── runs/                  # 19 Run-Konfigurationen
-│       ├── run001_control.yaml
-│       ├── run002_hash.yaml
-│       ├── run003_xsa.yaml
-│       ├── run004_leakyrelu.yaml
-│       ├── run005_mixed_quant.yaml
-│       ├── run006_film.yaml
-│       ├── run007_ttt.yaml
-│       ├── run008a_star_relu.yaml
-│       ├── run009_gqa.yaml
-│       ├── run010_recurrence.yaml
-│       ├── run016_best_combo_a.yaml
-│       ├── run017_best_combo_quantized.yaml
-│       └── ...
-├── core/                      # Python-Core
-│   ├── config.py              # Config-Loading
-│   ├── registry.py            # Run-Registry
-│   ├── logging.py             # Logging
-│   ├── seed.py                # Seed-Management
-│   └── artifacts.py           # Artifact-Tracking
-├── models/
-│   └── factories/
-│       ├── backbone_factory.py    # BackboneFactory
-│       └── feature_gate.py        # FeatureGate, FeatureGateManager
-├── tokenizers/
-│   └── tokenizers.py          # Byte, BigramHash, TrigramHash, Fallback
-├── quant/
-│   └── quantizers.py          # Int6Quantizer, Int5Quantizer, MixedQuantizer, GPTQLiteQuantizer
-├── train/                     # Training
-│   ├── trainer.py
-│   ├── optimizer_factory.py
-│   ├── scheduler.py
-│   └── ema.py
-├── eval/                      # Evaluation
-│   ├── bpb_eval.py
-│   ├── sliding_window.py
-│   └── benchmark.py
-├── research/                  # Research Engine (Phase 2)
-│   ├── ablation_engine.py     # AblationReporter, KillRules
-│   ├── phase1_evaluator.py    # Phase1Evaluator
-│   ├── phase2_evaluator.py    # Phase2Evaluator
-│   └── phase3_evaluator.py    # Phase3Evaluator
-├── orchestrator/              # Production Pipeline (Phase 3)
-│   ├── sweep.py               # SweepRunner
-│   ├── promote.py             # PromotionSystem, Stages
-│   ├── submit_bundle.py       # SubmissionBuilder
-│   ├── dashboard.py           # Dashboard CLI
-│   ├── multi_seed.py          # MultiSeedOrchestrator
-│   └── combo_builder.py       # DynamicComboBuilder
-├── reports/                   # Reports
-│   ├── compare_runs.py        # RunComparator
-│   └── leaderboard.py         # LeaderboardGenerator
-├── runs/                      # Run-System
-│   ├── run.py
-│   └── __main__.py
-├── rust-core/                 # Rust-Core
-│   ├── Cargo.toml
-│   └── src/
-│       ├── lib.rs
-│       ├── tokenizers.rs      # Rust-Tokenizer
-│       ├── quant.rs           # Rust-Quantisierung
-│       ├── models.rs          # Rust-Modelle
-│       └── eval.rs            # Rust-Evaluation
-├── rust_core/                 # Python-Bindings (auto-generiert)
-└── results/                   # Ergebnisse (auto-generiert)
+configs/
+base.yaml # Base-Konfiguration
+runs/ # 19 Run-Konfigurationen
+run001_control.yaml
+run002_hash.yaml
+run003_xsa.yaml
+run004_leakyrelu.yaml
+run005_mixed_quant.yaml
+run006_film.yaml
+run007_ttt.yaml
+run008a_star_relu.yaml
+run009_gqa.yaml
+run010_recurrence.yaml
+run016_best_combo_a.yaml
+run017_best_combo_quantized.yaml
+...
+core/ # Python-Core
+config.py # Config-Loading
+registry.py # Run-Registry
+logging.py # Logging
+seed.py # Seed-Management
+artifacts.py # Artifact-Tracking
+models/
+factories/
+backbone_factory.py # BackboneFactory
+feature_gate.py # FeatureGate, FeatureGateManager
+tokenizers/
+tokenizers.py # Byte, BigramHash, TrigramHash, Fallback
+quant/
+quantizers.py # Int6Quantizer, Int5Quantizer, MixedQuantizer, GPTQLiteQuantizer
+train/ # Training
+trainer.py
+optimizer_factory.py
+scheduler.py
+ema.py
+eval/ # Evaluation
+bpb_eval.py
+sliding_window.py
+benchmark.py
+research/ # Research Engine (Phase 2)
+ablation_engine.py # AblationReporter, KillRules
+phase1_evaluator.py # Phase1Evaluator
+phase2_evaluator.py # Phase2Evaluator
+phase3_evaluator.py # Phase3Evaluator
+orchestrator/ # Production Pipeline (Phase 3)
+sweep.py # SweepRunner
+promote.py # PromotionSystem, Stages
+submit_bundle.py # SubmissionBuilder
+dashboard.py # Dashboard CLI
+multi_seed.py # MultiSeedOrchestrator
+combo_builder.py # DynamicComboBuilder
+reports/ # Reports
+compare_runs.py # RunComparator
+leaderboard.py # LeaderboardGenerator
+runs/ # Run-System
+run.py
+__main__.py
+rust-core/ # Rust-Core
+Cargo.toml
+src/
+lib.rs
+tokenizers.rs # Rust-Tokenizer
+quant.rs # Rust-Quantisierung
+models.rs # Rust-Modelle
+eval.rs # Rust-Evaluation
+rust_core/ # Python-Bindings (auto-generiert)
+results/ # Ergebnisse (auto-generiert)
 ```
 
 ---
@@ -247,16 +247,16 @@ run_id: "run001_control"
 seed: 42
 
 model:
-  d_model: 512
-  num_layers: 6
-  activation: "gelu"
+d_model: 512
+num_layers: 6
+activation: "gelu"
 
 tokenizer:
-  type: "byte"
+type: "byte"
 
 training:
-  num_steps: 10000
-  learning_rate: 3e-4
+num_steps: 10000
+learning_rate: 3e-4
 ```
 
 ### Verfügbare Run-Configs (19)
@@ -284,7 +284,7 @@ training:
 
 ## Phasen-Status
 
-### Phase 1: Experiment Core ✅ ABGESCHLOSSEN
+### Phase 1: Experiment Core ABGESCHLOSSEN
 
 - [x] Config-first Run-System
 - [x] Modultrennung (Python/Rust)
@@ -293,7 +293,7 @@ training:
 - [x] Vergleichbarkeit
 - [x] Core-Komponenten (Config, Registry, Logging, Seed, Artifacts)
 
-### Phase 2: Research Engine ✅ ABGESCHLOSSEN
+### Phase 2: Research Engine ABGESCHLOSSEN
 
 - [x] Backbone Factory
 - [x] Feature-Gates (FeatureGate, FeatureGateManager)
@@ -302,7 +302,7 @@ training:
 - [x] Ablation Engine (AblationReporter, KillRules)
 - [x] Phase 1/2/3 Evaluatoren
 
-### Phase 3: Production Pipeline ✅ ABGESCHLOSSEN
+### Phase 3: Production Pipeline ABGESCHLOSSEN
 
 - [x] Sweep Runner (itertools.product, O(1) Memory)
 - [x] Promotion System (3-Layer Caching, Stage-Management)

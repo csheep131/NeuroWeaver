@@ -1,7 +1,7 @@
 # Promotion System
 
-**Letztes Update:** 2026-03-24  
-**Status:** ✅ Vollständig implementiert (Phase 3) | **Performance:** 5x schneller (3-Layer Caching)
+**Letztes Update:** 2026-03-24
+**Status:** Vollständig implementiert (Phase 3) | **Performance:** 5x schneller (3-Layer Caching)
 
 ---
 
@@ -46,14 +46,14 @@ print(f"Submitted: {len(submitted)}")
 ## Stage-Übersicht
 
 ```
-┌─────────────┐      ┌─────────────┐      ┌─────────────┐
-│  CANDIDATE  │ ───► │  PROMOTED   │ ───► │  SUBMITTED  │
-│  (Neu)      │      │ (Bewertet)  │      │ (Eingereicht)│
-└─────────────┘      └─────────────┘      └─────────────┘
-       │                    │                    │
-       ▼                    ▼                    ▼
-   Screening           Promotion            Submission
-   Evaluation          Evaluation           Bundle
+
+CANDIDATE PROMOTED SUBMITTED
+(Neu) (Bewertet) (Eingereicht)
+
+
+
+Screening Promotion Submission
+Evaluation Evaluation Bundle
 ```
 
 ### Stage-Enum
@@ -62,9 +62,9 @@ print(f"Submitted: {len(submitted)}")
 from orchestrator import Stage
 
 class Stage(Enum):
-    CANDIDATE = "candidate"    # Neuer Run zur Bewertung
-    PROMOTED = "promoted"      # Erfolgreich bewerteter Run
-    SUBMITTED = "submitted"    # Zur Submission vorbereiteter Run
+CANDIDATE = "candidate" # Neuer Run zur Bewertung
+PROMOTED = "promoted" # Erfolgreich bewerteter Run
+SUBMITTED = "submitted" # Zur Submission vorbereiteter Run
 ```
 
 ---
@@ -81,9 +81,9 @@ promo = create_promotion_system()
 
 # Mit benutzerdefinierter Konfiguration
 config = StageConfig(
-    candidate_threshold={"val_bpb": 1.5, "ms_per_step": 100},
-    promoted_threshold={"val_bpb": 1.2, "ms_per_step": 80},
-    artifact_size_limit=16_000_000,
+candidate_threshold={"val_bpb": 1.5, "ms_per_step": 100},
+promoted_threshold={"val_bpb": 1.2, "ms_per_step": 80},
+artifact_size_limit=16_000_000,
 )
 
 promo = PromotionSystem(config=config)
@@ -131,7 +131,7 @@ submitted = promo.get_by_stage(Stage.SUBMITTED)
 # Alle Runs mit Stage-Info
 all_runs = promo.get_all_runs()
 for run in all_runs:
-    print(f"{run.run_id}: {promo.get_stage(run.run_id).value}")
+print(f"{run.run_id}: {promo.get_stage(run.run_id).value}")
 ```
 
 ---
@@ -166,23 +166,23 @@ Runs werden automatisch disqualifiziert bei:
 from orchestrator import StageConfig
 
 config = StageConfig(
-    candidate_threshold={
-        "val_bpb": 1.5,
-        "ms_per_step": 100,
-        "artifact_bytes": 16_000_000,
-    },
-    promoted_threshold={
-        "val_bpb": 1.2,
-        "ms_per_step": 80,
-        "artifact_bytes": 12_000_000,
-    },
-    custom_rules=[
-        {
-            "name": "no_degradation",
-            "condition": lambda m: m.get("delta_bpb", 0) <= 0,
-            "description": "Keine BPB-Verschlechterung",
-        },
-    ],
+candidate_threshold={
+"val_bpb": 1.5,
+"ms_per_step": 100,
+"artifact_bytes": 16_000_000,
+},
+promoted_threshold={
+"val_bpb": 1.2,
+"ms_per_step": 80,
+"artifact_bytes": 12_000_000,
+},
+custom_rules=[
+{
+"name": "no_degradation",
+"condition": lambda m: m.get("delta_bpb", 0) <= 0,
+"description": "Keine BPB-Verschlechterung",
+},
+],
 )
 
 promo = PromotionSystem(config=config)
@@ -199,14 +199,14 @@ promo = PromotionSystem(config=config)
 screening_results = promo.evaluate_screening()
 
 # Ergebnisse
-passed = screening_results["passed"]      # Bestanden
-failed = screening_results["failed"]      # Durchgefallen
-disqualified = screening_results["disqualified"]  # Disqualifiziert
+passed = screening_results["passed"] # Bestanden
+failed = screening_results["failed"] # Durchgefallen
+disqualified = screening_results["disqualified"] # Disqualifiziert
 
 print(f"Passed: {len(passed)}")
 print(f"Failed: {len(failed)}")
 for run in failed:
-    print(f"  {run.run_id}: {run.failure_reason}")
+print(f" {run.run_id}: {run.failure_reason}")
 ```
 
 ### 2. Promotion Evaluation
@@ -214,15 +214,15 @@ for run in failed:
 ```python
 # Candidates zu Promoted befördern
 for candidate in promo.get_by_stage(Stage.CANDIDATE):
-    metrics = promo.get_metrics(candidate.run_id)
-    
-    # Promotion-Kriterien prüfen
-    if (
-        metrics.get("val_bpb", float("inf")) < 1.2
-        and metrics.get("ms_per_step", float("inf")) < 80
-    ):
-        promo.promote_run(candidate.run_id)
-        print(f"Promoted: {candidate.run_id}")
+metrics = promo.get_metrics(candidate.run_id)
+
+# Promotion-Kriterien prüfen
+if (
+metrics.get("val_bpb", float("inf")) < 1.2
+and metrics.get("ms_per_step", float("inf")) < 80
+):
+promo.promote_run(candidate.run_id)
+print(f"Promoted: {candidate.run_id}")
 ```
 
 ### 3. Submission Preparation
@@ -230,8 +230,8 @@ for candidate in promo.get_by_stage(Stage.CANDIDATE):
 ```python
 # Promoted Runs zur Submission einreichen
 for run in promo.get_by_stage(Stage.PROMOTED):
-    promo.submit_run(run.run_id)
-    print(f"Submitted: {run.run_id}")
+promo.submit_run(run.run_id)
+print(f"Submitted: {run.run_id}")
 ```
 
 ---
@@ -247,9 +247,9 @@ Das Promotion System verwendet 3 Cache-Ebenen für O(1) Lookups:
 self._run_cache: dict[str, RunEntry] = {}
 
 def _get_run_entry(self, run_id: str) -> RunEntry | None:
-    if run_id not in self._run_cache:
-        self._run_cache[run_id] = self.registry.get(run_id)
-    return self._run_cache[run_id]
+if run_id not in self._run_cache:
+self._run_cache[run_id] = self.registry.get(run_id)
+return self._run_cache[run_id]
 ```
 
 ### Layer 2: Stage Cache
@@ -259,9 +259,9 @@ def _get_run_entry(self, run_id: str) -> RunEntry | None:
 self._stage_cache: dict[str, Stage] = {}
 
 def get_stage(self, run_id: str) -> Stage:
-    if run_id not in self._stage_cache:
-        self._stage_cache[run_id] = self._determine_stage(run_id)
-    return self._stage_cache[run_id]
+if run_id not in self._stage_cache:
+self._stage_cache[run_id] = self._determine_stage(run_id)
+return self._stage_cache[run_id]
 ```
 
 ### Layer 3: Runs by Stage Cache
@@ -271,9 +271,9 @@ def get_stage(self, run_id: str) -> Stage:
 self._runs_by_stage_cache: dict[Stage, list[str]] = {}
 
 def get_by_stage(self, stage: Stage) -> list[RunEntry]:
-    if stage not in self._runs_by_stage_cache:
-        self._rebuild_stage_cache()
-    return [self.registry.get(rid) for rid in self._runs_by_stage_cache[stage]]
+if stage not in self._runs_by_stage_cache:
+self._rebuild_stage_cache()
+return [self.registry.get(rid) for rid in self._runs_by_stage_cache[stage]]
 ```
 
 ### Performance-Vergleich
@@ -300,12 +300,12 @@ promo = PromotionSystem()
 
 # Kill-Rules anwenden
 for run in promo.get_by_stage(Stage.CANDIDATE):
-    metrics = promo.get_metrics(run.run_id)
-    
-    # Kill-Rules prüfen
-    kill_reasons = reporter.evaluate_kill_rules(metrics)
-    if kill_reasons:
-        promo.disqualify_run(run.run_id, reasons=kill_reasons)
+metrics = promo.get_metrics(run.run_id)
+
+# Kill-Rules prüfen
+kill_reasons = reporter.evaluate_kill_rules(metrics)
+if kill_reasons:
+promo.disqualify_run(run.run_id, reasons=kill_reasons)
 ```
 
 ### Submission Bundle
@@ -348,16 +348,16 @@ Dashboard> list --stage submitted
 from orchestrator import StageConfig, PromotionSystem
 
 strict_config = StageConfig(
-    candidate_threshold={
-        "val_bpb": 1.3,      # Strenger
-        "ms_per_step": 60,   # Strenger
-        "artifact_bytes": 10_000_000,  # Strenger
-    },
-    promoted_threshold={
-        "val_bpb": 1.1,      # Sehr streng
-        "ms_per_step": 40,   # Sehr streng
-        "artifact_bytes": 8_000_000,   # Sehr streng
-    },
+candidate_threshold={
+"val_bpb": 1.3, # Strenger
+"ms_per_step": 60, # Strenger
+"artifact_bytes": 10_000_000, # Strenger
+},
+promoted_threshold={
+"val_bpb": 1.1, # Sehr streng
+"ms_per_step": 40, # Sehr streng
+"artifact_bytes": 8_000_000, # Sehr streng
+},
 )
 
 promo = PromotionSystem(config=strict_config)
@@ -367,16 +367,16 @@ promo = PromotionSystem(config=strict_config)
 
 ```python
 lenient_config = StageConfig(
-    candidate_threshold={
-        "val_bpb": 2.0,      # Locker
-        "ms_per_step": 200,  # Locker
-        "artifact_bytes": 32_000_000,  # Locker
-    },
-    promoted_threshold={
-        "val_bpb": 1.5,      # Moderat
-        "ms_per_step": 100,  # Moderat
-        "artifact_bytes": 20_000_000,  # Moderat
-    },
+candidate_threshold={
+"val_bpb": 2.0, # Locker
+"ms_per_step": 200, # Locker
+"artifact_bytes": 32_000_000, # Locker
+},
+promoted_threshold={
+"val_bpb": 1.5, # Moderat
+"ms_per_step": 100, # Moderat
+"artifact_bytes": 20_000_000, # Moderat
+},
 )
 
 promo = PromotionSystem(config=lenient_config)
@@ -388,32 +388,32 @@ promo = PromotionSystem(config=lenient_config)
 
 ```
 results/
-└── promotion/
-    ├── promotion_state.json    # Aktueller Stage-Stand
-    ├── evaluation_log.jsonl    # Evaluations-Logs
-    └── reports/
-        ├── screening_report.txt
-        └── promotion_report.txt
+promotion/
+promotion_state.json # Aktueller Stage-Stand
+evaluation_log.jsonl # Evaluations-Logs
+reports/
+screening_report.txt
+promotion_report.txt
 ```
 
 ### promotion_state.json Format
 
 ```json
 {
-  "last_updated": "2026-03-24T14:30:00Z",
-  "stages": {
-    "run001_control": "promoted",
-    "run002_hash": "candidate",
-    "run016_best_combo_a": "submitted",
-    "run017_best_combo_quantized": "submitted"
-  },
-  "statistics": {
-    "total_runs": 19,
-    "candidates": 12,
-    "promoted": 5,
-    "submitted": 2,
-    "disqualified": 0
-  }
+"last_updated": "2026-03-24T14:30:00Z",
+"stages": {
+"run001_control": "promoted",
+"run002_hash": "candidate",
+"run016_best_combo_a": "submitted",
+"run017_best_combo_quantized": "submitted"
+},
+"statistics": {
+"total_runs": 19,
+"candidates": 12,
+"promoted": 5,
+"submitted": 2,
+"disqualified": 0
+}
 }
 ```
 
@@ -428,19 +428,19 @@ results/
 import logging
 
 def promote_run(self, run_id: str):
-    old_stage = self.get_stage(run_id)
-    self._stage_cache[run_id] = Stage.PROMOTED
-    logging.info(f"Promoted {run_id}: {old_stage} → PROMOTED")
+old_stage = self.get_stage(run_id)
+self._stage_cache[run_id] = Stage.PROMOTED
+logging.info(f"Promoted {run_id}: {old_stage} → PROMOTED")
 ```
 
 ### 2. Cache invalidieren bei Updates
 
 ```python
 def refresh_cache(self):
-    """Cache bei Registry-Updates invalidieren."""
-    self._run_cache.clear()
-    self._stage_cache.clear()
-    self._runs_by_stage_cache.clear()
+"""Cache bei Registry-Updates invalidieren."""
+self._run_cache.clear()
+self._stage_cache.clear()
+self._runs_by_stage_cache.clear()
 ```
 
 ### 3. Batch-Operationen für große Run-Zahlen
@@ -448,9 +448,9 @@ def refresh_cache(self):
 ```python
 # Batch-Promotion für viele Runs
 def batch_promote(self, run_ids: list[str]):
-    for run_id in run_ids:
-        self.promote_run(run_id)
-    self._rebuild_stage_cache()  # Cache einmal neu bauen
+for run_id in run_ids:
+self.promote_run(run_id)
+self._rebuild_stage_cache() # Cache einmal neu bauen
 ```
 
 ---
@@ -466,7 +466,7 @@ def batch_promote(self, run_ids: list[str]):
 # Screening-Ergebnisse prüfen
 screening = promo.evaluate_screening()
 for run in screening["failed"]:
-    print(f"{run.run_id}: {run.failure_reason}")
+print(f"{run.run_id}: {run.failure_reason}")
 ```
 
 ### Cache inkonsistent
@@ -486,7 +486,7 @@ promo.refresh_cache()
 # Run in Registry prüfen
 entry = promo.registry.get("run001_control")
 if entry is None:
-    print("Run nicht in Registry")
+print("Run nicht in Registry")
 ```
 
 ---

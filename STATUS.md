@@ -1,9 +1,9 @@
 # Projekt-Status — NeuroWeave Ablation Machine
 
-**Stand:** 2026-03-24  
-**Gesamtstatus:** ✅ Phase 1–3 Abgeschlossen  
-**Performance:** 4–5x Speedup durch Phase-3-Optimierungen  
-**Run-Konfigurationen:** 27 YAML-Configs  
+**Stand:** 2026-03-24
+**Gesamtstatus:** Phase 1–3 Abgeschlossen
+**Performance:** 4–5x Speedup durch Phase-3-Optimierungen
+**Run-Konfigurationen:** 27 YAML-Configs
 
 ---
 
@@ -15,67 +15,67 @@ Die **Ablation Machine** ist eine voll funktionsfähige Plattform für reproduzi
 
 | Fähigkeit | Status | Beschreibung |
 |-----------|--------|--------------|
-| **Runs deklarativ** | ✅ | Konfiguration statt Code-Bastelei |
-| **Reproduzierbar trainieren** | ✅ | Same config = same results |
-| **Automatisch quantisieren** | ✅ | INT6, INT5, mixed precision, GPTQ-lite |
-| **Metriken vergleichen** | ✅ | BPB, Schrittzeit, Artifact-Größe |
-| **Kombinationen testen** | ✅ | Features systematisch aktivieren/verwerfen |
-| **Automatisierte Sweeps** | ✅ | Parameter-Raster automatisch durchlaufen |
-| **Promotion System** | ✅ | 3-Layer Caching, Stage-Management |
-| **Dashboard CLI** | ✅ | Interaktive Übersicht aller Runs |
+| **Runs deklarativ** | | Konfiguration statt Code-Bastelei |
+| **Reproduzierbar trainieren** | | Same config = same results |
+| **Automatisch quantisieren** | | INT6, INT5, mixed precision, GPTQ-lite |
+| **Metriken vergleichen** | | BPB, Schrittzeit, Artifact-Größe |
+| **Kombinationen testen** | | Features systematisch aktivieren/verwerfen |
+| **Automatisierte Sweeps** | | Parameter-Raster automatisch durchlaufen |
+| **Promotion System** | | 3-Layer Caching, Stage-Management |
+| **Dashboard CLI** | | Interaktive Übersicht aller Runs |
 
 ---
 
 ## Phasen-Übersicht
 
-### ✅ Phase 1: Experiment Core (Abgeschlossen)
+### Phase 1: Experiment Core (Abgeschlossen)
 
 **Ziel:** Core-Komponenten für reproduzierbare Experimente.
 
 | Komponente | Status | Datei |
 |------------|--------|-------|
-| Config-System | ✅ | `core/config.py` |
-| Run Registry | ✅ | `core/registry.py` |
-| Logging | ✅ | `core/logging.py` |
-| Seed-Management | ✅ | `core/seed.py` |
-| Artifact-Tracking | ✅ | `core/artifacts.py` |
-| Run Executor | ✅ | `runs/run.py` |
+| Config-System | | `core/config.py` |
+| Run Registry | | `core/registry.py` |
+| Logging | | `core/logging.py` |
+| Seed-Management | | `core/seed.py` |
+| Artifact-Tracking | | `core/artifacts.py` |
+| Run Executor | | `runs/run.py` |
 
 **Ergebnis:** Standardisierte Runs mit Config-first-Ansatz.
 
 ---
 
-### ✅ Phase 2: Research Engine (Abgeschlossen)
+### Phase 2: Research Engine (Abgeschlossen)
 
 **Ziel:** Flexible Forschungs-Plattform für Feature-Ablationen.
 
 | Komponente | Status | Datei |
 |------------|--------|-------|
-| Backbone Factory | ✅ | `models/factories/backbone_factory.py` |
-| Feature Gates | ✅ | `models/factories/feature_gate.py` |
-| Tokenizer Lab | ✅ | `tokenizers/tokenizers.py` |
-| Quant Lab | ✅ | `quant/quantizers.py` |
-| Ablation Engine | ✅ | `research/ablation_engine.py` |
-| Phase-Evaluatoren | ✅ | `research/phase{1,2,3}_evaluator.py` |
+| Backbone Factory | | `models/factories/backbone_factory.py` |
+| Feature Gates | | `models/factories/feature_gate.py` |
+| Tokenizer Lab | | `tokenizers/tokenizers.py` |
+| Quant Lab | | `quant/quantizers.py` |
+| Ablation Engine | | `research/ablation_engine.py` |
+| Phase-Evaluatoren | | `research/phase{1,2,3}_evaluator.py` |
 
 **Ergebnis:** Isolierte Feature-Tests mit automatischen Kill-Rules.
 
 ---
 
-### ✅ Phase 3: Production Pipeline (Abgeschlossen)
+### Phase 3: Production Pipeline (Abgeschlossen)
 
 **Ziel:** Skalierbare Automation für große Experiment-Serien.
 
 | Komponente | Status | Datei | Performance |
 |------------|--------|-------|-------------|
-| Sweep Runner | ✅ | `orchestrator/sweep.py` | 5x schneller (itertools) |
-| Promotion System | ✅ | `orchestrator/promote.py` | 5x schneller (3-Layer Cache) |
-| Submission Builder | ✅ | `orchestrator/submit_bundle.py` | 4x schneller (Lazy Loading) |
-| Dashboard CLI | ✅ | `orchestrator/dashboard.py` | Interaktiv |
-| Multi-Seed Orchestrator | ✅ | `orchestrator/multi_seed.py` | 3-Seed Validierung |
-| Dynamic Combo Builder | ✅ | `orchestrator/combo_builder.py` | Feature-Kombinationen |
-| Run Comparator | ✅ | `reports/compare_runs.py` | Vergleich |
-| Leaderboard Generator | ✅ | `reports/leaderboard.py` | Ranking |
+| Sweep Runner | | `orchestrator/sweep.py` | 5x schneller (itertools) |
+| Promotion System | | `orchestrator/promote.py` | 5x schneller (3-Layer Cache) |
+| Submission Builder | | `orchestrator/submit_bundle.py` | 4x schneller (Lazy Loading) |
+| Dashboard CLI | | `orchestrator/dashboard.py` | Interaktiv |
+| Multi-Seed Orchestrator | | `orchestrator/multi_seed.py` | 3-Seed Validierung |
+| Dynamic Combo Builder | | `orchestrator/combo_builder.py` | Feature-Kombinationen |
+| Run Comparator | | `reports/compare_runs.py` | Vergleich |
+| Leaderboard Generator | | `reports/leaderboard.py` | Ranking |
 
 **Ergebnis:** Skalierbar bis 10.000+ Runs mit O(1)-Lookups.
 
@@ -167,7 +167,7 @@ Die **Ablation Machine** ist eine voll funktionsfähige Plattform für reproduzi
 
 ### 1. Rust Core nicht kompiliert
 
-**Status:** ⚠️ Optional (Stub-Fallback aktiv)
+**Status:** Optional (Stub-Fallback aktiv)
 
 **Workaround:**
 ```bash
@@ -181,7 +181,7 @@ maturin develop --release
 
 ### 2. Config-Validierung unvollständig
 
-**Status:** ⚠️ Teilweise implementiert
+**Status:** Teilweise implementiert
 
 **Betroffen:** Einige Parameter werden nicht validiert (z.B. `mlp_ratio`, `vocab_size` Grenzwerte).
 
@@ -191,7 +191,7 @@ maturin develop --release
 
 ### 3. Multi-Seed nur lokal (8GB VRAM)
 
-**Status:** ℹ️ Design-Entscheidung
+**Status:** Design-Entscheidung
 
 **Hinweis:** Lokale Entwicklung nur mit 1 Seed. Multi-Seed (3 Seeds) nur für Remote/H100-Submission.
 
@@ -266,8 +266,8 @@ Runs werden verworfen bei:
 
 ## Team & Kontakt
 
-**Entwicklung:** NeuroWeave Team  
-**Lizenz:** MIT  
+**Entwicklung:** NeuroWeave Team
+**Lizenz:** MIT
 **Repository:** `/home/schaf/projects/NeuroWeave`
 
 ---
@@ -276,30 +276,30 @@ Runs werden verworfen bei:
 
 ### 2026-03-24
 
-- ✅ `run_tabelle.md` professionell überarbeitet (Layout, Sprache)
-- ✅ `STATUS.md` erstellt (diese Datei)
-- ✅ 27 Run-Konfigurationen verfügbar
-- ✅ Phase 1–3 vollständig implementiert
+- `run_tabelle.md` professionell überarbeitet (Layout, Sprache)
+- `STATUS.md` erstellt (diese Datei)
+- 27 Run-Konfigurationen verfügbar
+- Phase 1–3 vollständig implementiert
 
 ### 2026-03-23 (Phase 3 Abschluss)
 
-- ✅ Sweep Runner optimiert (itertools.product)
-- ✅ Promotion System mit 3-Layer-Caching
-- ✅ Submission Builder mit Lazy Loading
-- ✅ Dashboard CLI funktionsfähig
-- ✅ 4–5x Performance-Steigerung
+- Sweep Runner optimiert (itertools.product)
+- Promotion System mit 3-Layer-Caching
+- Submission Builder mit Lazy Loading
+- Dashboard CLI funktionsfähig
+- 4–5x Performance-Steigerung
 
 ### 2026-03-20 (Phase 2 Abschluss)
 
-- ✅ Backbone Factory implementiert
-- ✅ Feature Gates (XSA, FiLM, TTT, GQA, Recurrence)
-- ✅ Tokenizer Lab (Byte, BigramHash, TrigramHash)
-- ✅ Quant Lab (INT6, INT5, Mixed, GPTQ-lite)
-- ✅ Ablation Engine mit Kill-Rules
+- Backbone Factory implementiert
+- Feature Gates (XSA, FiLM, TTT, GQA, Recurrence)
+- Tokenizer Lab (Byte, BigramHash, TrigramHash)
+- Quant Lab (INT6, INT5, Mixed, GPTQ-lite)
+- Ablation Engine mit Kill-Rules
 
 ### 2026-03-15 (Phase 1 Abschluss)
 
-- ✅ Config-first Run-System
-- ✅ Run Registry
-- ✅ Standardisierte Outputs
-- ✅ Core-Komponenten (Config, Registry, Logging, Seed, Artifacts)
+- Config-first Run-System
+- Run Registry
+- Standardisierte Outputs
+- Core-Komponenten (Config, Registry, Logging, Seed, Artifacts)

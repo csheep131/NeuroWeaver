@@ -1,7 +1,7 @@
 # Sweep Runner
 
-**Letztes Update:** 2026-03-24  
-**Status:** ✅ Vollständig implementiert (Phase 3) | **Performance:** 5x schneller (O(1) Memory)
+**Letztes Update:** 2026-03-24
+**Status:** Vollständig implementiert (Phase 3) | **Performance:** 5x schneller (O(1) Memory)
 
 ---
 
@@ -28,16 +28,16 @@ sweep_id: "my_first_sweep"
 base_config: "configs/runs/run001_control.yaml"
 
 parameters:
-  - name: "model.d_model"
-    values: [256, 512, 768]
-  - name: "model.num_layers"
-    values: [4, 6, 8]
-  - name: "training.learning_rate"
-    values: [1e-4, 3e-4, 1e-3]
+- name: "model.d_model"
+values: [256, 512, 768]
+- name: "model.num_layers"
+values: [4, 6, 8]
+- name: "training.learning_rate"
+values: [1e-4, 3e-4, 1e-3]
 
 execution:
-  max_concurrent: 1
-  continue_on_failure: true
+max_concurrent: 1
+continue_on_failure: true
 ```
 
 ### Sweep ausführen
@@ -64,20 +64,20 @@ print(f"Successful: {sum(1 for r in results if r.success)}")
 
 ```yaml
 # Sweep-Identifikation
-sweep_id: "my_sweep"           # Eindeutige Sweep-ID
-base_config: "configs/runs/run001_control.yaml"  # Base-Config
+sweep_id: "my_sweep" # Eindeutige Sweep-ID
+base_config: "configs/runs/run001_control.yaml" # Base-Config
 
 # Parameter-Definition
 parameters:
-  - name: "<yaml_pfad>"
-    values: [<wert1>, <wert2>, ...]
-  # ... weitere Parameter
+- name: "<yaml_pfad>"
+values: [<wert1>, <wert2>, ...]
+# ... weitere Parameter
 
 # Execution-Konfiguration
 execution:
-  max_concurrent: 1             # Maximale parallele Runs
-  continue_on_failure: true     # Bei Fehlern weitermachen
-  output_dir: "results/sweeps/" # Output-Verzeichnis
+max_concurrent: 1 # Maximale parallele Runs
+continue_on_failure: true # Bei Fehlern weitermachen
+output_dir: "results/sweeps/" # Output-Verzeichnis
 ```
 
 ### Parameter-Pfade
@@ -106,16 +106,16 @@ sweep_id: "architecture_sweep"
 base_config: "configs/runs/run001_control.yaml"
 
 parameters:
-  - name: "model.d_model"
-    values: [256, 512, 768, 1024]
-  - name: "model.num_layers"
-    values: [4, 6, 8, 12]
-  - name: "model.activation"
-    values: ["gelu", "relu", "leaky_relu", "star_relu"]
+- name: "model.d_model"
+values: [256, 512, 768, 1024]
+- name: "model.num_layers"
+values: [4, 6, 8, 12]
+- name: "model.activation"
+values: ["gelu", "relu", "leaky_relu", "star_relu"]
 
 execution:
-  max_concurrent: 1
-  continue_on_failure: true
+max_concurrent: 1
+continue_on_failure: true
 ```
 
 **Ergebnis:** 4 × 4 × 4 = **64 Runs**
@@ -130,14 +130,14 @@ sweep_id: "quant_sweep"
 base_config: "configs/runs/run001_control.yaml"
 
 parameters:
-  - name: "quantization.type"
-    values: ["int6", "int5", "mixed", "gptq_lite"]
-  - name: "quantization.threshold"
-    values: [0.2, 0.3, 0.5]
+- name: "quantization.type"
+values: ["int6", "int5", "mixed", "gptq_lite"]
+- name: "quantization.threshold"
+values: [0.2, 0.3, 0.5]
 
 execution:
-  max_concurrent: 1
-  continue_on_failure: true
+max_concurrent: 1
+continue_on_failure: true
 ```
 
 **Ergebnis:** 4 × 3 = **12 Runs**
@@ -152,14 +152,14 @@ sweep_id: "tokenizer_sweep"
 base_config: "configs/runs/run001_control.yaml"
 
 parameters:
-  - name: "tokenizer.type"
-    values: ["byte", "bigram_hash", "trigram_hash"]
-  - name: "tokenizer.vocab_size"
-    values: [4096, 8192, 16384]
+- name: "tokenizer.type"
+values: ["byte", "bigram_hash", "trigram_hash"]
+- name: "tokenizer.vocab_size"
+values: [4096, 8192, 16384]
 
 execution:
-  max_concurrent: 1
-  continue_on_failure: true
+max_concurrent: 1
+continue_on_failure: true
 ```
 
 **Ergebnis:** 3 × 3 = **9 Runs**
@@ -174,23 +174,23 @@ sweep_id: "full_factorial"
 base_config: "configs/runs/run001_control.yaml"
 
 parameters:
-  # Architektur
-  - name: "model.d_model"
-    values: [256, 512]
-  - name: "model.num_layers"
-    values: [4, 6]
+# Architektur
+- name: "model.d_model"
+values: [256, 512]
+- name: "model.num_layers"
+values: [4, 6]
 
-  # Tokenizer
-  - name: "tokenizer.type"
-    values: ["byte", "bigram_hash"]
+# Tokenizer
+- name: "tokenizer.type"
+values: ["byte", "bigram_hash"]
 
-  # Quantisierung
-  - name: "quantization.enabled"
-    values: [true, false]
+# Quantisierung
+- name: "quantization.enabled"
+values: [true, false]
 
 execution:
-  max_concurrent: 1
-  continue_on_failure: true
+max_concurrent: 1
+continue_on_failure: true
 ```
 
 **Ergebnis:** 2 × 2 × 2 × 2 = **16 Runs**
@@ -211,12 +211,12 @@ sweep = create_sweep("configs/sweeps/my_sweep.yaml")
 from orchestrator.sweep import SweepConfig, SweepParameter
 
 config = SweepConfig(
-    sweep_id="my_sweep",
-    base_config="configs/runs/run001_control.yaml",
-    parameters=[
-        SweepParameter(name="model.d_model", values=[256, 512, 768]),
-        SweepParameter(name="model.num_layers", values=[4, 6, 8]),
-    ],
+sweep_id="my_sweep",
+base_config="configs/runs/run001_control.yaml",
+parameters=[
+SweepParameter(name="model.d_model", values=[256, 512, 768]),
+SweepParameter(name="model.num_layers", values=[4, 6, 8]),
+],
 )
 
 sweep = SweepRunner(config)
@@ -227,7 +227,7 @@ sweep = SweepRunner(config)
 ```python
 # Alle Kombinationen als Iterator
 for params in sweep.generate_all_parameters():
-    print(params)  # [256, 4], [256, 6], [256, 8], [512, 4], ...
+print(params) # [256, 4], [256, 6], [256, 8], [512, 4], ...
 
 # Anzahl Kombinationen
 num_combinations = sweep.num_combinations()
@@ -244,7 +244,7 @@ results = sweep.run_all()
 results = sweep.run_all(show_progress=True)
 
 # Einzelne Kombination ausführen
-params = [512, 6]  # d_model=512, num_layers=6
+params = [512, 6] # d_model=512, num_layers=6
 result = sweep.run_single(params)
 ```
 
@@ -259,8 +259,8 @@ print(f"Successful: {len(successful)}/{len(results)}")
 
 # Beste Runs nach BPB
 sorted_by_bpb = sorted(
-    successful,
-    key=lambda r: r.metrics.get("val_bpb", float("inf"))
+successful,
+key=lambda r: r.metrics.get("val_bpb", float("inf"))
 )
 best_run = sorted_by_bpb[0]
 print(f"Best BPB: {best_run.metrics['val_bpb']:.4f}")
@@ -278,12 +278,12 @@ by_run_id = {r.run_id: r for r in results}
 **Vorher (rekursiv, O(n^k)):**
 ```python
 def generate(idx: int, current: list[Any]) -> Iterator[list[Any]]:
-    if idx >= len(self.config.parameters):
-        yield current
-        return
-    param = self.config.parameters[idx]
-    for value in param.values:
-        yield from generate(idx + 1, current + [value])
+if idx >= len(self.config.parameters):
+yield current
+return
+param = self.config.parameters[idx]
+for value in param.values:
+yield from generate(idx + 1, current + [value])
 ```
 
 **Nachher (iterativ, O(1)):**
@@ -291,9 +291,9 @@ def generate(idx: int, current: list[Any]) -> Iterator[list[Any]]:
 import itertools
 
 def generate_all_parameters(self) -> Iterator[list[Any]]:
-    value_lists = [param.values for param in self.config.parameters]
-    for combination in itertools.product(*value_lists):
-        yield list(combination)
+value_lists = [param.values for param in self.config.parameters]
+for combination in itertools.product(*value_lists):
+yield list(combination)
 ```
 
 **Performance-Vergleich:**
@@ -308,21 +308,21 @@ def generate_all_parameters(self) -> Iterator[list[Any]]:
 
 ```python
 def apply_parameters(
-    base_config: Config,
-    parameters: list[Any],
+base_config: Config,
+parameters: list[Any],
 ) -> Config:
-    """Wendet Parameter auf Base-Config an."""
-    config_dict = base_config._raw.copy()
+"""Wendet Parameter auf Base-Config an."""
+config_dict = base_config._raw.copy()
 
-    for param, value in zip(self.config.parameters, parameters):
-        # YAML-Pfad navigieren (z.B. "model.d_model")
-        keys = param.name.split(".")
-        target = config_dict
-        for key in keys[:-1]:
-            target = target.setdefault(key, {})
-        target[keys[-1]] = value
+for param, value in zip(self.config.parameters, parameters):
+# YAML-Pfad navigieren (z.B. "model.d_model")
+keys = param.name.split(".")
+target = config_dict
+for key in keys[:-1]:
+target = target.setdefault(key, {})
+target[keys[-1]] = value
 
-    return Config(config_dict)
+return Config(config_dict)
 ```
 
 ---
@@ -352,10 +352,10 @@ base_config: "configs/runs/run001_control.yaml"
 run_id_template: "{sweep_id}_d{model.d_model}_l{model.num_layers}"
 
 parameters:
-  - name: "model.d_model"
-    values: [256, 512]
-  - name: "model.num_layers"
-    values: [4, 6]
+- name: "model.d_model"
+values: [256, 512]
+- name: "model.num_layers"
+values: [4, 6]
 ```
 
 **Ergebnis:**
@@ -372,7 +372,7 @@ parameters:
 
 ```yaml
 execution:
-  continue_on_failure: true  # Bei Fehlern weitermachen
+continue_on_failure: true # Bei Fehlern weitermachen
 ```
 
 **Verhalten:**
@@ -388,8 +388,8 @@ results = sweep.run_all()
 # Fehler analysieren
 failed = [r for r in results if not r.success]
 for result in failed:
-    print(f"Failed: {result.run_id}")
-    print(f"  Error: {result.error}")
+print(f"Failed: {result.run_id}")
+print(f" Error: {result.error}")
 ```
 
 ---
@@ -398,42 +398,42 @@ for result in failed:
 
 ```
 results/
-└── sweeps/
-    └── my_sweep/
-        ├── sweep_config.yaml       # Sweep-Konfiguration
-        ├── sweep_results.json      # Alle Ergebnisse
-        ├── summary.txt             # Text-Summary
-        └── runs/
-            ├── my_sweep_d256_l4/
-            │   ├── model.pt
-            │   ├── metrics.json
-            │   └── ...
-            ├── my_sweep_d256_l6/
-            └── ...
+sweeps/
+my_sweep/
+sweep_config.yaml # Sweep-Konfiguration
+sweep_results.json # Alle Ergebnisse
+summary.txt # Text-Summary
+runs/
+my_sweep_d256_l4/
+model.pt
+metrics.json
+...
+my_sweep_d256_l6/
+...
 ```
 
 ### sweep_results.json Format
 
 ```json
 {
-  "sweep_id": "my_sweep",
-  "total_runs": 16,
-  "successful": 14,
-  "failed": 2,
-  "started_at": "2026-03-24T10:00:00Z",
-  "completed_at": "2026-03-24T14:30:00Z",
-  "results": [
-    {
-      "run_id": "my_sweep_d256_l4",
-      "success": true,
-      "metrics": {
-        "val_bpb": 1.234,
-        "ms_per_step": 45.2,
-        "steps_completed": 10000
-      }
-    },
-    ...
-  ]
+"sweep_id": "my_sweep",
+"total_runs": 16,
+"successful": 14,
+"failed": 2,
+"started_at": "2026-03-24T10:00:00Z",
+"completed_at": "2026-03-24T14:30:00Z",
+"results": [
+{
+"run_id": "my_sweep_d256_l4",
+"success": true,
+"metrics": {
+"val_bpb": 1.234,
+"ms_per_step": 45.2,
+"steps_completed": 10000
+}
+},
+...
+]
 }
 ```
 
@@ -451,11 +451,11 @@ batch_size = 50
 all_results = []
 
 for i in range(0, sweep.num_combinations(), batch_size):
-    batch_results = sweep.run_batch(start=i, end=i+batch_size)
-    all_results.extend(batch_results)
-    
-    # Pause zwischen Batches
-    time.sleep(60)
+batch_results = sweep.run_batch(start=i, end=i+batch_size)
+all_results.extend(batch_results)
+
+# Pause zwischen Batches
+time.sleep(60)
 ```
 
 ### 2. Checkpointing
@@ -465,13 +465,13 @@ for i in range(0, sweep.num_combinations(), batch_size):
 import json
 
 def save_checkpoint(results: list, path: str):
-    with open(path, "w") as f:
-        json.dump([r.to_dict() for r in results], f)
+with open(path, "w") as f:
+json.dump([r.to_dict() for r in results], f)
 
 # Bei Unterbrechung fortsetzen
 def load_checkpoint(path: str) -> list:
-    with open(path, "r") as f:
-        return json.load(f)
+with open(path, "r") as f:
+return json.load(f)
 ```
 
 ### 3. Parallel Execution (geplant)
@@ -479,8 +479,8 @@ def load_checkpoint(path: str) -> list:
 ```yaml
 # Phase 4: Parallele Execution
 execution:
-  max_concurrent: 4  # 4 parallele Runs
-  use_multiprocessing: true
+max_concurrent: 4 # 4 parallele Runs
+use_multiprocessing: true
 ```
 
 ---
@@ -541,14 +541,14 @@ python3 -c "from orchestrator import create_sweep; create_sweep('configs/sweeps/
 **Lösung:**
 ```yaml
 execution:
-  continue_on_failure: true  # Weiter bei Fehlern
+continue_on_failure: true # Weiter bei Fehlern
 ```
 
 ```python
 # Fehler analysieren
 failed = [r for r in results if not r.success]
 for r in failed:
-    print(f"{r.run_id}: {r.error}")
+print(f"{r.run_id}: {r.error}")
 ```
 
 ---

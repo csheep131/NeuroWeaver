@@ -1,7 +1,7 @@
 # Smoke Test Report
 
 **Datum:** 2026-03-25
-**Status:** ✅ ALLE TESTS BESTANDEN
+**Status:** ALLE TESTS BESTANDEN
 
 ---
 
@@ -11,13 +11,13 @@ Alle Smoke Tests wurden erfolgreich durchgeführt. Die Infrastruktur für die Pa
 
 | Test | Status | Ergebnis |
 |------|--------|----------|
-| Dependencies | ✅ | Alle Pakete installiert |
-| Dataset | ✅ | 10 Shards gefunden |
-| Tokenizer | ✅ | 1024 Vocab geladen |
-| Dataset Loading | ✅ | Batches werden geladen |
-| Model Forward | ✅ | Forward Pass funktioniert |
-| Compression | ✅ | 12.28 MB (< 16 MB) |
-| Training | ✅ | 5 Steps abgeschlossen |
+| Dependencies | | Alle Pakete installiert |
+| Dataset | | 10 Shards gefunden |
+| Tokenizer | | 1024 Vocab geladen |
+| Dataset Loading | | Batches werden geladen |
+| Model Forward | | Forward Pass funktioniert |
+| Compression | | 12.28 MB (< 16 MB) |
+| Training | | 5 Steps abgeschlossen |
 
 ---
 
@@ -30,7 +30,7 @@ Alle Smoke Tests wurden erfolgreich durchgeführt. Die Infrastruktur für die Pa
 .venv/bin/python -c "import torch; import numpy; import sentencepiece; import yaml"
 ```
 
-**Ergebnis:** ✅ Bestanden
+**Ergebnis:** Bestanden
 
 Alle erforderlichen Pakete sind installiert:
 - torch
@@ -47,7 +47,7 @@ Alle erforderlichen Pakete sind installiert:
 ls -1 ./data/datasets/fineweb10B_sp1024/train/*.bin | wc -l
 ```
 
-**Ergebnis:** ✅ 10 Shards gefunden
+**Ergebnis:** 10 Shards gefunden
 
 Jeder Shard: ~20 MB (10M Tokens)
 Gesamt: ~200 MB (100M Tokens)
@@ -61,7 +61,7 @@ Gesamt: ~200 MB (100M Tokens)
 ls -lh ./data/tokenizers/fineweb_1024_bpe.model
 ```
 
-**Ergebnis:** ✅ Tokenizer gefunden (249 KB)
+**Ergebnis:** Tokenizer gefunden (249 KB)
 
 - Typ: SentencePiece BPE
 - Vocab Size: 1024
@@ -75,14 +75,14 @@ ls -lh ./data/tokenizers/fineweb_1024_bpe.model
 ```python
 from train_gpt import FineWebDataset
 dataset = FineWebDataset(
-    data_path='./data/datasets/fineweb10B_sp1024/train',
-    tokenizer_path='./data/tokenizers/fineweb_1024_bpe.model',
-    seq_len=1024
+data_path='./data/datasets/fineweb10B_sp1024/train',
+tokenizer_path='./data/tokenizers/fineweb_1024_bpe.model',
+seq_len=1024
 )
 x, y = dataset.get_batch(batch_tokens=1024)
 ```
 
-**Ergebnis:** ✅ Bestanden
+**Ergebnis:** Bestanden
 
 ```
 Vocab Size: 1024
@@ -100,12 +100,12 @@ import torch
 from train_gpt import Config, GPT
 
 cfg = Config(
-    d_model=384,
-    num_layers=9,
-    num_heads=6,
-    kv_heads=3,
-    vocab_size=1024,
-    max_seq_len=1024
+d_model=384,
+num_layers=9,
+num_heads=6,
+kv_heads=3,
+vocab_size=1024,
+max_seq_len=1024
 )
 
 model = GPT(cfg)
@@ -113,7 +113,7 @@ x = torch.randint(0, 1024, (2, 1024))
 logits, loss = model(x, x)
 ```
 
-**Ergebnis:** ✅ Bestanden
+**Ergebnis:** Bestanden
 
 ```
 Input: torch.Size([2, 1024])
@@ -134,7 +134,7 @@ model = GPT(cfg)
 size, _ = compress_model(model)
 ```
 
-**Ergebnis:** ✅ Bestanden
+**Ergebnis:** Bestanden
 
 ```
 Compressed Size: 12.28 MB
@@ -159,7 +159,7 @@ TRAIN_BATCH_TOKENS=512 \
 .venv/bin/python train_gpt.py
 ```
 
-**Ergebnis:** ✅ 5 Steps abgeschlossen
+**Ergebnis:** 5 Steps abgeschlossen
 
 ```
 ====================================================
@@ -194,28 +194,28 @@ ms/step: 102.9
 
 ## Challenge Compliance
 
-### ✅ Artifact Size
+### Artifact Size
 
 | Metrik | Wert | Limit | Status |
 |--------|------|-------|--------|
-| Compressed Model | 12.28 MB | 16 MB | ✅ |
+| Compressed Model | 12.28 MB | 16 MB | |
 
-### ✅ Training Infrastructure
+### Training Infrastructure
 
 | Feature | Status |
 |---------|--------|
-| DDP Support | ✅ |
-| Wallclock Limit | ✅ |
-| INT8 Compression | ✅ |
-| Reproducible Seeds | ✅ |
+| DDP Support | |
+| Wallclock Limit | |
+| INT8 Compression | |
+| Reproducible Seeds | |
 
-### ⏳ Evaluation
+### Evaluation
 
 | Metrik | Status |
 |--------|--------|
-| val_bpb | ⏳ Pending H100 |
-| training_time | ⏳ Pending H100 |
-| 3-Seed Validation | ⏳ Pending H100 |
+| val_bpb | Pending H100 |
+| training_time | Pending H100 |
+| 3-Seed Validation | Pending H100 |
 
 ---
 
@@ -234,35 +234,35 @@ ms/step: 102.9
 ### Sobald H100 Credits verfügbar sind:
 
 1. **Dataset aktualisieren**
-   ```bash
-   HF_TOKEN=hf_... python data/cached_challenge_fineweb.py \
-     --variant sp1024 --train-shards 80
-   ```
+```bash
+HF_TOKEN=hf_... python data/cached_challenge_fineweb.py \
+--variant sp1024 --train-shards 80
+```
 
 2. **Training auf 8xH100**
-   ```bash
-   torchrun --standalone --nproc_per_node=8 train_gpt.py \
-     --run_id baseline_v1
-   ```
+```bash
+torchrun --standalone --nproc_per_node=8 train_gpt.py \
+--run_id baseline_v1
+```
 
 3. **3-Seed Validation**
-   ```bash
-   for seed in 42 1 2; do
-     SEED=$seed torchrun --standalone --nproc_per_node=8 train_gpt.py
-   done
-   ```
+```bash
+for seed in 42 1 2; do
+SEED=$seed torchrun --standalone --nproc_per_node=8 train_gpt.py
+done
+```
 
 4. **submission.json aktualisieren**
-   - val_bpb eintragen
-   - compressed_size_bytes eintragen
-   - training_time eintragen
-   - Logs verlinken
+- val_bpb eintragen
+- compressed_size_bytes eintragen
+- training_time eintragen
+- Logs verlinken
 
 ---
 
 ## Fazit
 
-✅ **Alle Smoke Tests bestanden**
+**Alle Smoke Tests bestanden**
 
 Die Infrastruktur ist bereit für H100 Training. Sobald Compute Credits verfügbar sind, können die vollständigen Training Runs durchgeführt werden.
 

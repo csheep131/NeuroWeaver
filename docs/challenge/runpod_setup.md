@@ -53,13 +53,13 @@ cat ~/.ssh/id_ed25519.pub
 
 1. **Dashboard** → "GPU Cloud Pods" → "Deploy"
 2. **Template wählen:** "Parameter Golf Challenge" (offizielles Template)
-   - Alternativ: "PyTorch 2.1.0-py3.10" oder ähnliches
+- Alternativ: "PyTorch 2.1.0-py3.10" oder ähnliches
 3. **GPU wählen:**
-   - Testing: 1xH100 PCIe (~$2-3/h)
-   - Training: 8xH100 SXM (~$20-25/h)
+- Testing: 1xH100 PCIe (~$2-3/h)
+- Training: 8xH100 SXM (~$20-25/h)
 4. **GPU Count:** 1 (für Testing) oder 8 (für finale Runs)
 5. **Container Disk:** 50GB (minimum), 100GB+ empfohlen
-6. **SSH Access:** ✅ Aktivieren (wichtig!)
+6. **SSH Access:** Aktivieren (wichtig!)
 7. **Deploy Pod**
 
 ### 2.2 Pod starten
@@ -113,8 +113,8 @@ pip install torch numpy pyyaml datasets tqdm sentencepiece
 ```bash
 # FineWeb Dataset mit 1024-token Vocabulary
 python3 data/cached_challenge_fineweb.py \
-  --variant sp1024 \
-  --train-shards 80
+--variant sp1024 \
+--train-shards 80
 ```
 
 **Dauer:** ~10-30 Minuten (abhängig von Netzwerk)
@@ -187,8 +187,8 @@ tail -f training.log
 ```bash
 # Von RunPod zu lokal
 scp -i ~/.ssh/id_ed25519 -P <SSH_PORT> \
-  root@<POD_IP>:/workspace/NeuroWeave/records/baseline_v1/logs/*.log \
-  ./local_logs/
+root@<POD_IP>:/workspace/NeuroWeave/records/baseline_v1/logs/*.log \
+./local_logs/
 ```
 
 ### 6.2 Modell-Gewichte speichern
@@ -209,8 +209,8 @@ print(f'Gespeichert: model_weights.pt')
 
 # Herunterladen
 scp -i ~/.ssh/id_ed25519 -P <SSH_PORT> \
-  root@<POD_IP>:/workspace/NeuroWeave/model_weights.pt \
-  ./
+root@<POD_IP>:/workspace/NeuroWeave/model_weights.pt \
+./
 ```
 
 ---

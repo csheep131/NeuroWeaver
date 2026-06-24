@@ -1,6 +1,6 @@
 # Run Roadmap — Ablation-Maschine
 
-> **⚠️ WICHTIG FÜR 8GB VRAM LOKALE ENTWICKLUNG**
+> ** WICHTIG FÜR 8GB VRAM LOKALE ENTWICKLUNG**
 >
 > Dieses Dokument definiert **zwei parallele Roadmaps**:
 > - **A. Challenge-Roadmap**: Für echte H100-Challenge-Submission (remote)
@@ -28,9 +28,9 @@
 
 | Phase | Fokus | Anzahl Runs | Ziel | Status |
 |-------|-------|-------------|------|--------|
-| **Phase 1** | Baseline und erste Ablationen | 5 | Stabiles Run-System, Control-Baseline, Hash-Tokenizer-Varianten | ✅ Abgeschlossen |
-| **Phase 2** | Feature-Gates und Research | 10 | Einzelne Features isoliert testen, Ablationen | ✅ Abgeschlossen |
-| **Phase 3** | Finale Kandidaten und Submission | 2+ | Kombinationen, Submission-Bundles | ✅ Abgeschlossen |
+| **Phase 1** | Baseline und erste Ablationen | 5 | Stabiles Run-System, Control-Baseline, Hash-Tokenizer-Varianten | Abgeschlossen |
+| **Phase 2** | Feature-Gates und Research | 10 | Einzelne Features isoliert testen, Ablationen | Abgeschlossen |
+| **Phase 3** | Finale Kandidaten und Submission | 2+ | Kombinationen, Submission-Bundles | Abgeschlossen |
 
 ---
 
@@ -40,23 +40,23 @@
 
 | Run-ID | Fokus | Priorität | Status | Implementiert |
 |--------|-------|-----------|--------|---------------|
-| `run001_control` | Baseline | P0 | 🔴 Pending | ✅ Ja |
-| `run001b_frontierish_control` | 11L, d=512, MLP 3-3.5x, BigramHash 4096 | P0 | 🔴 Pending | ✅ Ja |
-| `run002a_bigram_4k` | Vocab 4096 | P1 | 🔴 Pending | ✅ Ja |
-| `run002b_bigram_8k` | Vocab 8192 | P1 | 🔴 Pending | ✅ Ja |
-| `run002c_trigram_small` | Kleines Trigram | P2 | 🔴 Pending | ✅ Ja |
-| `run003_xsa` | Cross-Sequence Attention | P2 | 🔴 Pending | ✅ Ja |
-| `run004_leakyrelu` | LeakyReLU² Aktivierung | P1 | 🔴 Pending | ✅ Ja |
-| `run005a_quant_mlp5_attn6` | INT5 MLP, INT6 Attention | P2 | 🔴 Pending | ✅ Ja |
-| `run005b_quant_attn5_mlp6` | INT5 Attention, INT6 MLP | P2 | 🔴 Pending | ✅ Ja |
-| `run006_film` | FiLM Feature | P3 | 🔴 Pending | ✅ Ja |
-| `run007_ttt` | TTT Feature (late-stage) | P4 | 🔴 Pending (nur smoke lokal) | ✅ Ja |
-| `run008a_star_relu` | Star-ReLU / ReLU² Stil | P3 | 🔴 Pending | ✅ Ja |
-| `run008b_true_gated_mlp` | Echtes Gated MLP | P3 | 🔴 Pending | ✅ Ja |
-| `run009_gqa` | Grouped Query Attention | P1 | 🔴 Pending | ✅ Ja |
-| `run010_recurrence` | Recurrent Blocks | P1 | 🔴 Pending | ✅ Ja |
-| `run016_best_combo_a` | Dynamisch aus Gewinnern | P5/Final | 🔴 Pending | ✅ Ja |
-| `run017_best_combo_quantized` | Dynamisch aus Gewinnern + Quant | P5/Final | 🔴 Pending | ✅ Ja |
+| `run001_control` | Baseline | P0 | Pending | Ja |
+| `run001b_frontierish_control` | 11L, d=512, MLP 3-3.5x, BigramHash 4096 | P0 | Pending | Ja |
+| `run002a_bigram_4k` | Vocab 4096 | P1 | Pending | Ja |
+| `run002b_bigram_8k` | Vocab 8192 | P1 | Pending | Ja |
+| `run002c_trigram_small` | Kleines Trigram | P2 | Pending | Ja |
+| `run003_xsa` | Cross-Sequence Attention | P2 | Pending | Ja |
+| `run004_leakyrelu` | LeakyReLU² Aktivierung | P1 | Pending | Ja |
+| `run005a_quant_mlp5_attn6` | INT5 MLP, INT6 Attention | P2 | Pending | Ja |
+| `run005b_quant_attn5_mlp6` | INT5 Attention, INT6 MLP | P2 | Pending | Ja |
+| `run006_film` | FiLM Feature | P3 | Pending | Ja |
+| `run007_ttt` | TTT Feature (late-stage) | P4 | Pending (nur smoke lokal) | Ja |
+| `run008a_star_relu` | Star-ReLU / ReLU² Stil | P3 | Pending | Ja |
+| `run008b_true_gated_mlp` | Echtes Gated MLP | P3 | Pending | Ja |
+| `run009_gqa` | Grouped Query Attention | P1 | Pending | Ja |
+| `run010_recurrence` | Recurrent Blocks | P1 | Pending | Ja |
+| `run016_best_combo_a` | Dynamisch aus Gewinnern | P5/Final | Pending | Ja |
+| `run017_best_combo_quantized` | Dynamisch aus Gewinnern + Quant | P5/Final | Pending | Ja |
 
 **Gestrichen / auf P5:**
 - `run014_gated_film` (zu komplex)
@@ -115,7 +115,7 @@ Zu den bestehenden Metriken werden folgende lokale Messwerte ergänzt:
 **Phase:** 1
 **Parent:** — (Root)
 **Priorität:** **P0**
-**Status:** 🔴 Pending
+**Status:** Pending
 
 ### Ziel
 
@@ -168,11 +168,11 @@ Dieser Run dient als Referenzpunkt für alle weiteren Ablationen.
 
 ### Kill-Kriterien
 
-- ❌ `val_bpb` > 1.60 → Architektur zu schwach
-- ❌ `ms_per_step` > 75ms → Ineffiziente Implementierung
-- ❌ Training divergiert in >1 von 3 Seeds → Instabiles Setup
-- ❌ `artifact_bytes` > 12.000.000 → Zu wenig Headroom für Phase 3
-- ❌ Lokal: OOM bei Default-Konfiguration → Config anpassen
+- `val_bpb` > 1.60 → Architektur zu schwach
+- `ms_per_step` > 75ms → Ineffiziente Implementierung
+- Training divergiert in >1 von 3 Seeds → Instabiles Setup
+- `artifact_bytes` > 12.000.000 → Zu wenig Headroom für Phase 3
+- Lokal: OOM bei Default-Konfiguration → Config anpassen
 
 ### Geschätzte Ressourcen
 
@@ -191,7 +191,7 @@ Dieser Run dient als Referenzpunkt für alle weiteren Ablationen.
 **Phase:** 1
 **Parent:** `run001_control`
 **Priorität:** **P0**
-**Status:** 🔴 Pending
+**Status:** Pending
 
 ### Ziel
 
@@ -230,9 +230,9 @@ Dient als zweiter Referenzpunkt für Runs, die von vornherein aggressiver optimi
 
 ### Kill-Kriterien
 
-- ❌ `val_bpb` > run001_control → Kein Vorteil
-- ❌ Training instabil bei WD 0.04 → WD reduzieren
-- ❌ Lokal: Kein Vorteil in proxy-Metriken → Priorität reduzieren
+- `val_bpb` > run001_control → Kein Vorteil
+- Training instabil bei WD 0.04 → WD reduzieren
+- Lokal: Kein Vorteil in proxy-Metriken → Priorität reduzieren
 
 ### Geschätzte Ressourcen
 
@@ -251,7 +251,7 @@ Dient als zweiter Referenzpunkt für Runs, die von vornherein aggressiver optimi
 **Phase:** 1
 **Parent:** `run001_control`
 **Priorität:** **P1**
-**Status:** 🔴 Pending
+**Status:** Pending
 
 ### Ziel
 
@@ -286,9 +286,9 @@ Evaluiere den Trade-off zwischen Token-Effizienz und Vocab-Größe.
 
 ### Kill-Kriterien
 
-- ❌ `val_bpb` Verbesserung < 0.01 → Zu wenig Gewinn
-- ❌ `ms_per_step` erhöht um > 20% → Overhead zu hoch
-- ❌ Hash-Kollisionen verursachen Instabilität → Design-Problem
+- `val_bpb` Verbesserung < 0.01 → Zu wenig Gewinn
+- `ms_per_step` erhöht um > 20% → Overhead zu hoch
+- Hash-Kollisionen verursachen Instabilität → Design-Problem
 
 ### Geschätzte Ressourcen
 
@@ -307,7 +307,7 @@ Evaluiere den Trade-off zwischen Token-Effizienz und Vocab-Größe.
 **Phase:** 1
 **Parent:** `run001_control`
 **Priorität:** **P1**
-**Status:** 🔴 Pending
+**Status:** Pending
 
 ### Ziel
 
@@ -343,9 +343,9 @@ Evaluiere ob größeres Vocab bessere BPB bei akzeptablem Memory-Trade-off liefe
 
 ### Kill-Kriterien
 
-- ❌ Δ BPB vs. 4K < 0.01 → 4K bevorzugen
-- ❌ `artifact_bytes` erhöht um > 3 MB → Zu groß
-- ❌ Lokal: Throughput >20% schlechter als 4K → Overhead zu hoch
+- Δ BPB vs. 4K < 0.01 → 4K bevorzugen
+- `artifact_bytes` erhöht um > 3 MB → Zu groß
+- Lokal: Throughput >20% schlechter als 4K → Overhead zu hoch
 
 ### Geschätzte Ressourcen
 
@@ -364,7 +364,7 @@ Evaluiere ob größeres Vocab bessere BPB bei akzeptablem Memory-Trade-off liefe
 **Phase:** 1
 **Parent:** `run001_control`
 **Priorität:** **P2**
-**Status:** 🔴 Pending
+**Status:** Pending
 
 ### Ziel
 
@@ -400,9 +400,9 @@ Evaluiere ob Trigramme besseren Trade-off als Bigramme bieten.
 
 ### Kill-Kriterien
 
-- ❌ Δ BPB vs. Bigram 8K < 0.01 → Bigram bevorzugen
-- ❌ `ms_per_step` erhöht um > 25% → Overhead zu hoch
-- ❌ Lokal: OOM oder instabil → Config anpassen
+- Δ BPB vs. Bigram 8K < 0.01 → Bigram bevorzugen
+- `ms_per_step` erhöht um > 25% → Overhead zu hoch
+- Lokal: OOM oder instabil → Config anpassen
 
 ### Geschätzte Ressourcen
 
@@ -425,37 +425,37 @@ Dieses Gate stellt sicher, dass nur validierte Features kombiniert werden.
 ### Regeln für Kombinationen
 
 1. **Nur Features kombinieren, die stabil positiv waren**
-   - Feature muss in ≥2 Proxy-Runs gleiche Richtung gezeigt haben
-   - Kein Feature mit "knapp positiv" oder "gemischt" kombinieren
+- Feature muss in ≥2 Proxy-Runs gleiche Richtung gezeigt haben
+- Kein Feature mit "knapp positiv" oder "gemischt" kombinieren
 
 2. **Maximal 3 neue Freiheitsgrade pro Kombi-Run**
-   - Nicht mehr als 3 Features gleichzeitig hinzufügen
-   - Sonst zu viele Variablen für saubere Attribution
+- Nicht mehr als 3 Features gleichzeitig hinzufügen
+- Sonst zu viele Variablen für saubere Attribution
 
 3. **Keine Kombination aus zwei "knapp positiven" Features**
-   - Wenn Feature A und B beide nur marginal positiv: nicht kombinieren
-   - Lieber Feature A mit starkem Feature C kombinieren
+- Wenn Feature A und B beide nur marginal positiv: nicht kombinieren
+- Lieber Feature A mit starkem Feature C kombinieren
 
 4. **Mindestens ein "starkes" Feature pro Kombi**
-   - Jedes Kombi-Run muss ≥1 Feature mit klarem positiven Signal haben
-   - Andere Features können "neutral bis leicht positiv" sein
+- Jedes Kombi-Run muss ≥1 Feature mit klarem positiven Signal haben
+- Andere Features können "neutral bis leicht positiv" sein
 
 ### Gate-Entscheidung
 
 | Feature | Proxy-Ergebnis | Gate-Status |
 |---------|----------------|-------------|
-| Hash 4k | BPB ↓ 0.03, Throughput ~gleich | ✅ PASS |
-| Hash 8k | BPB ↓ 0.04, Throughput ~gleich | ✅ PASS |
-| Trigram | BPB ↓ 0.05, Throughput ↓ 10% | ✅ PASS (mit Overhead) |
-| LeakyReLU | BPB ~gleich, Throughput ↑ 10% | ✅ PASS |
-| GQA | BPB ~gleich, Throughput ↑ 15%, VRAM ↓ | ✅ PASS |
-| Recurrence | BPB ↓ 0.02 (lang), ~gleich (kurz) | ⚠️ WATCH |
-| XSA | BPB ↓ 0.04, Throughput ↓ 20% | ✅ PASS (mit Overhead-Label) |
-| Quant5/6 | BPB ↑ 0.02, Size ↓ 30% | ⚠️ WATCH |
-| FiLM | BPB ↓ 0.01, Size ↑ 5% | ❌ FAIL |
-| TTT | Nur smoke, Throughput ↓ 40% | ❌ FAIL |
-| Star-ReLU | BPB ~gleich, Throughput ↑ 8% | ✅ PASS |
-| Gated MLP | BPB ↓ 0.03, Size ↑ 10% | ⚠️ WATCH |
+| Hash 4k | BPB ↓ 0.03, Throughput ~gleich | PASS |
+| Hash 8k | BPB ↓ 0.04, Throughput ~gleich | PASS |
+| Trigram | BPB ↓ 0.05, Throughput ↓ 10% | PASS (mit Overhead) |
+| LeakyReLU | BPB ~gleich, Throughput ↑ 10% | PASS |
+| GQA | BPB ~gleich, Throughput ↑ 15%, VRAM ↓ | PASS |
+| Recurrence | BPB ↓ 0.02 (lang), ~gleich (kurz) | WATCH |
+| XSA | BPB ↓ 0.04, Throughput ↓ 20% | PASS (mit Overhead-Label) |
+| Quant5/6 | BPB ↑ 0.02, Size ↓ 30% | WATCH |
+| FiLM | BPB ↓ 0.01, Size ↑ 5% | FAIL |
+| TTT | Nur smoke, Throughput ↓ 40% | FAIL |
+| Star-ReLU | BPB ~gleich, Throughput ↑ 8% | PASS |
+| Gated MLP | BPB ↓ 0.03, Size ↑ 10% | WATCH |
 
 **Für Phase 3 zugelassen:** Hash (4k/8k), Trigram, LeakyReLU, GQA, XSA (mit Overhead-Label), Star-ReLU
 **Beobachten:** Recurrence, Quant-Strategie, Gated MLP
@@ -465,9 +465,9 @@ Dieses Gate stellt sicher, dass nur validierte Features kombiniert werden.
 
 | Label | Bedeutung | Verwendung in Phase 3 |
 |-------|-----------|----------------------|
-| ✅ PASS | Stabil positiv in ≥2 Runs, klare Verbesserung | Darf kombiniert werden |
-| ⚠️ WATCH | Gemischt oder knapp positiv, weiterer Test nötig | Nur einzeln weiter testen, nicht kombinieren |
-| ❌ FAIL | Negativ oder keine klare Verbesserung | Nicht in Phase 3 verwenden |
+| PASS | Stabil positiv in ≥2 Runs, klare Verbesserung | Darf kombiniert werden |
+| WATCH | Gemischt oder knapp positiv, weiterer Test nötig | Nur einzeln weiter testen, nicht kombinieren |
+| FAIL | Negativ oder keine klare Verbesserung | Nicht in Phase 3 verwenden |
 
 ### Dokumentation
 
@@ -485,7 +485,7 @@ Dieses Gate stellt sicher, dass nur validierte Features kombiniert werden.
 **Phase:** 2
 **Parent:** `run001_control`
 **Priorität:** **P2**
-**Status:** 🔴 Pending
+**Status:** Pending
 
 ### Ziel
 
@@ -537,10 +537,10 @@ XSA ermöglicht Attention über Sequenzgrenzen hinweg und kann lange Abhängigke
 
 ### Kill-Kriterien
 
-- ❌ `val_bpb` Verbesserung < 0.02 → XSA lohnt nicht
-- ❌ `ms_per_step` erhöht um > 30% → Overhead inakzeptabel
-- ❌ Lokal: OOM bei `last_2` → XSA auf Remote verschieben oder `seq_len` reduzieren
-- ❌ Lokal: `peak_vram_mb` > 8000 → Config anpassen (window halbieren)
+- `val_bpb` Verbesserung < 0.02 → XSA lohnt nicht
+- `ms_per_step` erhöht um > 30% → Overhead inakzeptabel
+- Lokal: OOM bei `last_2` → XSA auf Remote verschieben oder `seq_len` reduzieren
+- Lokal: `peak_vram_mb` > 8000 → Config anpassen (window halbieren)
 
 ### Geschätzte Ressourcen
 
@@ -559,7 +559,7 @@ XSA ermöglicht Attention über Sequenzgrenzen hinweg und kann lange Abhängigke
 **Phase:** 2
 **Parent:** `run001_control`
 **Priorität:** **P1**
-**Status:** 🔴 Pending
+**Status:** Pending
 
 ### Ziel
 
@@ -592,10 +592,10 @@ LeakyReLU² ist rechnerisch günstiger und kann bei ähnlicher Qualität die Ste
 
 ### Kill-Kriterien
 
-- ❌ `val_bpb` verschlechtert um > 0.05 → Qualität zu schlecht
-- ❌ `ms_per_step` nicht reduziert → Kein Vorteil gegenüber GELU
-- ❌ Training instabil (NaNs) → Aktivierungsfunktion defekt
-- ❌ Dead Neurons > 5% → Leakiness zu niedrig
+- `val_bpb` verschlechtert um > 0.05 → Qualität zu schlecht
+- `ms_per_step` nicht reduziert → Kein Vorteil gegenüber GELU
+- Training instabil (NaNs) → Aktivierungsfunktion defekt
+- Dead Neurons > 5% → Leakiness zu niedrig
 
 ### Geschätzte Ressourcen
 
@@ -614,7 +614,7 @@ LeakyReLU² ist rechnerisch günstiger und kann bei ähnlicher Qualität die Ste
 **Phase:** 2
 **Parent:** `run001_control`
 **Priorität:** **P2**
-**Status:** 🔴 Pending
+**Status:** Pending
 
 ### Ziel
 
@@ -653,10 +653,10 @@ Ziel ist BPB-Erhalt bei reduzierter Artifact-Größe.
 
 ### Kill-Kriterien
 
-- ❌ Quant-Gap > 0.08 → Quantisierung zu aggressiv
-- ❌ `artifact_bytes` reduziert um < 20% → Aufwand lohnt nicht
-- ❌ Training mit Fake-Quant divergiert → Quant-Aware Training nötig
-- ❌ INT5 für MLP zu schlecht → auf INT6 hochstufen
+- Quant-Gap > 0.08 → Quantisierung zu aggressiv
+- `artifact_bytes` reduziert um < 20% → Aufwand lohnt nicht
+- Training mit Fake-Quant divergiert → Quant-Aware Training nötig
+- INT5 für MLP zu schlecht → auf INT6 hochstufen
 
 ### Geschätzte Ressourcen
 
@@ -675,7 +675,7 @@ Ziel ist BPB-Erhalt bei reduzierter Artifact-Größe.
 **Phase:** 2
 **Parent:** `run001_control`
 **Priorität:** **P2**
-**Status:** 🔴 Pending
+**Status:** Pending
 
 ### Ziel
 
@@ -713,9 +713,9 @@ Vergleiche mit run005a um optimale Quant-Strategie zu finden.
 
 ### Kill-Kriterien
 
-- ❌ Quant-Gap > 0.08 → Quantisierung zu aggressiv
-- ❌ Quant-Gap schlechter als run005a → 005a bevorzugen
-- ❌ Training mit Fake-Quant divergiert → Quant-Aware Training nötig
+- Quant-Gap > 0.08 → Quantisierung zu aggressiv
+- Quant-Gap schlechter als run005a → 005a bevorzugen
+- Training mit Fake-Quant divergiert → Quant-Aware Training nötig
 
 ### Geschätzte Ressourcen
 
@@ -734,7 +734,7 @@ Vergleiche mit run005a um optimale Quant-Strategie zu finden.
 **Phase:** 2
 **Parent:** `run001_control`
 **Priorität:** **P4**
-**Status:** 🔴 Pending
+**Status:** Pending
 
 ### Ziel
 
@@ -767,9 +767,9 @@ FiLM ermöglicht kontextabhängige Skalierung und Verschiebung von Aktivierungen
 
 ### Kill-Kriterien
 
-- ❌ `val_bpb` Verbesserung < 0.02 → FiLM lohnt nicht
-- ❌ `ms_per_step` erhöht um > 25% → Overhead zu hoch
-- ❌ `artifact_bytes` erhöht um > 2 MB → Zu viele Parameter
+- `val_bpb` Verbesserung < 0.02 → FiLM lohnt nicht
+- `ms_per_step` erhöht um > 25% → Overhead zu hoch
+- `artifact_bytes` erhöht um > 2 MB → Zu viele Parameter
 
 ### Geschätzte Ressourcen
 
@@ -788,14 +788,14 @@ FiLM ermöglicht kontextabhängige Skalierung und Verschiebung von Aktivierungen
 **Phase:** 2
 **Parent:** `run001_control`
 **Priorität:** **P5**
-**Status:** 🔴 Pending
+**Status:** Pending
 
 ### Ziel
 
 Teste TTT (Test-Time Training) als optionales Feature.
 TTT ermöglicht adaptive Inferenz durch Mini-Updates während der Vorhersage.
 
-> **⚠️ LATE-STAGE FEATURE**
+> ** LATE-STAGE FEATURE**
 > - Kein lokaler Pflicht-Run
 > - Nur 1 Pass
 > - Nur letzte 1-2 Layer
@@ -828,10 +828,10 @@ TTT ermöglicht adaptive Inferenz durch Mini-Updates während der Vorhersage.
 
 ### Kill-Kriterien
 
-- ❌ `val_bpb` Verbesserung < 0.03 → TTT lohnt nicht
-- ❌ `ms_per_step` erhöht um > 50% → Inferenz zu langsam
-- ❌ TTT divergiert bei >5% der Samples → Instabil
-- ❌ TTT in allen Layern → Zu teuer, auf `last_N` beschränken
+- `val_bpb` Verbesserung < 0.03 → TTT lohnt nicht
+- `ms_per_step` erhöht um > 50% → Inferenz zu langsam
+- TTT divergiert bei >5% der Samples → Instabil
+- TTT in allen Layern → Zu teuer, auf `last_N` beschränken
 
 ### Geschätzte Ressourcen
 
@@ -850,7 +850,7 @@ TTT ermöglicht adaptive Inferenz durch Mini-Updates während der Vorhersage.
 **Phase:** 2
 **Parent:** `run001_control`
 **Priorität:** **P4**
-**Status:** 🔴 Pending
+**Status:** Pending
 
 ### Ziel
 
@@ -882,9 +882,9 @@ Star-ReLU kombiniert Vorteile von ReLU mit quadratischer Komponente.
 
 ### Kill-Kriterien
 
-- ❌ `val_bpb` verschlechtert um > 0.04 → Qualität zu schlecht
-- ❌ `ms_per_step` nicht reduziert → Kein Vorteil
-- ❌ Training instabil (NaNs) → Beta zu hoch
+- `val_bpb` verschlechtert um > 0.04 → Qualität zu schlecht
+- `ms_per_step` nicht reduziert → Kein Vorteil
+- Training instabil (NaNs) → Beta zu hoch
 
 ### Geschätzte Ressourcen
 
@@ -903,7 +903,7 @@ Star-ReLU kombiniert Vorteile von ReLU mit quadratischer Komponente.
 **Phase:** 2
 **Parent:** `run001_control`
 **Priorität:** **P4**
-**Status:** 🔴 Pending
+**Status:** Pending
 
 ### Ziel
 
@@ -935,10 +935,10 @@ Gated MLPs sind expressiver und können bei ähnlicher Parameterzahl bessere BPB
 
 ### Kill-Kriterien
 
-- ❌ `val_bpb` Verbesserung < 0.02 → Gate lohnt nicht
-- ❌ `ms_per_step` erhöht um > 30% → Overhead zu hoch
-- ❌ `artifact_bytes` erhöht um > 30% → Zu viele Parameter
-- ❌ Training instabil → Gradient-Clipping nötig
+- `val_bpb` Verbesserung < 0.02 → Gate lohnt nicht
+- `ms_per_step` erhöht um > 30% → Overhead zu hoch
+- `artifact_bytes` erhöht um > 30% → Zu viele Parameter
+- Training instabil → Gradient-Clipping nötig
 
 ### Geschätzte Ressourcen
 
@@ -957,7 +957,7 @@ Gated MLPs sind expressiver und können bei ähnlicher Parameterzahl bessere BPB
 **Phase:** 2
 **Parent:** `run001_control`
 **Priorität:** **P1**
-**Status:** 🔴 Pending
+**Status:** Pending
 
 ### Ziel
 
@@ -991,10 +991,10 @@ GQA reduziert KV-Cache und kann Step-Zeit verbessern.
 
 ### Kill-Kriterien
 
-- ❌ `val_bpb` verschlechtert um > 0.04 → Qualität zu schlecht
-- ❌ `ms_per_step` nicht reduziert → Kein Vorteil
-- ❌ GQA-Gruppen zu klein (<4) → Qualität leidet
-- ❌ GQA-Gruppen zu groß (>8) → Vorteil schwindet
+- `val_bpb` verschlechtert um > 0.04 → Qualität zu schlecht
+- `ms_per_step` nicht reduziert → Kein Vorteil
+- GQA-Gruppen zu klein (<4) → Qualität leidet
+- GQA-Gruppen zu groß (>8) → Vorteil schwindet
 
 ### Geschätzte Ressourcen
 
@@ -1013,7 +1013,7 @@ GQA reduziert KV-Cache und kann Step-Zeit verbessern.
 **Phase:** 2
 **Parent:** `run001_control`
 **Priorität:** **P1**
-**Status:** 🔴 Pending
+**Status:** Pending
 
 ### Ziel
 
@@ -1081,11 +1081,11 @@ Recurrence kann Sequenzverarbeitung effizienter machen und lange Abhängigkeiten
 
 ### Kill-Kriterien
 
-- ❌ `val_bpb` Verbesserung < 0.02 (bei langer Sequenz) → Recurrence lohnt nicht
-- ❌ `ms_per_step` erhöht um > 40% → Zu sequentiell
-- ❌ Training divergiert → Recurrent-Gradienten instabil
-- ❌ Recurrence nur bei sehr langen Sequenzen besser → Nische
-- ❌ Lokal: OOM bei Proxy A → Config anpassen
+- `val_bpb` Verbesserung < 0.02 (bei langer Sequenz) → Recurrence lohnt nicht
+- `ms_per_step` erhöht um > 40% → Zu sequentiell
+- Training divergiert → Recurrent-Gradienten instabil
+- Recurrence nur bei sehr langen Sequenzen besser → Nische
+- Lokal: OOM bei Proxy A → Config anpassen
 
 ### Geschätzte Ressourcen
 
@@ -1111,7 +1111,7 @@ Keine festen Kombinationen im Voraus — erst nach Validierung der Einzel-Featur
 **Phase:** 3
 **Parent:** Dynamisch (aus Gewinnern)
 **Priorität:** **P5/Final** (nach Phase 2, nach Gate-Freeze)
-**Status:** 🔴 Pending
+**Status:** Pending
 
 ### Ziel
 
@@ -1148,9 +1148,9 @@ Zusammensetzung erfolgt **dynamisch** basierend auf tatsächlichen Ergebnissen.
 
 ### Kill-Kriterien
 
-- ❌ `val_bpb` schlechter als bester Einzel-Run → Keine Synergie
-- ❌ `ms_per_step` > 80ms → Zu komplex
-- ❌ Lokal: OOM bei Default-Konfiguration → Features reduzieren
+- `val_bpb` schlechter als bester Einzel-Run → Keine Synergie
+- `ms_per_step` > 80ms → Zu komplex
+- Lokal: OOM bei Default-Konfiguration → Features reduzieren
 
 ### Geschätzte Ressourcen
 
@@ -1169,7 +1169,7 @@ Zusammensetzung erfolgt **dynamisch** basierend auf tatsächlichen Ergebnissen.
 **Phase:** 3
 **Parent:** `run016_best_combo_a`
 **Priorität:** **P5/Final** (nach Phase 2, nach Gate-Freeze)
-**Status:** 🔴 Pending
+**Status:** Pending
 
 ### Ziel
 
@@ -1205,9 +1205,9 @@ Kombiniere beste Features mit optimaler Quant-Strategie aus run005a/b.
 
 ### Kill-Kriterien
 
-- ❌ Quant-Gap > 0.05 → Quantisierung zu aggressiv
-- ❌ `artifact_bytes` > 16 MB → Disqualifiziert
-- ❌ `quantized_val_bpb` > 1.55 → Zu viel Verlust
+- Quant-Gap > 0.05 → Quantisierung zu aggressiv
+- `artifact_bytes` > 16 MB → Disqualifiziert
+- `quantized_val_bpb` > 1.55 → Zu viel Verlust
 
 ### Geschätzte Ressourcen
 
@@ -1222,7 +1222,7 @@ Kombiniere beste Features mit optimaler Quant-Strategie aus run005a/b.
 
 ## Multi-Seed Finales (Top-Kandidaten)
 
-> **⚠️ NUR FÜR H100**
+> ** NUR FÜR H100**
 > Multi-Seed-Validierung erfolgt ausschließlich auf H100-Hardware.
 > Lokal entfällt Multi-Seed-Testing.
 
@@ -1231,7 +1231,7 @@ Kombiniere beste Features mit optimaler Quant-Strategie aus run005a/b.
 **Run-IDs:** `run018_control_s1`, `run019_control_s2`, `run020_control_s3`
 **Phase:** 3
 **Parent:** `run001_control`
-**Status:** 🔴 Pending (nur H100)
+**Status:** Pending (nur H100)
 
 **Ziel:** Baseline mit 3 Seeds für statistische Signifikanz.
 **Erfolg:** σ < 0.02 BPB, alle Seeds konvergieren
@@ -1244,7 +1244,7 @@ Kombiniere beste Features mit optimaler Quant-Strategie aus run005a/b.
 **Run-IDs:** `run027_combo_s1`, `run028_combo_s2`, `run029_combo_s3`
 **Phase:** 3
 **Parent:** `run016_best_combo_a`
-**Status:** 🔴 Pending (nur H100)
+**Status:** Pending (nur H100)
 
 **Ziel:** Best Combo mit 3 Seeds für Submission vorbereiten.
 **Erfolg:** Alle 3 Seeds mit `val_bpb` < 1.45, `ms_per_step` < 75ms
@@ -1257,7 +1257,7 @@ Kombiniere beste Features mit optimaler Quant-Strategie aus run005a/b.
 **Run-IDs:** `run030_quantcombo_s1`, `run031_quantcombo_s2`, `run032_quantcombo_s3`
 **Phase:** 3
 **Parent:** `run017_best_combo_quantized`
-**Status:** 🔴 Pending (nur H100)
+**Status:** Pending (nur H100)
 
 **Ziel:** Finale Submission-Kandidaten mit Quantisierung.
 **Erfolg:**
@@ -1301,26 +1301,26 @@ Kombiniere beste Features mit optimaler Quant-Strategie aus run005a/b.
 
 **Priorisierungsübersicht:**
 ```
-P0: run001_control, run001b_frontierish_control ✅ Implementiert
-P1: run002a_bigram_4k, run004_leakyrelu, run009_gqa, run010_recurrence ✅ Implementiert
-P2: run002b_bigram_8k, run005a/b_quant, run002c_trigram, run003_xsa ✅ Implementiert
-P3: run008a_star_relu, run008b_gated, run006_film ✅ Implementiert
-P4: run007_ttt (late-stage, nur smoke lokal) ✅ Implementiert
-P5/Final: run016_best_combo_a, run017_best_combo_quantized ✅ Implementiert
+P0: run001_control, run001b_frontierish_control Implementiert
+P1: run002a_bigram_4k, run004_leakyrelu, run009_gqa, run010_recurrence Implementiert
+P2: run002b_bigram_8k, run005a/b_quant, run002c_trigram, run003_xsa Implementiert
+P3: run008a_star_relu, run008b_gated, run006_film Implementiert
+P4: run007_ttt (late-stage, nur smoke lokal) Implementiert
+P5/Final: run016_best_combo_a, run017_best_combo_quantized Implementiert
 ```
 
 ---
 
 ## Implementierungsstatus (Aktualisiert: 2026-03-24)
 
-### Phase 1 ✅ Abgeschlossen
+### Phase 1 Abgeschlossen
 - [x] run001_control - Config und Smoke-Test
 - [x] run001b_frontierish_control - Config und Smoke-Test
 - [x] run002a_bigram_4k - Config und Smoke-Test
 - [x] run002b_bigram_8k - Config und Smoke-Test
 - [x] run002c_trigram_small - Config und Smoke-Test
 
-### Phase 2 ✅ Abgeschlossen
+### Phase 2 Abgeschlossen
 - [x] run003_xsa - Config und Smoke-Test
 - [x] run004_leakyrelu - Config und Smoke-Test
 - [x] run005a_quant_mlp5_attn6 - Config und Smoke-Test
@@ -1332,7 +1332,7 @@ P5/Final: run016_best_combo_a, run017_best_combo_quantized ✅ Implementiert
 - [x] run009_gqa - Config und Smoke-Test
 - [x] run010_recurrence - Config und Smoke-Test
 
-### Phase 3 ✅ Abgeschlossen
+### Phase 3 Abgeschlossen
 - [x] run016_best_combo_a - Config, Smoke-Test, Combo Builder
 - [x] run017_best_combo_quantized - Config, Smoke-Test, Submission Bundle
 - [x] Dynamic Combo Builder - Implementiert
@@ -1348,13 +1348,13 @@ Diese Regeln gelten für **alle** Runs und sind im Code zu implementieren:
 
 | Regel | Bedingung | Aktion |
 |-------|-----------|--------|
-| **K1** | `artifact_bytes` > 16.000.000 | ❌ Disqualifiziert (Challenge-Limit) |
-| **K2** | `ms_per_step` > 100ms (H100) | ❌ Zu langsam für 10min-Limit |
-| **K3** | Quant-Gap > 0.08 | ❌ Quantisierung zu aggressiv |
-| **K4** | σ > 0.05 BPB über 3 Seeds (H100) | ❌ Zu volatil |
-| **K5** | Feature nur in 1/3 Seeds gut (H100) | ❌ Nicht robust genug |
-| **K6** | `peak_vram_mb` > 7500 (lokal) | ⚠️ Config anpassen (seq_len reduzieren) |
-| **K7** | `oom_count` > 0 (lokal) | ⚠️ Microbatch reduzieren, checkpointing |
+| **K1** | `artifact_bytes` > 16.000.000 | Disqualifiziert (Challenge-Limit) |
+| **K2** | `ms_per_step` > 100ms (H100) | Zu langsam für 10min-Limit |
+| **K3** | Quant-Gap > 0.08 | Quantisierung zu aggressiv |
+| **K4** | σ > 0.05 BPB über 3 Seeds (H100) | Zu volatil |
+| **K5** | Feature nur in 1/3 Seeds gut (H100) | Nicht robust genug |
+| **K6** | `peak_vram_mb` > 7500 (lokal) | Config anpassen (seq_len reduzieren) |
+| **K7** | `oom_count` > 0 (lokal) | Microbatch reduzieren, checkpointing |
 
 ---
 
@@ -1362,27 +1362,27 @@ Diese Regeln gelten für **alle** Runs und sind im Code zu implementieren:
 
 ```
 run001_control (Baseline)
-├── run001b_frontierish_control (11L, d=512, MLP 3.5x, BigramHash 4096, WD 0.04)
-├── run002a_bigram_4k
-│   └── run016_best_combo_a (dynamisch)
-│       └── run017_best_combo_quantized (dynamisch + Quant)
-│           └── run030-032_quantcombo_3seed (H100 only)
-├── run002b_bigram_8k
-├── run002c_trigram_small
-├── run003_xsa
-├── run004_leakyrelu
-├── run005a_quant_mlp5_attn6
-│   └── run017_best_combo_quantized (Quant-Strategie)
-├── run005b_quant_attn5_mlp6
-│   └── run017_best_combo_quantized (Quant-Strategie)
-├── run006_film
-├── run007_ttt (late-stage, smoke only lokal)
-├── run008a_star_relu
-├── run008b_true_gated_mlp
-├── run009_gqa
-│   └── run016_best_combo_a (Attention-Option)
-└── run010_recurrence
-    └── run016_best_combo_a (Recurrence-Option)
+run001b_frontierish_control (11L, d=512, MLP 3.5x, BigramHash 4096, WD 0.04)
+run002a_bigram_4k
+run016_best_combo_a (dynamisch)
+run017_best_combo_quantized (dynamisch + Quant)
+run030-032_quantcombo_3seed (H100 only)
+run002b_bigram_8k
+run002c_trigram_small
+run003_xsa
+run004_leakyrelu
+run005a_quant_mlp5_attn6
+run017_best_combo_quantized (Quant-Strategie)
+run005b_quant_attn5_mlp6
+run017_best_combo_quantized (Quant-Strategie)
+run006_film
+run007_ttt (late-stage, smoke only lokal)
+run008a_star_relu
+run008b_true_gated_mlp
+run009_gqa
+run016_best_combo_a (Attention-Option)
+run010_recurrence
+run016_best_combo_a (Recurrence-Option)
 ```
 
 **Gestrichene Branches:**
@@ -1393,14 +1393,14 @@ run001_control (Baseline)
 
 ## Nächste Schritte
 
-1. **✅ Phase 1 MVP implementiert** (run001_control, run001b_frontierish_control)
-2. **✅ Lokale Default-Konfiguration validiert** (8GB VRAM Smoke-Tests)
-3. **✅ Run-System validiert** (Reproduzierbarkeit, Metriken, smoke/proxy Typen)
-4. **✅ Phase 1 Hash-Varianten implementiert** (run002a/b/c als proxy)
-5. **✅ Phase 2 Features implementiert** (Alle 10 Runs als proxy)
-6. **✅ Phase 2 Quant-Varianten implementiert** (run005a/b als proxy)
-7. **✅ Kombinationen implementiert** (run016/017 dynamisch mit Combo Builder)
-8. **⏳ Multi-Seed auf H100** (submission-Phase - ausstehend)
+1. ** Phase 1 MVP implementiert** (run001_control, run001b_frontierish_control)
+2. ** Lokale Default-Konfiguration validiert** (8GB VRAM Smoke-Tests)
+3. ** Run-System validiert** (Reproduzierbarkeit, Metriken, smoke/proxy Typen)
+4. ** Phase 1 Hash-Varianten implementiert** (run002a/b/c als proxy)
+5. ** Phase 2 Features implementiert** (Alle 10 Runs als proxy)
+6. ** Phase 2 Quant-Varianten implementiert** (run005a/b als proxy)
+7. ** Kombinationen implementiert** (run016/017 dynamisch mit Combo Builder)
+8. ** Multi-Seed auf H100** (submission-Phase - ausstehend)
 
 ### Ausstehende Arbeiten
 
@@ -1413,5 +1413,5 @@ run001_control (Baseline)
 
 *Dokument erstellt: 2026-03-24*
 *Letzte Überarbeitung: 2026-03-24*
-*Status: Alle Phasen ✅ Implementiert und Smoke-getestet*
+*Status: Alle Phasen Implementiert und Smoke-getestet*
 *Nächster Meilenstein: Echte Trainingsläufe auf H100*

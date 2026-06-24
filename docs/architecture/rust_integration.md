@@ -1,7 +1,7 @@
 # Rust-Integration
 
-**Letztes Update:** 2026-03-24  
-**Status:** ✅ Implementiert (Phase 1-3) | ⚠️ Build-System benötigt Refinement
+**Letztes Update:** 2026-03-24
+**Status:** Implementiert (Phase 1-3) | Build-System benötigt Refinement
 
 ---
 
@@ -12,29 +12,29 @@ Die Wettkampf/Ablation Machine verwendet Rust für performance-kritische Kompone
 ### Architektur
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                    Python (Management Layer)                 │
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐  │
-│  │   Config    │  │  Registry   │  │   Orchestrator      │  │
-│  │   Logging   │  │   Runs      │  │   Dashboard CLI     │  │
-│  └─────────────┘  └─────────────┘  └─────────────────────┘  │
-└─────────────────────────────────────────────────────────────┘
-                              │
-                              │ PyO3 Bindings
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│                   Rust (Performance Layer)                   │
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐  │
-│  │  Tokenizers │  │   Quant     │  │      Models         │  │
-│  │  (Bigram/   │  │  (INT5/     │  │   (Backbone,        │  │
-│  │   Trigram)  │  │   INT6)     │  │    Layers)          │  │
-│  └─────────────┘  └─────────────┘  └─────────────────────┘  │
-│  ┌─────────────┐                                            │
-│  │    Eval     │                                            │
-│  │  (BPB,      │                                            │
-│  │  Sliding)   │                                            │
-│  └─────────────┘                                            │
-└─────────────────────────────────────────────────────────────┘
+
+Python (Management Layer)
+
+Config Registry Orchestrator
+Logging Runs Dashboard CLI
+
+
+
+PyO3 Bindings
+
+
+Rust (Performance Layer)
+
+Tokenizers Quant Models
+(Bigram/ (INT5/ (Backbone,
+Trigram) INT6) Layers)
+
+
+Eval
+(BPB,
+Sliding)
+
+
 ```
 
 ---
@@ -43,23 +43,23 @@ Die Wettkampf/Ablation Machine verwendet Rust für performance-kritische Kompone
 
 ```
 wettkampf/
-├── rust-core/                 # Rust-Source-Code
-│   ├── Cargo.toml             # Rust-Dependencies
-│   ├── pyproject.toml         # Maturin-Konfiguration
-│   └── src/
-│       ├── lib.rs             # Python-Bindings (PyO3)
-│       ├── tokenizers.rs      # Tokenizer-Implementierungen
-│       ├── quant.rs           # Quantisierungs-Logik
-│       ├── models.rs          # Modell-Architekturen
-│       └── eval.rs            # Evaluation (BPB, SlidingWindow)
-│
-├── rust_core/                 # Python-Bindings (auto-generiert)
-│   └── __init__.py            # Import-Wrapper mit Fallback
-│
-└── core/                      # Python-Core (ruft Rust auf)
-    ├── config.py
-    ├── registry.py
-    └── ...
+rust-core/ # Rust-Source-Code
+Cargo.toml # Rust-Dependencies
+pyproject.toml # Maturin-Konfiguration
+src/
+lib.rs # Python-Bindings (PyO3)
+tokenizers.rs # Tokenizer-Implementierungen
+quant.rs # Quantisierungs-Logik
+models.rs # Modell-Architekturen
+eval.rs # Evaluation (BPB, SlidingWindow)
+
+rust_core/ # Python-Bindings (auto-generiert)
+__init__.py # Import-Wrapper mit Fallback
+
+core/ # Python-Core (ruft Rust auf)
+config.py
+registry.py
+...
 ```
 
 ---
@@ -76,16 +76,16 @@ wettkampf/
 ```rust
 #[pyclass]
 pub struct BigramHashTokenizer {
-    vocab_size: usize,
+vocab_size: usize,
 }
 
 #[pymethods]
 impl BigramHashTokenizer {
-    #[new]
-    fn new(vocab_size: usize) -> Self { ... }
+#[new]
+fn new(vocab_size: usize) -> Self { ... }
 
-    fn encode(&self, text: &str) -> PyResult<Vec<usize>> { ... }
-    fn decode(&self, tokens: Vec<usize>) -> PyResult<String> { ... }
+fn encode(&self, text: &str) -> PyResult<Vec<usize>> { ... }
+fn decode(&self, tokens: Vec<usize>) -> PyResult<String> { ... }
 }
 ```
 
@@ -126,13 +126,13 @@ Beispiel:
 ```rust
 #[pyclass]
 pub struct Int6Quantizer {
-    scale: f64,
+scale: f64,
 }
 
 #[pymethods]
 impl Int6Quantizer {
-    fn quantize(&self, weights: Vec<f64>) -> PyResult<Vec<u8>> { ... }
-    fn dequantize(&self, quantized: Vec<u8>) -> PyResult<Vec<f64>> { ... }
+fn quantize(&self, weights: Vec<f64>) -> PyResult<Vec<u8>> { ... }
+fn dequantize(&self, quantized: Vec<u8>) -> PyResult<Vec<f64>> { ... }
 }
 ```
 
@@ -159,7 +159,7 @@ quantized = mixed.quantize(weights)
 - `RustBackbone` – Rust-Implementierung des Model Backbones
 - Layer-Implementierungen (Attention, MLP, Normalization)
 
-**Status:** ⚠️ Placeholder-Implementierungen
+**Status:** Placeholder-Implementierungen
 - Framework ist vorbereitet
 - Eigentliche Neural-Network-Logik fehlt noch
 - PyO3-Bindings sind funktionsfähig
@@ -187,10 +187,10 @@ pub struct BPBEvaluator;
 
 #[pymethods]
 impl BPBEvaluator {
-    #[staticmethod]
-    fn compute_bpb(loss: f64, num_bytes: usize) -> PyResult<f64> {
-        Ok(loss / (num_bytes as f64))
-    }
+#[staticmethod]
+fn compute_bpb(loss: f64, num_bytes: usize) -> PyResult<f64> {
+Ok(loss / (num_bytes as f64))
+}
 }
 ```
 
@@ -273,10 +273,10 @@ python3 -c "from rust_core import Int6Quantizer; print('Quant: OK')"
 **Logging:**
 ```python
 try:
-    from rust_core import BigramHashTokenizer
+from rust_core import BigramHashTokenizer
 except ImportError:
-    logger.warning("Rust-Core nicht verfügbar, verwende Python-Fallback")
-    from tokenizers.tokenizers import BigramHashTokenizer
+logger.warning("Rust-Core nicht verfügbar, verwende Python-Fallback")
+from tokenizers.tokenizers import BigramHashTokenizer
 ```
 
 ---
@@ -305,19 +305,19 @@ use pyo3::prelude::*;
 
 #[pyclass]
 pub struct MyComponent {
-    value: f64,
+value: f64,
 }
 
 #[pymethods]
 impl MyComponent {
-    #[new]
-    fn new(value: f64) -> Self {
-        MyComponent { value }
-    }
+#[new]
+fn new(value: f64) -> Self {
+MyComponent { value }
+}
 
-    fn process(&self, data: Vec<f64>) -> PyResult<Vec<f64>> {
-        Ok(data.iter().map(|&x| x * self.value).collect())
-    }
+fn process(&self, data: Vec<f64>) -> PyResult<Vec<f64>> {
+Ok(data.iter().map(|&x| x * self.value).collect())
+}
 }
 ```
 
@@ -328,9 +328,9 @@ use my_module::MyComponent;
 
 #[pymodule]
 fn rust_core(_py: Python, m: &PyModule) -> PyResult<()> {
-    m.add_class::<MyComponent>()?;
-    // ... andere exports
-    Ok(())
+m.add_class::<MyComponent>()?;
+// ... andere exports
+Ok(())
 }
 ```
 
@@ -357,21 +357,21 @@ result = component.process([1.0, 2.0, 3.0])
 **Rust:**
 ```rust
 fn process(&self, data: Vec<f64>) -> PyResult<Vec<f64>> {
-    if data.is_empty() {
-        return Err(PyValueError::new_err("Data cannot be empty"));
-    }
-    // ... Verarbeitung
-    Ok(result)
+if data.is_empty() {
+return Err(PyValueError::new_err("Data cannot be empty"));
+}
+// ... Verarbeitung
+Ok(result)
 }
 ```
 
 **Python:**
 ```python
 try:
-    result = rust_component.process(data)
+result = rust_component.process(data)
 except ValueError as e:
-    logger.error(f"Rust processing failed: {e}")
-    result = python_fallback(data)
+logger.error(f"Rust processing failed: {e}")
+result = python_fallback(data)
 ```
 
 ### 2. Performance-Optimierung
@@ -386,33 +386,33 @@ except ValueError as e:
 ```rust
 #[cfg(test)]
 mod tests {
-    use super::*;
+use super::*;
 
-    #[test]
-    fn test_quantize_roundtrip() {
-        let quantizer = Int6Quantizer::new(0.1);
-        let weights = vec![0.5, -0.3, 0.8];
-        let quantized = quantizer.quantize(weights.clone()).unwrap();
-        let dequantized = quantizer.dequantize(quantized).unwrap();
-        
-        for (orig, recon) in weights.iter().zip(dequantized.iter()) {
-            assert!((orig - recon).abs() < 0.1);
-        }
-    }
+#[test]
+fn test_quantize_roundtrip() {
+let quantizer = Int6Quantizer::new(0.1);
+let weights = vec![0.5, -0.3, 0.8];
+let quantized = quantizer.quantize(weights.clone()).unwrap();
+let dequantized = quantizer.dequantize(quantized).unwrap();
+
+for (orig, recon) in weights.iter().zip(dequantized.iter()) {
+assert!((orig - recon).abs() < 0.1);
+}
+}
 }
 ```
 
 **Python-Tests:**
 ```python
 def test_rust_tokenizer():
-    from rust_core import BigramHashTokenizer
-    
-    tokenizer = BigramHashTokenizer(vocab_size=8192)
-    text = "Hello World"
-    tokens = tokenizer.encode(text)
-    decoded = tokenizer.decode(tokens)
-    
-    assert decoded == text
+from rust_core import BigramHashTokenizer
+
+tokenizer = BigramHashTokenizer(vocab_size=8192)
+text = "Hello World"
+tokens = tokenizer.encode(text)
+decoded = tokenizer.decode(tokens)
+
+assert decoded == text
 ```
 
 ---

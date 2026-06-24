@@ -133,62 +133,62 @@ cargo doc --no-deps --document-private-items
 
 ```python
 class Config:
-    """
-    Lädt und validiert YAML-Konfigurationen.
-    
-    Attributes:
-        run_id: Eindeutige Run-Identifikation
-        seed: Random Seed für Reproduzierbarkeit
-        model: Model-Konfiguration
-        training: Training-Konfiguration
-        tokenizer: Tokenizer-Konfiguration
-        
-    Example:
-        >>> config = Config.from_yaml("configs/runs/run001_control.yaml")
-        >>> print(config.run_id)
-        'run001_control'
-    """
+"""
+Lädt und validiert YAML-Konfigurationen.
+
+Attributes:
+run_id: Eindeutige Run-Identifikation
+seed: Random Seed für Reproduzierbarkeit
+model: Model-Konfiguration
+training: Training-Konfiguration
+tokenizer: Tokenizer-Konfiguration
+
+Example:
+>>> config = Config.from_yaml("configs/runs/run001_control.yaml")
+>>> print(config.run_id)
+'run001_control'
+"""
 ```
 
 ### RunRegistry-Klasse
 
 ```python
 class RunRegistry:
-    """
-    Zentrales Registry für alle Runs.
-    
-    Features:
-    - O(1) Lookups by run_id
-    - Lineage-Tracking (Parent-Child-Beziehungen)
-    - Seed-Statistiken (Volatility Detection)
-    - Lazy Loading from disk
-    
-    Example:
-        >>> registry = RunRegistry()
-        >>> entry = registry.get("run001_control")
-        >>> print(entry.status)
-        'completed'
-    """
+"""
+Zentrales Registry für alle Runs.
+
+Features:
+- O(1) Lookups by run_id
+- Lineage-Tracking (Parent-Child-Beziehungen)
+- Seed-Statistiken (Volatility Detection)
+- Lazy Loading from disk
+
+Example:
+>>> registry = RunRegistry()
+>>> entry = registry.get("run001_control")
+>>> print(entry.status)
+'completed'
+"""
 ```
 
 ### SweepRunner-Klasse
 
 ```python
 class SweepRunner:
-    """
-    Führt Parameter-Sweeps effizient aus.
-    
-    Verwendet itertools.product für O(1) Memory-Komplexität.
-    
-    Attributes:
-        config: Sweep-Konfiguration
-        registry: Run-Registry für Result-Tracking
-        
-    Example:
-        >>> sweep = SweepRunner(config)
-        >>> results = sweep.run_all()
-        >>> print(f"Completed: {len(results)}")
-    """
+"""
+Führt Parameter-Sweeps effizient aus.
+
+Verwendet itertools.product für O(1) Memory-Komplexität.
+
+Attributes:
+config: Sweep-Konfiguration
+registry: Run-Registry für Result-Tracking
+
+Example:
+>>> sweep = SweepRunner(config)
+>>> results = sweep.run_all()
+>>> print(f"Completed: {len(results)}")
+"""
 ```
 
 ---

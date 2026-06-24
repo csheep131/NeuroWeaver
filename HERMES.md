@@ -21,28 +21,28 @@ The default goal is:
 Always follow this order:
 
 1. **Read first**
-   - inspect relevant files before proposing changes
-   - identify entry points, dependencies, side effects, and conventions
+- inspect relevant files before proposing changes
+- identify entry points, dependencies, side effects, and conventions
 
 2. **Explain briefly**
-   - summarize current behavior
-   - state the likely problem or optimization potential
-   - name assumptions explicitly
+- summarize current behavior
+- state the likely problem or optimization potential
+- name assumptions explicitly
 
 3. **Create a patch plan**
-   - propose the smallest useful change
-   - list touched files
-   - mention risks and test impact
+- propose the smallest useful change
+- list touched files
+- mention risks and test impact
 
 4. **Apply minimal changes**
-   - do not rewrite large areas unless explicitly requested
-   - preserve naming, architecture, and coding style where reasonable
-   - prefer incremental refactoring over broad redesign
+- do not rewrite large areas unless explicitly requested
+- preserve naming, architecture, and coding style where reasonable
+- prefer incremental refactoring over broad redesign
 
 5. **Validate**
-   - run or propose focused tests
-   - check for regressions
-   - explain what still remains risky or unknown
+- run or propose focused tests
+- check for regressions
+- explain what still remains risky or unknown
 
 ---
 
@@ -231,19 +231,19 @@ If such a change seems necessary:
 For codebase optimization tasks, respond in this structure:
 
 1. **Current state**
-   - what the relevant code appears to do
+- what the relevant code appears to do
 
 2. **Problem / opportunity**
-   - what is weak, risky, duplicated, slow, or hard to maintain
+- what is weak, risky, duplicated, slow, or hard to maintain
 
 3. **Minimal improvement plan**
-   - exact files and scope
+- exact files and scope
 
 4. **Patch**
-   - focused implementation only
+- focused implementation only
 
 5. **Validation**
-   - tests, manual checks, and remaining risks
+- tests, manual checks, and remaining risks
 
 ---
 
@@ -405,13 +405,13 @@ docs: update README for Phase 3 completion
 
 ```
 main
-  ├── develop
-  │     ├── feature/*
-  │     ├── fix/*
-  │     └── perf/*
-  ├── phase-1
-  ├── phase-2
-  └── phase-3
+develop
+feature/*
+fix/*
+perf/*
+phase-1
+phase-2
+phase-3
 ```
 
 ### Branch-Naming
@@ -507,7 +507,7 @@ seed: 42
 
 # Vermeiden
 run_id: "run001_control"
-Seed: 42  # Key muss lowercase sein
+Seed: 42 # Key muss lowercase sein
 ```
 
 ---
@@ -518,28 +518,28 @@ Seed: 42  # Key muss lowercase sein
 
 ```
 tests/
-├── test_core.py
-├── test_orchestrator.py
-├── test_research.py
-├── test_tokenizers.py
-└── test_quant.py
+test_core.py
+test_orchestrator.py
+test_research.py
+test_tokenizers.py
+test_quant.py
 ```
 
 ### Test-Naming
 
 ```python
 def test_<unit>_<scenario>_<expected_result>():
-    ...
+...
 
 # Beispiele
 def test_sweep_runner_generate_all_parameters_returns_iterator():
-    ...
+...
 
 def test_promotion_system_evaluate_run_with_missing_metrics_returns_none():
-    ...
+...
 
 def test_int6_quantizer_quantize_preserves_shape():
-    ...
+...
 ```
 
 ### Fixtures
@@ -549,17 +549,17 @@ import pytest
 
 @pytest.fixture
 def sample_config():
-    return {"run_id": "test", "seed": 42}
+return {"run_id": "test", "seed": 42}
 
 @pytest.fixture
 def trained_model():
-    model = BackboneFactory.create(...)
-    # Mock training
-    return model
+model = BackboneFactory.create(...)
+# Mock training
+return model
 
 def test_sweep_with_config(sample_config):
-    sweep = SweepRunner(sample_config)
-    assert sweep is not None
+sweep = SweepRunner(sample_config)
+assert sweep is not None
 ```
 
 ---
@@ -622,31 +622,31 @@ twine upload dist/*
 
 ```python
 class SweepRunner:
-    """
-    Executes parameter sweeps efficiently.
+"""
+Executes parameter sweeps efficiently.
 
-    Uses itertools.product for O(1) memory combination generation.
-    Supports concurrent execution and checkpointing.
+Uses itertools.product for O(1) memory combination generation.
+Supports concurrent execution and checkpointing.
 
-    Attributes:
-        config: Sweep configuration
-        registry: Run registry for result tracking
+Attributes:
+config: Sweep configuration
+registry: Run registry for result tracking
 
-    Example:
-        >>> sweep = SweepRunner(config)
-        >>> results = sweep.run_all()
-    """
+Example:
+>>> sweep = SweepRunner(config)
+>>> results = sweep.run_all()
+"""
 
-    def run_all(self) -> list[RunResult]:
-        """
-        Execute all parameter combinations.
+def run_all(self) -> list[RunResult]:
+"""
+Execute all parameter combinations.
 
-        Returns:
-            List of run results with metrics
+Returns:
+List of run results with metrics
 
-        Raises:
-            SweepError: If parameter generation fails
-        """
+Raises:
+SweepError: If parameter generation fails
+"""
 ```
 
 ---
@@ -657,10 +657,10 @@ class SweepRunner:
 
 | Metrik | Ziel | Erreicht |
 |--------|------|----------|
-| Sweep-Skalierung | 10.000+ Combos | ✅ 10.000+ |
-| Promotion-Latenz | <500ms bei 1000 Runs | ✅ 300ms |
-| Bundle-Größe | <100MB | ✅ ~50MB |
-| Gesamt-Speedup | 4x | ✅ 4-5x |
+| Sweep-Skalierung | 10.000+ Combos | 10.000+ |
+| Promotion-Latenz | <500ms bei 1000 Runs | 300ms |
+| Bundle-Größe | <100MB | ~50MB |
+| Gesamt-Speedup | 4x | 4-5x |
 
 ### Monitoring
 

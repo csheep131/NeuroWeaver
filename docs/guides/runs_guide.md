@@ -1,7 +1,7 @@
 # Runs starten
 
-**Letztes Update:** 2026-03-24  
-**Status:** ✅ Vollständig implementiert (Phase 1-3)
+**Letztes Update:** 2026-03-24
+**Status:** Vollständig implementiert (Phase 1-3)
 
 ---
 
@@ -30,28 +30,28 @@ python3 -m runs.run --config configs/runs/run001_control.yaml --seed 42
 ## Run-System Architektur
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                    runs/run.py                               │
-│  ┌─────────────────────────────────────────────────────┐    │
-│  │  execute_run(config: Config) -> RunResult           │    │
-│  │  1. Registry initialisieren                          │    │
-│  │  2. Logger einrichten                                │    │
-│  │  3. Seed setzen                                      │    │
-│  │  4. Modell erstellen (BackboneFactory)               │    │
-│  │  5. Tokenizer erstellen                              │    │
-│  │  6. Training-Loop ausführen                          │    │
-│  │  7. Evaluation durchführen                           │    │
-│  │  8. Artefakte speichern                              │    │
-│  │  9. Metriken loggen                                  │    │
-│  │  10. Registry aktualisieren                          │    │
-│  └─────────────────────────────────────────────────────┘    │
-└─────────────────────────────────────────────────────────────┘
-         │
-         ▼
-┌─────────────────────────────────────────────────────────────┐
-│                    core/registry.py                          │
-│  RunRegistry speichert Run-Metadaten und Metriken           │
-└─────────────────────────────────────────────────────────────┘
+
+runs/run.py
+
+execute_run(config: Config) -> RunResult
+1. Registry initialisieren
+2. Logger einrichten
+3. Seed setzen
+4. Modell erstellen (BackboneFactory)
+5. Tokenizer erstellen
+6. Training-Loop ausführen
+7. Evaluation durchführen
+8. Artefakte speichern
+9. Metriken loggen
+10. Registry aktualisieren
+
+
+
+
+
+core/registry.py
+RunRegistry speichert Run-Metadaten und Metriken
+
 ```
 
 ---
@@ -152,24 +152,24 @@ python3 -m runs.run -c configs/runs/run001_control.yaml -v
 ```python
 # runs/run.py
 def execute_run(config_path: str, seed: int | None = None) -> RunResult:
-    # Config laden
-    config = load_config(config_path)
-    
-    # Seed überschreiben falls angegeben
-    if seed is not None:
-        config._raw["seed"] = seed
-    
-    # Registry initialisieren
-    registry = RunRegistry()
-    
-    # Logger einrichten
-    logger = RunLogger(config.run_id)
-    
-    # Seed setzen (Reproduzierbarkeit)
-    set_seed(config.seed)
-    
-    # Run in Registry registrieren
-    registry.register(config.run_id, config)
+# Config laden
+config = load_config(config_path)
+
+# Seed überschreiben falls angegeben
+if seed is not None:
+config._raw["seed"] = seed
+
+# Registry initialisieren
+registry = RunRegistry()
+
+# Logger einrichten
+logger = RunLogger(config.run_id)
+
+# Seed setzen (Reproduzierbarkeit)
+set_seed(config.seed)
+
+# Run in Registry registrieren
+registry.register(config.run_id, config)
 ```
 
 ### 2. Modell-Erstellung
@@ -189,22 +189,22 @@ model = factory.create(config)
 from train.trainer import Trainer
 
 trainer = Trainer(
-    model=model,
-    config=config,
-    logger=logger,
+model=model,
+config=config,
+logger=logger,
 )
 
 # Training durchführen
 for step in range(config.training.num_steps):
-    batch = get_next_batch()
-    loss = trainer.step(batch)
-    
-    # Metriken loggen
-    if step % config.logging.log_steps == 0:
-        logger.log_metrics({
-            "loss": loss,
-            "step": step,
-        })
+batch = get_next_batch()
+loss = trainer.step(batch)
+
+# Metriken loggen
+if step % config.logging.log_steps == 0:
+logger.log_metrics({
+"loss": loss,
+"step": step,
+})
 ```
 
 ### 4. Evaluation
@@ -218,9 +218,9 @@ val_bpb = evaluator.evaluate(model, val_data)
 
 # Metriken speichern
 logger.log_metrics({
-    "val_bpb": val_bpb,
-    "ms_per_step": trainer.avg_step_time,
-    "steps_completed": step,
+"val_bpb": val_bpb,
+"ms_per_step": trainer.avg_step_time,
+"steps_completed": step,
 })
 ```
 
@@ -229,8 +229,8 @@ logger.log_metrics({
 ```python
 # Modell speichern
 artifact_path = logger.save_artifact(
-    model.state_dict(),
-    "model.pt",
+model.state_dict(),
+"model.pt",
 )
 
 # Artifact-Größe tracken
@@ -247,9 +247,9 @@ logger.log_metrics({"artifact_bytes": artifact_bytes})
 ```python
 # Run abschließen
 registry.complete_run(
-    config.run_id,
-    metrics=logger.get_metrics(),
-    artifact_path=artifact_path,
+config.run_id,
+metrics=logger.get_metrics(),
+artifact_path=artifact_path,
 )
 ```
 
@@ -277,36 +277,36 @@ Jeder Run produziert folgende Metriken:
 
 ```
 results/
-└── runs/
-    └── run001_control/
-        ├── model.pt              # Modell-Gewichte
-        ├── config.yaml           # Verwendete Config
-        ├── metrics.json          # Alle Metriken
-        ├── logs.jsonl            # Training-Logs
-        └── artifacts/
-            └── ...               # Zusätzliche Artefakte
+runs/
+run001_control/
+model.pt # Modell-Gewichte
+config.yaml # Verwendete Config
+metrics.json # Alle Metriken
+logs.jsonl # Training-Logs
+artifacts/
+... # Zusätzliche Artefakte
 ```
 
 ### metrics.json Format
 
 ```json
 {
-  "run_id": "run001_control",
-  "seed": 42,
-  "config_hash": "a1b2c3d4e5f6...",
-  "parent_run_id": null,
-  "status": "completed",
-  "metrics": {
-    "val_bpb": 1.234,
-    "ms_per_step": 45.2,
-    "steps_completed": 10000,
-    "artifact_bytes": 8500000,
-    "quantized_val_bpb": 1.289,
-    "delta_bpb": 0.0,
-    "delta_ms": 0.0
-  },
-  "started_at": "2026-03-24T10:00:00Z",
-  "completed_at": "2026-03-24T12:30:00Z"
+"run_id": "run001_control",
+"seed": 42,
+"config_hash": "a1b2c3d4e5f6...",
+"parent_run_id": null,
+"status": "completed",
+"metrics": {
+"val_bpb": 1.234,
+"ms_per_step": 45.2,
+"steps_completed": 10000,
+"artifact_bytes": 8500000,
+"quantized_val_bpb": 1.289,
+"delta_bpb": 0.0,
+"delta_ms": 0.0
+},
+"started_at": "2026-03-24T10:00:00Z",
+"completed_at": "2026-03-24T12:30:00Z"
 }
 ```
 
@@ -330,9 +330,9 @@ tail -f results/runs/run001_control/logs.jsonl
 python3 -c "
 import json
 with open('results/runs/run001_control/metrics.json') as f:
-    metrics = json.load(f)
-    print(f'Steps: {metrics[\"metrics\"][\"steps_completed\"]}')
-    print(f'Val BPB: {metrics[\"metrics\"][\"val_bpb\"]:.4f}')
+metrics = json.load(f)
+print(f'Steps: {metrics[\"metrics\"][\"steps_completed\"]}')
+print(f'Val BPB: {metrics[\"metrics\"][\"val_bpb\"]:.4f}')
 "
 ```
 
@@ -356,12 +356,12 @@ print(comparator.print_summary(comparison))
 ```
 Run Comparison
 ==============
-Metric          run001_control    run002_hash    Delta
+Metric run001_control run002_hash Delta
 ---------------------------------------------------------
-Val BPB         1.234             1.256          +1.8%
-MS/Step         45.2              42.1           -6.9%
-Steps           10000             10000          0.0%
-Artifact (MB)   8.5               8.2            -3.5%
+Val BPB 1.234 1.256 +1.8%
+MS/Step 45.2 42.1 -6.9%
+Steps 10000 10000 0.0%
+Artifact (MB) 8.5 8.2 -3.5%
 ```
 
 ---
@@ -380,27 +380,27 @@ cp configs/runs/run001_control.yaml configs/runs/my_custom_run.yaml
 # configs/runs/my_custom_run.yaml
 run_id: "my_custom_run"
 seed: 42
-parent_run_id: "run001_control"  # Für Lineage-Tracking
+parent_run_id: "run001_control" # Für Lineage-Tracking
 
 model:
-  d_model: 768
-  num_layers: 8
-  activation: "gelu"
-  use_feature_gate: true
+d_model: 768
+num_layers: 8
+activation: "gelu"
+use_feature_gate: true
 
 tokenizer:
-  type: "bigram_hash"
-  vocab_size: 8192
+type: "bigram_hash"
+vocab_size: 8192
 
 quantization:
-  enabled: true
-  type: "mixed"
-  threshold: 0.3
+enabled: true
+type: "mixed"
+threshold: 0.3
 
 training:
-  num_steps: 50000
-  learning_rate: 1e-4
-  batch_size: 32
+num_steps: 50000
+learning_rate: 1e-4
+batch_size: 32
 ```
 
 ### Schritt 3: Run starten
@@ -439,7 +439,7 @@ maturin develop --release
 ```yaml
 # In der Config batch_size reduzieren
 training:
-  batch_size: 16  # Statt 32
+batch_size: 16 # Statt 32
 ```
 
 ### Artifact zu groß
@@ -449,8 +449,8 @@ Kill-Rule greift bei >16MB:
 ```yaml
 # Modell-Größe reduzieren
 model:
-  d_model: 256  # Statt 512
-  num_layers: 4  # Statt 6
+d_model: 256 # Statt 512
+num_layers: 4 # Statt 6
 ```
 
 ---

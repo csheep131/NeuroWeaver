@@ -1,7 +1,7 @@
 # PR Delta — Parameter Golf Challenge Submission
 
 **Stand:** 2026-03-25
-**Status:** ✅ Implementiert — Bereit für Testing
+**Status:** Implementiert — Bereit für Testing
 
 ---
 
@@ -11,22 +11,22 @@ Dieser PR fügt die fehlenden Komponenten für eine vollständige Submission zur
 
 ### Was war vorhanden (80-90%)
 
-- ✅ Model Factory (`models/factories/backbone_factory.py`)
-- ✅ Training Infrastructure (`train/trainer.py`, `runs/run.py`)
-- ✅ Submission Infrastructure (`orchestrator/submit_bundle.py`)
-- ✅ Evaluation (`eval/bpb_eval.py`)
-- ✅ Quantisierung (`quant/quantizers.py`)
-- ✅ Tokenizers (`tokenizers/tokenizers.py`)
-- ✅ Tests (19 Test-Dateien)
-- ✅ 27 YAML-Run-Konfigurationen
+- Model Factory (`models/factories/backbone_factory.py`)
+- Training Infrastructure (`train/trainer.py`, `runs/run.py`)
+- Submission Infrastructure (`orchestrator/submit_bundle.py`)
+- Evaluation (`eval/bpb_eval.py`)
+- Quantisierung (`quant/quantizers.py`)
+- Tokenizers (`tokenizers/tokenizers.py`)
+- Tests (19 Test-Dateien)
+- 27 YAML-Run-Konfigurationen
 
 ### Was fehlte (Delta)
 
-- ❌ `train_gpt.py` — Challenge-spezifisches Trainingsskript
-- ❌ `train_gpt_mlx.py` — MLX-Version für Apple Silicon
-- ❌ `data/cached_challenge_fineweb.py` — Dataset Loader
-- ❌ `records/` — Submission-Ordnerstruktur
-- ❌ Challenge-Dokumentation
+- `train_gpt.py` — Challenge-spezifisches Trainingsskript
+- `train_gpt_mlx.py` — MLX-Version für Apple Silicon
+- `data/cached_challenge_fineweb.py` — Dataset Loader
+- `records/` — Submission-Ordnerstruktur
+- Challenge-Dokumentation
 
 ---
 
@@ -62,9 +62,9 @@ Dieser PR fügt die fehlenden Komponenten für eine vollständige Submission zur
 
 ```
 records/baseline_v1/
-├── README.md           # Submission Beschreibung
-├── submission.json     # Metadaten (Name, GitHub ID, val_bpb, etc.)
-└── logs/               # Trainings-Logs (wird nach Runs gefüllt)
+README.md # Submission Beschreibung
+submission.json # Metadaten (Name, GitHub ID, val_bpb, etc.)
+logs/ # Trainings-Logs (wird nach Runs gefüllt)
 ```
 
 ### 4. Dokumentation
@@ -170,26 +170,26 @@ torchrun --standalone --nproc_per_node=8 train_gpt.py
 
 ## Challenge Compliance
 
-### ✅ Submission Criteria
+### Submission Criteria
 
 | Kriterium | Status | Implementierung |
 |-----------|--------|-----------------|
-| **Artifact < 16MB** | ✅ | INT8 + zlib Compression |
-| **Training < 10min** | ✅ | Wallclock-Limit in `train_gpt.py` |
-| **8xH100 Support** | ✅ | torchrun mit DDP |
-| **val_bpb Evaluation** | ✅ | `compute_bpb()` Funktion |
-| **3-Seed Validierung** | ✅ | `--seed` Parameter |
-| **Reproduzierbar** | ✅ | Deterministic Seeds |
+| **Artifact < 16MB** | | INT8 + zlib Compression |
+| **Training < 10min** | | Wallclock-Limit in `train_gpt.py` |
+| **8xH100 Support** | | torchrun mit DDP |
+| **val_bpb Evaluation** | | `compute_bpb()` Funktion |
+| **3-Seed Validierung** | | `--seed` Parameter |
+| **Reproduzierbar** | | Deterministic Seeds |
 
-### ✅ Required Files
+### Required Files
 
 | Datei | Status | Pfad |
 |-------|--------|------|
-| `train_gpt.py` | ✅ | `/train_gpt.py` |
-| `README.md` | ✅ | `/records/baseline_v1/README.md` |
-| `submission.json` | ✅ | `/records/baseline_v1/submission.json` |
-| `requirements.txt` | ✅ | `/requirements.txt` |
-| `logs/` | ⏳ | `/records/baseline_v1/logs/` (nach Runs) |
+| `train_gpt.py` | | `/train_gpt.py` |
+| `README.md` | | `/records/baseline_v1/README.md` |
+| `submission.json` | | `/records/baseline_v1/submission.json` |
+| `requirements.txt` | | `/requirements.txt` |
+| `logs/` | | `/records/baseline_v1/logs/` (nach Runs) |
 
 ---
 
@@ -221,7 +221,7 @@ torchrun --standalone --nproc_per_node=8 train_gpt.py
 
 ### 1. Rust Core nicht kompiliert
 
-**Status:** ⚠️ Optional (Python-Fallback aktiv)
+**Status:** Optional (Python-Fallback aktiv)
 
 **Workaround:**
 ```bash
@@ -233,7 +233,7 @@ maturin develop --release
 
 ### 2. Dataset Download langsam
 
-**Status:** ℹ️ Netzwerk-abhängig
+**Status:** Netzwerk-abhängig
 
 **Workaround:**
 ```bash
@@ -243,7 +243,7 @@ export HF_DATASETS_CACHE=/workspace/hf_cache
 
 ### 3. MLX nur für Apple Silicon
 
-**Status:** ℹ️ Design-Entscheidung
+**Status:** Design-Entscheidung
 
 **Hinweis:** `train_gpt_mlx.py` läuft nur auf Mac mit M1/M2/M3. Für NVIDIA GPUs `train_gpt.py` verwenden.
 
@@ -308,7 +308,7 @@ python -c "from train_gpt import compress_model; size, _ = compress_model(model)
 
 # 3. Multi-Seed Test
 for seed in 42 1 2; do
-  RUN_ID=test_s$seed SEED=$seed python train_gpt.py
+RUN_ID=test_s$seed SEED=$seed python train_gpt.py
 done
 
 # Erwartet: 3 Runs mit ähnlichem val_bpb (σ < 0.03)
@@ -350,23 +350,23 @@ docs: update README.md with Challenge section
 
 ### Challenge Compliance
 
-- [ ] Artifact < 16MB ✅
-- [ ] Training < 10min ✅
-- [ ] 8xH100 Support ✅
-- [ ] Reproduzierbar ✅
+- [ ] Artifact < 16MB
+- [ ] Training < 10min
+- [ ] 8xH100 Support
+- [ ] Reproduzierbar
 
 ### Dokumentation
 
-- [ ] README.md aktualisiert ✅
-- [ ] Submission Guide ✅
-- [ ] RunPod Setup ✅
-- [ ] Usage Beispiele ✅
+- [ ] README.md aktualisiert
+- [ ] Submission Guide
+- [ ] RunPod Setup
+- [ ] Usage Beispiele
 
 ### Tests
 
-- [ ] Smoke Test definiert ✅
-- [ ] Integration Tests definiert ✅
-- [ ] Test-Plan dokumentiert ✅
+- [ ] Smoke Test definiert
+- [ ] Integration Tests definiert
+- [ ] Test-Plan dokumentiert
 
 ---
 

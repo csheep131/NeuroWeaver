@@ -70,7 +70,7 @@ RUN_ID=smoke_test ITERATIONS=200 python train_gpt.py
 ```bash
 # Auf 8xH100 mit torchrun
 torchrun --standalone --nproc_per_node=8 train_gpt.py \
-  --run_id baseline_v1
+--run_id baseline_v1
 ```
 
 Oder mit Environment Variables:
@@ -93,21 +93,21 @@ torchrun --standalone --nproc_per_node=8 train_gpt.py
 
 Eine vollständige Submission muss folgende Kriterien erfüllen:
 
-### ✅ Pflicht-Dateien
+### Pflicht-Dateien
 
 ```
 records/<submission_name>/
-├── README.md           # Beschreibung der Submission
-├── submission.json     # Metadaten (Name, GitHub ID, val_bpb, etc.)
-├── train_gpt.py        # Trainingsskript (muss lauffähig sein)
-├── requirements.txt    # Dependencies (falls nicht Standard)
-└── logs/
-    ├── run1.log        # Trainings-Log (Seed 1)
-    ├── run2.log        # Trainings-Log (Seed 2)
-    └── run3.log        # Trainings-Log (Seed 3, empfohlen)
+README.md # Beschreibung der Submission
+submission.json # Metadaten (Name, GitHub ID, val_bpb, etc.)
+train_gpt.py # Trainingsskript (muss lauffähig sein)
+requirements.txt # Dependencies (falls nicht Standard)
+logs/
+run1.log # Trainings-Log (Seed 1)
+run2.log # Trainings-Log (Seed 2)
+run3.log # Trainings-Log (Seed 3, empfohlen)
 ```
 
-### ✅ Metriken
+### Metriken
 
 | Metrik | requirement |
 |--------|-------------|
@@ -116,7 +116,7 @@ records/<submission_name>/
 | **training_time** | < 600 Sekunden |
 | **statistical_significance** | 3 Runs für p < 0.01 |
 
-### ✅ Reproduzierbarkeit
+### Reproduzierbarkeit
 
 - [ ] Skript läuft ohne manuelle Intervention
 - [ ] Alle Dependencies sind dokumentiert
@@ -129,34 +129,34 @@ records/<submission_name>/
 
 ```json
 {
-  "name": "Your Submission Name",
-  "github_id": "your-github-username",
-  "val_bpb": 1.234,
-  "compressed_size_bytes": 15000000,
-  "description": "Brief description of your approach",
-  "architecture": {
-    "num_layers": 11,
-    "d_model": 512,
-    "num_heads": 8,
-    "kv_heads": 4,
-    "mlp_ratio": 4,
-    "vocab_size": 1024,
-    "activation": "leaky_relu_squared",
-    "attention_type": "gqa",
-    "use_rope": true
-  },
-  "training": {
-    "optimizer": "adamw",
-    "learning_rate": 0.0003,
-    "weight_decay": 0.1,
-    "warmup_steps": 100,
-    "max_steps": 2000,
-    "batch_tokens": 8192
-  },
-  "seeds": [42, 1, 2],
-  "logs": ["logs/run1.log", "logs/run2.log", "logs/run3.log"],
-  "created_at": "2026-03-25",
-  "notes": "Any additional notes"
+"name": "Your Submission Name",
+"github_id": "your-github-username",
+"val_bpb": 1.234,
+"compressed_size_bytes": 15000000,
+"description": "Brief description of your approach",
+"architecture": {
+"num_layers": 11,
+"d_model": 512,
+"num_heads": 8,
+"kv_heads": 4,
+"mlp_ratio": 4,
+"vocab_size": 1024,
+"activation": "leaky_relu_squared",
+"attention_type": "gqa",
+"use_rope": true
+},
+"training": {
+"optimizer": "adamw",
+"learning_rate": 0.0003,
+"weight_decay": 0.1,
+"warmup_steps": 100,
+"max_steps": 2000,
+"batch_tokens": 8192
+},
+"seeds": [42, 1, 2],
+"logs": ["logs/run1.log", "logs/run2.log", "logs/run3.log"],
+"created_at": "2026-03-25",
+"notes": "Any additional notes"
 }
 ```
 
@@ -255,7 +255,7 @@ RUN_ID=baseline_s3 SEED=2 python train_gpt.py
 
 ## Häufige Fehler
 
-### ❌ Artifact zu groß
+### Artifact zu groß
 
 **Problem:** Compressed Size > 16MB
 
@@ -264,7 +264,7 @@ RUN_ID=baseline_s3 SEED=2 python train_gpt.py
 - Weniger Parameter (smaller d_model oder weniger Layer)
 - Weight Tying aktivieren
 
-### ❌ Training zu langsam
+### Training zu langsam
 
 **Problem:** > 10 Minuten auf 8xH100
 
@@ -273,7 +273,7 @@ RUN_ID=baseline_s3 SEED=2 python train_gpt.py
 - Gradient Accumulation reduzieren
 - Mixed Precision (AMP) verwenden
 
-### ❌ val_bpb zu hoch
+### val_bpb zu hoch
 
 **Problem:** BPB > 1.50 (schlechter als Baseline)
 
