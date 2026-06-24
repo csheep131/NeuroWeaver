@@ -2,7 +2,7 @@
 
 Eine Experimentier-Plattform für systematisches Ablation-Testing von ML-Modellen.
 
-**Status:** Phase 1-3 ✅ Alle abgeschlossen | **Performance:** 4-5x Speedup | **Configs:** 19 Run-Konfigurationen
+**Status:** Phase 1-3 Alle abgeschlossen | **Performance:** 4-5x Speedup | **Configs:** 19 Run-Konfigurationen
 
 ---
 
